@@ -164,7 +164,7 @@ function colorRol($rol) {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    background: #4f46e5;
     color: white;
     display: flex;
     align-items: center;

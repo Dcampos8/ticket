@@ -160,7 +160,7 @@ $slaPorcentaje = $ticketsCerrados > 0 ? round(($sla/$ticketsCerrados)*100,2) : 0
 ?>
 <style>
     body{
-        margin-top: 100px;
+        margin-top: 0;
     }
     div#modalTicketsEstatus {
     margin-top: 66;

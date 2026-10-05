@@ -57,7 +57,7 @@
     .status-baja { background: #f1f5f9; color: #475569; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
 
     /* Botones Modernos */
-    .btn-success { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); border: none; font-weight: 600; border-radius: 8px; }
+    .btn-success { background: #187443; border: none; font-weight: 600; border-radius: 8px; }
     .btn-outline-primary { border: 2px solid #1e3a8a; color: #1e3a8a; font-weight: 700; border-radius: 8px; transition: 0.3s; }
     .btn-outline-primary:hover { background: #1e3a8a; color: #fff; }
     .btn-warning { background: #f59e0b; border: none; color: #fff; font-weight: 600; }

@@ -81,7 +81,7 @@ $usuarios = $conexion->query("
 
     /* Botón Generar */
     .btn-primary { 
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); 
+        background: #1e3a8a;
         border: none; 
         border-radius: 8px; 
         padding: 8px 15px; 

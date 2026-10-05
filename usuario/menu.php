@@ -1,8 +1,10 @@
 <?php
 // Aseguramos que la sesión esté iniciada
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
+$userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
 ?>
-<link rel="icon" href="../img/icono.png">
+<link rel="icon" href="<?= htmlspecialchars($userBaseUrl) ?>img/icono.png">
+<link rel="stylesheet" href="<?= htmlspecialchars($userBaseUrl) ?>css/redesign.css?v=<?= time() ?>">
 <style>
     .sidebar { width: 250px; min-height: 100vh; height: 100vh; position: fixed; inset: 0 auto 0 0; z-index: 1000; overflow-y: auto; padding-top: 8px; }
     .sidebar .logo-animate { display: block; width: min(78%, 190px); max-height: 70px; object-fit: contain; margin: 15px auto; }
@@ -22,7 +24,7 @@ if (session_status() === PHP_SESSION_NONE) { session_start(); }
 </style>
 
 <nav class="sidebar d-flex flex-column">
-    <img src="../img/Camion%20Cont%20Der.png" class="logo-animate" alt="Transportes Valadez">
+    <img src="<?= htmlspecialchars($userBaseUrl) ?>img/Camion%20Cont%20Der.png" class="logo-animate" alt="Transportes Valadez">
     <div class="sidebar-user">
         <i class="fa-solid fa-user-circle me-2"></i>
         <?= htmlspecialchars($_SESSION['nombre_completo'] ?? 'Usuario') ?>

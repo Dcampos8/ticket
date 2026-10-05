@@ -77,7 +77,7 @@ $data = $res->fetch_assoc();
     .form-control:focus { border-color: var(--primary-valadez); box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); }
     
     .btn-submit { 
-        background: linear-gradient(135deg, #059669 0%, #10b981 100%); 
+        background: #187443;
         border: none; color: white; font-weight: 700; padding: 12px 30px; 
         border-radius: 8px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
         transition: transform 0.2s;

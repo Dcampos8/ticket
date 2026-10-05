@@ -82,7 +82,7 @@ if(isset($_POST['generar'])){
 
     /* Botón de Generar Pro */
     .btn-generar {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: #1e3a8a;
         color: white;
         border: none;
         padding: 12px 25px;

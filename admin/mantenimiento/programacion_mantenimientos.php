@@ -41,7 +41,7 @@ if(file_exists(ROOT_PATH . 'admin/header.php')){
     }
 
     .btn-email-main {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: #1e3a8a;
         border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; color: white;
         transition: transform 0.2s;
     }
@@ -49,7 +49,7 @@ if(file_exists(ROOT_PATH . 'admin/header.php')){
 
     /* Estilo para el botón de Excel */
     .btn-excel-main {
-        background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
+        background: #187443;
         border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; color: white;
         transition: transform 0.2s;
     }

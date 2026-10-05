@@ -34,7 +34,7 @@ $rol = $_SESSION['rol'] ?? 'usuario';
     }
 
     .profile-header {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        background: #172033;
         padding: 40px 30px 30px;
         color: white;
         text-align: center;
@@ -48,13 +48,13 @@ $rol = $_SESSION['rol'] ?? 'usuario';
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #ef4444, #f87171);
+        background: #c9252d;
     }
 
     .profile-avatar-big {
         width: 90px;
         height: 90px;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #c9252d;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -127,7 +127,7 @@ $rol = $_SESSION['rol'] ?? 'usuario';
     }
 
     .btn-update {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #c9252d;
         color: #ffffff;
         border: none;
         border-radius: 12px;
@@ -143,7 +143,7 @@ $rol = $_SESSION['rol'] ?? 'usuario';
     }
 
     .btn-update:hover {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        background: #a51f26;
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
         color: #ffffff;

@@ -28,7 +28,7 @@ $puedeAsignarRoles = esSuperAdmin();
   <title>Crear Usuario - Transportes Valadez</title>
   <style>
     body {
-      background: linear-gradient(135deg, #e9ecef, #dee2e6);
+      background: #f3f5f8;
       min-height: 100vh;
       display: flex;
       align-items: center;

@@ -191,10 +191,7 @@ function claseTipoTicket($tipo) {
 
     /* Apariencia general */
     body {
-        background:
-            radial-gradient(circle at 0% 0%, var(--bg-1) 0%, transparent 55%),
-            radial-gradient(circle at 100% 0%, var(--bg-2) 0%, transparent 55%),
-            #f8fafc;
+        background: #f3f5f8;
         font-family: 'Segoe UI', Roboto, sans-serif;
         color: var(--ink);
     }
@@ -214,7 +211,7 @@ function claseTipoTicket($tipo) {
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        background: linear-gradient(120deg, var(--primary-dark), var(--primary) 60%, var(--accent) 130%);
+        background: var(--primary-dark);
         border-radius: var(--radius-lg);
         padding: 22px 26px;
         margin-bottom: 20px;

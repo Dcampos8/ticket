@@ -124,7 +124,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
     padding:14px;
     font-size:16px;
     font-weight:600;
-    background:linear-gradient(135deg,var(--tv-navy,#1e3a8a),var(--tv-navy-dark,#172554));
+    background:var(--tv-navy,#1e3a8a);
     color:white;
     transition:.3s;
 }

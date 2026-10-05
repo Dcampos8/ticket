@@ -24,7 +24,7 @@
          puedan sobrescribir puntualmente si lo necesitan -->
     <link rel="stylesheet" href="<?= BASE_URL ?>css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/menu.css?v=<?= time() ?>">
-    <link rel="stylesheet" href="<?= BASE_URL ?>css/lineas.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>css/redesign.css?v=<?= time() ?>">
 
     <!-- 4. SCRIPTS (Cargar jQuery primero es vital) -->
     <!-- jQuery único y moderno -->
@@ -37,4 +37,4 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 </head>
-<body>
+<body class="admin-shell">

@@ -8,9 +8,9 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
         background: #ffffff; 
     }
-    /* Cambio a degradado Rojo Corporativo */
+    /* Encabezado corporativo */
     .card-header-custom { 
-        background: linear-gradient(135deg, #8b0000 0%, #e31e24 100%); 
+        background: #1e3a8a;
         color: white; 
         border-radius: 15px 15px 0 0 !important; 
         padding: 20px; 
@@ -48,7 +48,7 @@
     }
     /* Botón de guardado ajustado */
     .btn-save { 
-        background: linear-gradient(135deg, #e31e24 0%, #b91c1c 100%); 
+        background: #c9252d;
         border: none; 
         padding: 12px 30px; 
         font-weight: 600; 

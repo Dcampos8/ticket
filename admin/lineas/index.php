@@ -763,6 +763,7 @@ if (isset($_GET['obtener_historial_stock'])) {
     exit();
 }
 include ($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+echo '<link rel="stylesheet" href="' . BASE_URL . 'css/lineas.css?v=' . time() . '">';
 $msg = '';
 /* =========================================================
    FUNCIÓN PARSEADORA DE FECHAS (PHP)
@@ -1937,10 +1938,7 @@ if ($kpi_otros > 0) {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             color: var(--lt-ink);
-            background:
-                radial-gradient(circle at 0% 0%, rgba(230, 235, 248, 0.6) 0%, transparent 50%),
-                radial-gradient(circle at 100% 0%, rgba(253, 236, 235, 0.5) 0%, transparent 50%),
-                #f6f7f9;
+            background: #f3f5f8;
         }
 
         /* Encabezado */
@@ -1950,7 +1948,7 @@ if ($kpi_otros > 0) {
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            background: linear-gradient(120deg, var(--lt-primary-dark), var(--lt-primary) 58%, var(--lt-brand-red) 128%);
+            background: var(--lt-primary-dark);
             border-radius: var(--lt-radius-lg);
             padding: 26px 30px;
             margin-bottom: 22px;
@@ -2387,16 +2385,16 @@ if ($kpi_otros > 0) {
             box-shadow: 0 16px 44px rgba(15, 23, 42, 0.16);
         }
         .lt-modal .modal-header {
-            background: linear-gradient(120deg, var(--lt-primary-dark), var(--lt-primary) 62%, var(--lt-brand-red) 125%);
+            background: var(--lt-primary-dark);
             border-bottom: none;
             padding: 20px 26px;
             color: #fff;
         }
         .lt-modal .modal-header.lt-header-danger {
-            background: linear-gradient(120deg, #7f1d1d, #dc2626 70%, #f97316 140%);
+            background: #b91c1c;
         }
         .lt-modal .modal-header.lt-header-neutral {
-            background: linear-gradient(120deg, #1e293b, #334155 70%, #475569 140%);
+            background: #334155;
         }
         .lt-modal .modal-title {
             display: flex;
@@ -2538,7 +2536,7 @@ if ($kpi_otros > 0) {
             top: 6px;
             bottom: 6px;
             width: 2px;
-            background: linear-gradient(180deg, var(--lt-primary), var(--lt-accent) 60%, var(--lt-line));
+            background: var(--lt-primary);
         }
         .lt-timeline-item { position: relative; padding-bottom: 20px; }
         .lt-timeline-item:last-child { padding-bottom: 0; }
