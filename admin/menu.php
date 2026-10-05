@@ -144,7 +144,7 @@ function checkActive($target, $currentUri, $dropdowns = []) {
       <!-- Lado Derecho: Usuario -->
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item dropdown">
-          <a class="nav-link user-profile-pill dropdown-toggle d-flex align-items-center <?= checkActive('perfil', $currentUri, $dropdowns) ?>" href="#" data-bs-toggle="dropdown">
+          <a class="nav-link user-profile-pill dropdown-toggle d-flex align-items-center <?= checkActive('perfil', $currentUri, $dropdowns) ?>" href="#" data-bs-toggle="dropdown" title="Cuenta: <?= htmlspecialchars($_SESSION['usuario'] ?? 'Admin', ENT_QUOTES, 'UTF-8') ?>" aria-label="Cuenta de usuario">
             <div class="user-avatar-small me-2">
               <i class="fas fa-user"></i>
             </div>
