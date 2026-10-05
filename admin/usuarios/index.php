@@ -10,6 +10,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+echo '<pre>' . htmlspecialchars(print_r([
+    'rol' => $_SESSION['rol'] ?? null,
+    'id' => $_SESSION['id'] ?? null,
+    'usuario' => $_SESSION['usuario'] ?? null,
+], true), ENT_QUOTES, 'UTF-8') . '</pre>';
+exit;
+
 // 3b. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
