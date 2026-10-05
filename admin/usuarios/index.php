@@ -272,7 +272,7 @@ function colorRol($rol) {
                   </span>
                 </td>
                 <td class="acciones">
-                  <?php if ($rolSesionActual === 'admin' && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
+                  <?php if (strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
                     <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>
