@@ -7,14 +7,25 @@ if (!isset($_SESSION['logueado']) || !tieneModulo('tickets')) {
 }
 
 include '../../../backend/conexion.php';
-
+$actorEsSuperAdmin = false;
+$idActor = (int) ($_SESSION['id'] ?? 0);
+if ($idActor > 0) {
+    $stmtActor = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    if ($stmtActor) {
+        $stmtActor->bind_param("i", $idActor);
+        $stmtActor->execute();
+        $rolActor = $stmtActor->get_result()->fetch_assoc()['rol'] ?? '';
+        $stmtActor->close();
+        $actorEsSuperAdmin = strtolower(trim((string) $rolActor)) === 'superadmin';
+    }
+}
 if (isset($_POST['usuario'], $_POST['permiso'])) {
   $usuario = $_POST['usuario'];
   $permiso = intval($_POST['permiso']);
 
   // Esta opción también modifica la fila de usuarios: un admin no puede
   // cambiar permisos de tickets del superadmin mediante una petición directa.
-  if (!esSuperAdmin()) {
+  if (!$actorEsSuperAdmin) {
     $check = $conexion->prepare("SELECT rol FROM usuarios WHERE usuario = ?");
     $check->bind_param("s", $usuario);
     $check->execute();

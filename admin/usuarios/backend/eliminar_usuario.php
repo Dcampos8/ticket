@@ -12,7 +12,18 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. Mismo sistema de permisos que usa el listado (no un check manual de $_SESSION['rol'])
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
-
+$actorEsSuperAdmin = false;
+$idActor = (int) ($_SESSION['id'] ?? 0);
+if ($idActor > 0) {
+    $stmtActor = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    if ($stmtActor) {
+        $stmtActor->bind_param("i", $idActor);
+        $stmtActor->execute();
+        $rolActor = $stmtActor->get_result()->fetch_assoc()['rol'] ?? '';
+        $stmtActor->close();
+        $actorEsSuperAdmin = strtolower(trim((string) $rolActor)) === 'superadmin';
+    }
+}
 // 3. Validar dato recibido
 if (!isset($_POST['usuario_id'])) {
     die("ID no recibido");
@@ -21,7 +32,7 @@ if (!isset($_POST['usuario_id'])) {
 $id = intval($_POST['usuario_id']);
 
 // Evita borrar una cuenta superadmin mediante una petición directa.
-if (!esSuperAdmin()) {
+if (!$actorEsSuperAdmin) {
     $check = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
     $check->bind_param("i", $id);
     $check->execute();

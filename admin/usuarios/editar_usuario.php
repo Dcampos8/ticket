@@ -17,7 +17,19 @@ requerirModulo('usuarios');
 // 5. Cargar el menú
 include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
 
-$puedeAsignarRoles = esSuperAdmin();
+$actorEsSuperAdmin = false;
+$idActor = (int) ($_SESSION['id'] ?? 0);
+if ($idActor > 0) {
+    $stmtActor = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    if ($stmtActor) {
+        $stmtActor->bind_param("i", $idActor);
+        $stmtActor->execute();
+        $rolActor = $stmtActor->get_result()->fetch_assoc()['rol'] ?? '';
+        $stmtActor->close();
+        $actorEsSuperAdmin = strtolower(trim((string) $rolActor)) === 'superadmin';
+    }
+}
+$puedeAsignarRoles = $actorEsSuperAdmin;
 
 // 6. Obtener datos del usuario
 $usuario = null;
@@ -37,7 +49,7 @@ if (!$usuario) {
 }
 
 // Un admin puede administrar usuarios, pero la cuenta superadmin queda reservada.
-if (strtolower(trim((string) ($usuario['rol'] ?? ''))) === 'superadmin' && !esSuperAdmin()) {
+if (strtolower(trim((string) ($usuario['rol'] ?? ''))) === 'superadmin' && !$actorEsSuperAdmin) {
     http_response_code(403);
     exit('No tienes permiso para ver o modificar esta cuenta.');
 }

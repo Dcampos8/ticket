@@ -19,7 +19,18 @@ if (!esSuperAdmin() && !tieneModulo('usuarios')) {
 }
 
 include('../../../backend/conexion.php');
-
+$actorEsSuperAdmin = false;
+$idActor = (int) ($_SESSION['id'] ?? 0);
+if ($idActor > 0) {
+    $stmtActor = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    if ($stmtActor) {
+        $stmtActor->bind_param("i", $idActor);
+        $stmtActor->execute();
+        $rolActor = $stmtActor->get_result()->fetch_assoc()['rol'] ?? '';
+        $stmtActor->close();
+        $actorEsSuperAdmin = strtolower(trim((string) $rolActor)) === 'superadmin';
+    }
+}
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id      = intval($_POST["id"]);
     $usuario = $_POST["usuario"];
@@ -39,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         http_response_code(404);
         exit("Usuario no encontrado");
     }
-    if (strtolower(trim((string) ($usuarioActual['rol'] ?? ''))) === 'superadmin' && !esSuperAdmin()) {
+    if (strtolower(trim((string) ($usuarioActual['rol'] ?? ''))) === 'superadmin' && !$actorEsSuperAdmin) {
         http_response_code(403);
         exit("No tienes permiso para modificar esta cuenta");
     }
@@ -49,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Solo el superadmin puede dejar/poner a alguien como admin o superadmin.
-    if (!esSuperAdmin() && in_array($rol, ['admin', 'superadmin'], true)) {
+    if (!$actorEsSuperAdmin && in_array($rol, ['admin', 'superadmin'], true)) {
         http_response_code(403);
         die("No autorizado para asignar ese rol");
     }
