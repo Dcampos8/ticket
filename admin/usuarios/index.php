@@ -12,6 +12,7 @@ echo '<pre>' . htmlspecialchars(print_r([
 ], true), ENT_QUOTES, 'UTF-8') . '</pre>';
 exit;
 
+
 // 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
 
