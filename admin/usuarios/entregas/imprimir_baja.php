@@ -1,4 +1,8 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('usuarios');
+?><?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {

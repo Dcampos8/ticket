@@ -1,11 +1,16 @@
-# Credenciales y entorno
-.env
+# Secretos y configuracion local
+/.env
+/.env.*
+!/.env.example
 
-# Archivos de depuración
-debug_*.txt
-debug_*.log
+# Archivos temporales y logs
+/debug_*.txt
+/debug_*.log
 *.log
+/tmp/*
+!/tmp/.gitkeep
 
-# Uploads de usuarios (contenido dinámico, no versionar)
+# Archivos subidos por usuarios (conservar en el servidor)
 /uploads/*
 !/uploads/.gitkeep
+!/uploads/.htaccess

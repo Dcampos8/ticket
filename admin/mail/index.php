@@ -1,4 +1,8 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirAdmin();
+?><?php
 // Cargar la configuración global y el menú
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');

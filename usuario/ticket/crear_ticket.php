@@ -1,5 +1,8 @@
 <?php
 session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 require_once '../../backend/conexion.php';
 
 if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
@@ -162,6 +165,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 
 <div class="ticket-page">
     <form id="formCrearTicket" enctype="multipart/form-data" class="form-container">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="usuario" value="<?= htmlspecialchars($_SESSION['usuario']) ?>">
         <input type="hidden" name="area" value="<?= htmlspecialchars($_SESSION['area']) ?>">
         <input type="hidden" name="nombre" value="<?= htmlspecialchars($_SESSION['nombre_completo']) ?>">

@@ -1,5 +1,10 @@
 <?php
-ini_set('display_errors', 1);
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('mantenimiento');
+?><?php
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 require('../../backend/conexion.php');

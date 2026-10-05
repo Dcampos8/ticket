@@ -13,7 +13,7 @@ if (!isset($_SESSION['logueado']) || !esAdminOSuperior()) {
     header("Location: ../../../login.php");
     exit();
 }
-if (!esSuperAdmin() && !in_array('usuarios', $_SESSION['modulos_permitidos'] ?? [], true)) {
+if (!esSuperAdmin() && !tieneModulo('usuarios')) {
     http_response_code(403);
     exit("No autorizado");
 }
@@ -28,6 +28,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone   = $_POST['phone'];
     $area    = $_POST["area"];
     $rol     = $_POST["rol"];
+
+    // Bloquea cambios directos por POST sobre la cuenta superadmin.
+    $stmtActual = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    $stmtActual->bind_param("i", $id);
+    $stmtActual->execute();
+    $usuarioActual = $stmtActual->get_result()->fetch_assoc();
+    $stmtActual->close();
+    if (!$usuarioActual) {
+        http_response_code(404);
+        exit("Usuario no encontrado");
+    }
+    if (($usuarioActual['rol'] ?? '') === 'superadmin' && !esSuperAdmin()) {
+        http_response_code(403);
+        exit("No tienes permiso para modificar esta cuenta");
+    }
 
     if ($conexion->connect_error) {
         die("Conexión fallida: " . $conexion->connect_error);

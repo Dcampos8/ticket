@@ -1,14 +1,22 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 ob_start();
 ob_clean();
-include('../../backend/conexion.php');
+require_once __DIR__ . '/../../config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirAdmin();
+require_once ROOT_PATH . 'backend/conexion.php';
 
-$fecha_inicio = $_GET['fecha_inicio'] ?? date('Y-m-d', strtotime('monday this week'));
-$fecha_fin    = $_GET['fecha_fin'] ?? date('Y-m-d');
-
+$validarFecha = static function ($valor, $predeterminada): string {
+    if (!is_string($valor) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) return $predeterminada;
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+    return ($fecha && $fecha->format('Y-m-d') === $valor) ? $valor : $predeterminada;
+};
+$fecha_inicio = $validarFecha($_GET['fecha_inicio'] ?? '', date('Y-m-d', strtotime('monday this week')));
+$fecha_fin = $validarFecha($_GET['fecha_fin'] ?? '', date('Y-m-d'));
 header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 echo "\xEF\xBB\xBF"; // BOM para Excel
 

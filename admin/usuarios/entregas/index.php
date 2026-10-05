@@ -1,4 +1,8 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('usuarios');
+?><?php
     // 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
     require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
     // 4. Cargar el menú (Usando ROOT_PATH para asegurar que lo encuentre)

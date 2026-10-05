@@ -19,22 +19,21 @@ requerirModulo('reportes');
 include(ROOT_PATH . 'admin/menu.php');
 
 
-// Verifica si se aplicó un filtro de fechas
-$fecha_inicio = $_GET['fecha_inicio'] ?? '';
-$fecha_fin = $_GET['fecha_fin'] ?? '';
-
-$condicion_fecha = '';
-if (!empty($fecha_inicio) && !empty($fecha_fin)) {
-  $condicion_fecha = "WHERE DATE(t.fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'";
-}
-
-$sql = "SELECT t.id, t.nombre,t.estatus, t.descripcion, t.fecha_creacion, u.area, t.fecha_modificacion 
-        FROM tickets t
-        LEFT JOIN usuarios u ON t.nombre = u.usuario
-        $condicion_fecha
-        ORDER BY t.fecha_creacion DESC";
-$resultado = $conexion->query($sql);
-?>
+// Valida fechas como ISO antes de usarlas en consultas.
+$validarFecha = static function ($valor): bool {
+    if (!is_string($valor) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) return false;
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+    return $fecha && $fecha->format('Y-m-d') === $valor;
+};
+$fecha_inicio = $validarFecha($_GET['fecha_inicio'] ?? '') ? $_GET['fecha_inicio'] : '';
+$fecha_fin = $validarFecha($_GET['fecha_fin'] ?? '') ? $_GET['fecha_fin'] : '';
+$aplicarFiltroFechas = $fecha_inicio !== '' && $fecha_fin !== '';
+$sql = "SELECT t.id, t.nombre, t.estatus, t.descripcion, t.fecha_creacion, u.area, t.fecha_modificacion
+        FROM tickets t LEFT JOIN usuarios u ON t.nombre = u.usuario" . ($aplicarFiltroFechas ? " WHERE DATE(t.fecha_creacion) BETWEEN ? AND ?" : '') . " ORDER BY t.fecha_creacion DESC";
+$stmtReporte = $conexion->prepare($sql);
+if ($aplicarFiltroFechas) $stmtReporte->bind_param('ss', $fecha_inicio, $fecha_fin);
+$stmtReporte->execute();
+$resultado = $stmtReporte->get_result();?>
 
 <!-- DataTables + estilos -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">

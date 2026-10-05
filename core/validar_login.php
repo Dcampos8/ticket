@@ -1,6 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
@@ -27,6 +28,7 @@ $resultado = $stmt->get_result();
 
 if ($fila = $resultado->fetch_assoc()) {
     if (password_verify($contrasena, $fila['contrasena'])) {
+        session_regenerate_id(true);
         $_SESSION['logueado'] = true;
         $_SESSION['id'] = $fila['id'];
         $_SESSION['usuario'] = $fila['usuario'];

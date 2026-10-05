@@ -1,4 +1,6 @@
-<?php
+<?phprequire_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('usuarios');
 function val($campo){
     return isset($_GET[$campo]) ? htmlspecialchars($_GET[$campo]) : '';
 }

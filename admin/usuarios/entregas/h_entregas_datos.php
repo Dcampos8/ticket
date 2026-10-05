@@ -1,4 +1,6 @@
-<?php
+<?phprequire_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('usuarios');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
 include(ROOT_PATH . 'admin/menu.php');
 

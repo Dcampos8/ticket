@@ -1,8 +1,15 @@
 <?php
-// Obtener fechas desde la URL
-$inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : 'inicio';
-$fin = isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : 'fin';
-
+require_once __DIR__ . '/../../config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('reportes');
+require_once ROOT_PATH . 'backend/conexion.php';
+$validarFecha = static function ($valor, $predeterminada): string {
+    if (!is_string($valor) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) return $predeterminada;
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+    return ($fecha && $fecha->format('Y-m-d') === $valor) ? $valor : $predeterminada;
+};
+$inicio = $validarFecha($_GET['fecha_inicio'] ?? '', date('Y-m-01'));
+$fin = $validarFecha($_GET['fecha_fin'] ?? '', date('Y-m-d'));
 // Armar nombre del archivo
 $nombreArchivo = "ACTIVIDADES SISTEMAS ($inicio al $fin).xls";
 
@@ -13,11 +20,10 @@ header("Content-Disposition: attachment; filename=\"$nombreArchivo\"");
 // Forzar UTF-8 para Excel
 echo "\xEF\xBB\xBF";
 
-include('../../backend/conexion.php');
-
-// Si estás usando filtro por fecha, puedes incluirlo aquí
-$query = "SELECT * FROM tickets WHERE fecha_creacion BETWEEN '$inicio' AND '$fin' ORDER BY fecha_creacion DESC";
-$resultado = $conexion->query($query);
+$stmt = $conexion->prepare('SELECT * FROM tickets WHERE fecha_creacion BETWEEN ? AND ? ORDER BY fecha_creacion DESC');
+$stmt->bind_param('ss', $inicio, $fin);
+$stmt->execute();
+$resultado = $stmt->get_result();
 
 // Comenzar tabla
 echo "<table border='1'>";

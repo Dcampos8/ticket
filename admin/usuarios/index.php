@@ -271,12 +271,15 @@ function colorRol($rol) {
                   </span>
                 </td>
                 <td class="acciones">
-                  <a href="editar_usuario.php?id=<?= $u['id'] ?>" title="Editar">✏️</a>
-
-                  <form class="form-eliminar" action="<?= BASE_URL ?>admin/usuarios/backend/eliminar_usuario.php" method="POST" style="display:inline;">
-                    <input type="hidden" name="usuario_id" value="<?= $u['id'] ?>">
-                    <button type="button" class="btn-eliminar" title="Eliminar" data-nombre="<?= htmlspecialchars($u['nombre_completo']) ?>">🗑️</button>
-                  </form>
+                  <?php if (($u['rol'] ?? '') === 'superadmin' && !esSuperAdmin()): ?>
+                    <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
+                  <?php else: ?>
+                    <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>
+                    <form class="form-eliminar" action="<?= BASE_URL ?>admin/usuarios/backend/eliminar_usuario.php" method="POST" style="display:inline;">
+                      <input type="hidden" name="usuario_id" value="<?= (int) $u['id'] ?>">
+                      <button type="button" class="btn-eliminar" title="Eliminar" data-nombre="<?= htmlspecialchars($u['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>">🗑️</button>
+                    </form>
+                  <?php endif; ?>
                 </td>
               </tr>
             <?php endwhile; ?>

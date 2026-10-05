@@ -20,6 +20,19 @@ if (!isset($_POST['usuario_id'])) {
 
 $id = intval($_POST['usuario_id']);
 
+// Evita borrar una cuenta superadmin mediante una petición directa.
+if (!esSuperAdmin()) {
+    $check = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    $check->bind_param("i", $id);
+    $check->execute();
+    $rolObjetivo = $check->get_result()->fetch_assoc()['rol'] ?? null;
+    $check->close();
+    if ($rolObjetivo === 'superadmin') {
+        http_response_code(403);
+        exit('No tienes permiso para eliminar esta cuenta.');
+    }
+}
+
 // 4. Eliminar
 $stmt = $conexion->prepare("DELETE FROM usuarios WHERE id = ?");
 $stmt->bind_param("i", $id);

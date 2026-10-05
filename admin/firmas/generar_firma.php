@@ -1,4 +1,8 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('firmas');
+?><?php
 function crearFirma($nombre, $puesto, $telefono, $correo_user) {
 
     $path_fondo = 'fondo_base.png';

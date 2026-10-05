@@ -36,6 +36,12 @@ if (!$usuario) {
     exit();
 }
 
+// Un admin puede administrar usuarios, pero la cuenta superadmin queda reservada.
+if (($usuario['rol'] ?? '') === 'superadmin' && !esSuperAdmin()) {
+    http_response_code(403);
+    exit('No tienes permiso para ver o modificar esta cuenta.');
+}
+
 $modulosUsuario = parsearModulos($usuario['modulos_permitidos'] ?? null);
 ?>
 

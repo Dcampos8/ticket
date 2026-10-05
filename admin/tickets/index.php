@@ -1,7 +1,8 @@
 <?php
 /*
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 */
 // 1. Cargar la configuración global
@@ -12,6 +13,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. Verificar Sesión y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('tickets');
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 // -----------------------------------------------------------------
 // Filtros (GET) - búsqueda de texto, área, tipo, estatus y fechas
@@ -694,7 +698,8 @@ function claseTipoTicket($tipo) {
                                     <?php endif; ?>
                                     <?php if (($_SESSION['rol'] ?? '') === 'admin' && !$esFinalizado): ?>
                                         <form action="backend/subir_imagen_admin_ticket.php" method="POST" enctype="multipart/form-data" class="d-inline">
-                                            <input type="hidden" name="ticket_id" value="<?= $f['id'] ?>">
+                                            <input type="hidden" name="ticket_id" value="<?= (int) $f['id'] ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
                                             <label for="img_adm_<?= $f['id'] ?>" class="adjunto-upload-label" title="Subir adjunto de admin">
                                                 <i class="fas fa-upload"></i>
                                             </label>

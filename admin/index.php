@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 session_start();
 
 include_once '../config.php';
@@ -14,8 +15,13 @@ $conexion->set_charset("utf8");
 
 /* ================= FILTRO POR FECHA ================= */
 
-$fecha_inicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
-$fecha_fin    = $_GET['fecha_fin'] ?? date('Y-m-d');
+$validarFecha = static function ($valor, $predeterminada): string {
+    if (!is_string($valor) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) return $predeterminada;
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+    return ($fecha && $fecha->format('Y-m-d') === $valor) ? $valor : $predeterminada;
+};
+$fecha_inicio = $validarFecha($_GET['fecha_inicio'] ?? '', date('Y-m-01'));
+$fecha_fin = $validarFecha($_GET['fecha_fin'] ?? '', date('Y-m-d'));
 
 /* ================= KPIs ================= */
 

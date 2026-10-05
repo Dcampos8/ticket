@@ -1,59 +1,39 @@
-# 🎫 Sistema de Tickets
+# Sistema de Tickets — Transportes Valadez
 
-Sistema web para la gestión, seguimiento y control de incidencias técnicas y reportes administrativos. Desarrollado para optimizar la comunicación interna y el flujo de trabajo en entornos de logística y transporte.
+Aplicación PHP para registrar y administrar tickets, evidencias y módulos administrativos. El repositorio se despliega en Hostinger para `ticket.transportesvaladez.com`.
 
-## 🚀 Funcionalidades
+## Estructura
 
-*   **Levantamiento de Tickets:** Formulario dinámico para usuarios con captura de datos (Área, Tipo de Incidencia, Descripción).
-*   **Gestión de Evidencia:** Soporte para carga de imágenes (`uploads/`) vinculadas directamente al reporte.
-*   **Notificaciones Automáticas:** Envío de alertas por correo electrónico mediante **PHPMailer** (SMTP) al departamento de sistemas.
-*   **Panel Administrativo:** Visualización y cambio de estatus de los tickets (Pendiente, En Proceso, Finalizado).
-*   **Reportes en Tiempo Real:** Base de datos normalizada en MySQL para asegurar la integridad de la información.
+- `admin/`: panel y módulos administrativos.
+- `usuario/`: portal de usuarios.
+- `core/`, `shared/`: conexión, autenticación, permisos y componentes compartidos.
+- `backend/`: endpoints y librerías existentes.
+- `config/`: carga de variables de entorno.
+- `css/`, `js/`, `img/`, `fonts/`: recursos de interfaz.
+- `uploads/`: archivos dinámicos cargados por usuarios; no versionar su contenido.
 
-## 🛠️ Stack Tecnológico
+## Configuración
 
-*   **Backend:** PHP 8.x
-*   **Base de Datos:** MySQL (MariaDB)
-*   **Frontend:** HTML5, CSS3 (Diseño responsivo), JavaScript (AJAX para envío de formularios).
-*   **Librerías:** [PHPMailer](https://github.com/PHPMailer/PHPMailer) para la gestión de correos.
+1. Usa PHP 8.x con `mysqli` y `curl` habilitados, más una base de datos MySQL/MariaDB.
+2. Crea `.env` a partir de `.env.example` y configura las credenciales de base de datos y correo que realmente use la instalación.
+3. Nunca subas `.env`, contraseñas, tokens ni claves al repositorio. Si una credencial estuvo en un commit compartido, revócala y genera una nueva.
+4. Configura la base de datos del sistema. Este repositorio no incluye un volcado SQL completo; para instalaciones nuevas primero hay que preparar y documentar el esquema vigente.
+5. Asegura que `uploads/` exista, sea escribible por PHP y no permita ejecutar scripts subidos.
 
-## 📋 Requisitos Previos
+## Despliegue en Hostinger
 
-Para instalar este proyecto, asegúrate de tener:
-*   Servidor web (Apache/Nginx).
-*   PHP >= 7.4.
-*   Extensión `mysqli` habilitada.
-*   Acceso a un servidor SMTP (ej. Hostinger, Gmail) para el envío de correos.
+El repositorio GitHub se despliega en `public_html/ticket` desde la rama `main`. El flujo es:
 
-## 🔧 Instalación
+1. Editar y revisar cambios localmente.
+2. Crear un commit y subirlo a GitHub (`Push origin`).
+3. Redistribuir desde hPanel, o usar despliegue automático si está activado.
+4. Verificar el sitio y los registros de despliegue.
 
-1.  **Clonar el repositorio:**
-    ```bash
-    git clone [https://github.com/TV-DEVELOP/ticket.git](https://github.com/TV-DEVELOP/ticket.git)
-    ```
+No vacíes manualmente la carpeta del subdominio para publicar. Mantén la configuración `.env` del servidor fuera de Git y conserva los archivos existentes de `uploads/` durante los despliegues.
 
-2.  **Configurar la Base de Datos:**
-    *   Importa el archivo `.sql` (si está disponible) o crea la tabla `tickets` con los campos: `id`, `nombre`, `nombre_completo`, `area`, `tipo_ticket`, `descripcion`, `estatus`, `fecha_creacion`, `imagen`.
+## Seguridad operativa
 
-3.  **Configurar conexión:**
-    *   Edita el archivo `conexion.php` con tus credenciales locales o de producción:
-    ```php
-    $conexion = new mysqli("localhost", "usuario", "password", "base_de_datos");
-    ```
-
-4.  **Configurar PHPMailer:**
-    *   En el archivo de procesamiento, ajusta las credenciales SMTP:
-    ```php
-    $mail->Host = 'tu-servidor-smtp.com';
-    $mail->Username = 'tu-correo@dominio.com';
-    $mail->Password = 'tu-password';
-    ```
-
-## 📁 Estructura del Proyecto
-```text
-├── src/               # Código fuente (PHP)
-├── uploads/           # Carpeta para almacenamiento de imágenes/evidencias
-├── js/                # Scripts de frontend
-├── css/               # Estilos corporativos
-├── PHPMailer/         # Dependencias para envío de correos
-└── conexion.php       # Configuración de BD
+- Usa consultas preparadas cuando los valores de una consulta provengan de una solicitud o sesión.
+- Protege cada endpoint en el servidor con autenticación, autorización por rol/módulo y token CSRF en acciones que modifican datos.
+- Valida tipo, tamaño y nombre de cada archivo cargado; genera nombres aleatorios y almacena los archivos sin permiso de ejecución.
+- Evita imprimir datos de solicitudes, errores de base de datos o credenciales en respuestas visibles; registra errores en logs protegidos.

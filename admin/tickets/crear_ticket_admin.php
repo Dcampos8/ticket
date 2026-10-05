@@ -6,6 +6,9 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 // 3. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
@@ -58,13 +61,14 @@ $fecha_actual_local = date('Y-m-d\TH:i');
             <h3 class="mb-4 text-primary"><i class="fa-solid fa-clipboard-check me-2"></i>Nuevo Ticket Administrativo</h3>
 
             <form id="formTicketAdmin" class="grid-form" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
                 <!-- ================= USUARIO ================= -->
                 <div class="section-title">Información del Solicitante</div>
 
                 <div class="campo">
                     <label class="fw-bold">Seleccionar Usuario</label>
-                    <select id="nombre_select" class="form-select border-primary" required>
+                    <select id="nombre_select" name="usuario_id" class="form-select border-primary" required>
                         <option value="">Seleccionar...</option>
                         <?php foreach ($usuarios_array as $id => $data): ?>
                             <option value="<?= $id ?>"><?= htmlspecialchars($data['nombre_completo']) ?></option>
