@@ -158,7 +158,6 @@ function claseTipoTicket($tipo) {
     /* Corrección de Modales y Navbar */
     .modal { z-index: 9999 !important; }
     .modal-backdrop { z-index: 9998 !important; }
-    .navbar { position: relative; z-index: 1; }
     .modal-dialog { margin: auto; }
     /* Este "transparent" es solo para el visor de imágenes (su .modal-body ya
        trae fondo propio con bg-dark). Si se aplica a TODOS los modales, el de
@@ -172,11 +171,11 @@ function claseTipoTicket($tipo) {
         --surface: #ffffff;
         --bg-1: #eef2ff;
         --bg-2: #ecfeff;
-        --primary: #4338ca;
-        --primary-dark: #312e81;
-        --primary-soft: #eef2ff;
-        --accent: #0d9488;
-        --accent-soft: #ccfbf1;
+        --primary: #1e3a8a;
+        --primary-dark: #172554;
+        --primary-soft: #e8edf8;
+        --accent: #c9252d;
+        --accent-soft: #fbe9ea;
         --danger: #dc2626;
         --danger-soft: #fee2e2;
         --success: #059669;
@@ -184,9 +183,9 @@ function claseTipoTicket($tipo) {
         --warning: #d97706;
         --warning-soft: #fef3c7;
         --neutral: #94a3b8;
-        --radius-lg: 20px;
-        --radius-md: 14px;
-        --radius-sm: 10px;
+        --radius-lg: 13px;
+        --radius-md: 10px;
+        --radius-sm: 7px;
     }
 
     /* Apariencia general */
@@ -541,8 +540,8 @@ function claseTipoTicket($tipo) {
         .filtros-acciones .btn-limpiar { flex: 1; text-align: center; }
     }
 </style>
-<div class="container-fluid px-4 mb-5" style="margin-top:50px;">
-    <div class="table-container-custom_">
+<div class="container-fluid px-4 mb-5" style="margin-top:0;">
+    <div class="table-container-custom">
         <div class="tickets-header">
             <div>
                 <h1 class="page-title">

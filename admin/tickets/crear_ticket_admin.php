@@ -45,13 +45,10 @@ $fecha_actual_local = date('Y-m-d\TH:i');
 <style>
     /* Ajuste para que el contenido respete el menú lateral del admin */
     .ticket-admin-content {
-        margin-left: 220px;
+        margin-left: 0;
         padding: 20px;
         background-color: #f8f9fa;
         min-height: 100vh;
-    }
-    @media (max-width: 992px) {
-        .ticket-admin-content { margin-left: 0; }
     }
 </style>
 

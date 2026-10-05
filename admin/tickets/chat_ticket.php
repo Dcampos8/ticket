@@ -12,59 +12,72 @@ $usuarioActual = $_SESSION['usuario'];
 <html>
 <head>
     <title>Chat Ticket #<?= $ticket_id ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+:root { --chat-navy: #172554; --chat-blue: #1e3a8a; --chat-bg: #f3f5f8; --chat-line: #dfe4ec; }
+* { box-sizing: border-box; }
 body {
-    font-family: Arial, sans-serif;
-    background: #ececec;
-    margin:0;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #202a3b;
+    background: var(--chat-bg);
+    margin: 0;
 }
 
 h2 {
-    background: #075E54;
-    padding: 15px;
+    background: var(--chat-navy);
+    padding: 16px 24px;
     color: white;
     margin: 0;
-    text-align: center;
+    text-align: left;
+    font-size: 1.05rem;
+    font-weight: 650;
+    border-bottom: 3px solid #c9252d;
 }
 
 /* Caja contenedora del chat */
 #chatBox {
-    width: 90%;
-    max-width: 600px;
-    height: 440px;
-    margin: 20px auto;
-    padding: 15px;
+    width: min(94%, 900px);
+    height: calc(100vh - 160px);
+    min-height: 300px;
+    margin: 20px auto 12px;
+    padding: 20px;
     background: #ffffff;
     overflow-y: auto;
-    border-radius: 10px;
-    border: 1px solid #ddd;
+    border-radius: 12px;
+    border: 1px solid var(--chat-line);
+    box-shadow: 0 2px 8px rgba(23, 32, 51, .06);
     display: flex;
     flex-direction: column;
 }
 
 /* Burbuja de mensaje */
 .msg {
-    max-width: 70%;
-    padding: 10px;
-    border-radius: 15px;
-    margin-bottom: 12px;
+    max-width: min(78%, 620px);
+    padding: 11px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
     position: relative;
     font-size: 14px;
-    box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+    box-shadow: none;
+    overflow-wrap: anywhere;
 }
 
 /* Mensaje del usuario actual */
 .me {
-    background: #DCF8C6;
+    background: var(--chat-blue);
+    color: #fff;
     align-self: flex-end;
     text-align: right;
 }
 
 /* Mensaje del otro usuario */
 .them {
-    background: #e9ecef;
+    background: #eef1f5;
     align-self: flex-start;
 }
 
@@ -72,14 +85,13 @@ h2 {
     font-size: 11px;
     display: block;
     margin-top: 5px;
-    opacity: 0.6;
+    opacity: 0.72;
 }
 
 /* Caja de envió */
 #inputBox {
-    width: 90%;
-    max-width: 600px;
-    margin: 10px auto;
+    width: min(94%, 900px);
+    margin: 0 auto 20px;
     display: flex;
     gap: 10px;
 }
@@ -87,19 +99,33 @@ h2 {
 #mensaje {
     width: 100%;
     padding: 12px;
-    border-radius: 20px;
-    border: 1px solid #aaa;
+    border-radius: 8px;
+    border: 1px solid #d7dde7;
     font-size: 14px;
+    min-width: 0;
+}
+#mensaje:focus {
+    outline: none;
+    border-color: #627cae;
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, .11);
 }
 
 button {
-    background: #25D366;
+    flex: 0 0 46px;
+    background: var(--chat-blue);
     border: none;
-    padding: 12px 16px;
-    border-radius: 50%;
+    padding: 10px;
+    border-radius: 8px;
     cursor: pointer;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
+}
+button:hover { background: #172554; }
+@media (max-width: 600px) {
+    h2 { padding: 14px 16px; }
+    #chatBox { width: calc(100% - 24px); height: calc(100vh - 145px); padding: 14px; }
+    #inputBox { width: calc(100% - 24px); }
+    .msg { max-width: 88%; }
 }
 </style>
 </head>
