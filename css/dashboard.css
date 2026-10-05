@@ -98,12 +98,12 @@
     }
 
     /* VARIANTES DE COLOR KPI (GRADIENTES) */
-    .kpi-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-    .kpi-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
-    .kpi-orange { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
-    .kpi-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
-    .kpi-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-    .kpi-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); color: white; }
+    .kpi-blue { background: #2563eb; color: white; }
+    .kpi-green { background: #15803d; color: white; }
+    .kpi-orange { background: #b45309; color: white; }
+    .kpi-purple { background: #6d28d9; color: white; }
+    .kpi-red { background: #c9252d; color: white; }
+    .kpi-yellow { background: #a16207; color: white; }
 
     /* TARJETAS DE GRÁFICAS */
     .card-chart {
@@ -166,8 +166,8 @@
         transition: all 0.2s;
     }
 
-    .btn-primary { background: #0f172a; border: none; }
-    .btn-primary:hover { background: #1e293b; transform: translateY(-2px); }
+    .btn-primary { background: #1e3a8a; border: 1px solid #1e3a8a; }
+    .btn-primary:hover { background: #172554; border-color: #172554; }
     
-    .btn-success { background: #16a34a; border: none; }
-    .btn-success:hover { background: #15803d; transform: translateY(-2px); }
+    .btn-success { background: #15803d; border: 1px solid #15803d; }
+    .btn-success:hover { background: #166534; border-color: #166534; }

@@ -1,186 +1,64 @@
-/* =============================================================
-   ESTILO PROFESIONAL - TRANSPORTES VALADEZ (Abril 2026)
-   ============================================================= */
-
+/* Navegación administrativa */
 :root {
-    --nav-bg: rgba(15, 23, 42, 0.95); /* Azul Slate oscuro */
-    --accent: #e31e24;                /* Rojo Valadez (color corporativo) */
-    --hover-bg: rgba(255, 255, 255, 0.1);
-    --text-muted: rgba(255, 255, 255, 0.7);
-    --dropdown-bg: #1e293b;
+  --nav-bg: #172033;
+  --accent: #c9252d;
+  --hover-bg: #2a3549;
+  --text-muted: #c1c9d6;
+  --dropdown-bg: #fff;
 }
 
-/* 1. ESTRUCTURA BASE DE LA NAVBAR */
 .custom-navbar {
-    background: var(--nav-bg) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0.6rem 0;
-    transition: all 0.3s ease;
-    z-index: 1100;
+  min-height: 66px;
+  padding: .45rem 0;
+  background: var(--nav-bg) !important;
+  border-bottom: 1px solid #2c374b;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .12);
+  z-index: 1100;
 }
-
-/* 2. LINKS DE NAVEGACIÓN (Desktop) */
-.navbar-nav .nav-link {
-    font-size: 0.88rem;
-    font-weight: 500;
-    padding: 0.5rem 0.8rem !important;
-    color: var(--text-muted) !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: all 0.2s ease;
+.custom-navbar .navbar-brand { display: flex; align-items: center; min-height: 42px; }
+.custom-navbar .navbar-nav .nav-link {
+  min-height: 42px;
+  padding: .55rem .72rem !important;
+  border-radius: 7px;
+  color: var(--text-muted) !important;
+  font-size: .84rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: .5rem;
 }
-
-.navbar-nav .nav-link i {
-    font-size: 1.1rem;
-    margin-bottom: 3px;
-    transition: transform 0.3s ease;
+.custom-navbar .navbar-nav .nav-link i { font-size: .95rem; color: #aebbd0; }
+.custom-navbar .navbar-nav .nav-link:hover,
+.custom-navbar .navbar-nav .nav-link.active,
+.custom-navbar .navbar-nav .show > .nav-link { color: #fff !important; background: var(--hover-bg); }
+.custom-navbar .navbar-nav .nav-link.active i { color: #fff; }
+.custom-navbar .dropdown-menu {
+  min-width: 220px;
+  margin-top: .45rem !important;
+  padding: .4rem;
+  background: var(--dropdown-bg) !important;
+  border: 1px solid #e0e5ec !important;
+  border-radius: 9px !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .15) !important;
 }
+.custom-navbar .dropdown-item { color: #344055 !important; border-radius: 6px; font-size: .86rem; }
+.custom-navbar .dropdown-item i { width: 22px; margin-right: 7px; color: var(--tv-navy); }
+.custom-navbar .dropdown-item:hover,
+.custom-navbar .dropdown-item:focus { color: var(--tv-navy-dark) !important; background: #edf1f8 !important; }
+.custom-navbar .dropdown-divider { border-color: #e3e7ee; }
+.user-profile-pill { flex-direction: row !important; padding: .35rem .65rem !important; background: #202b3e; }
+.user-avatar-small { display: inline-flex; width: 29px; height: 29px; align-items: center; justify-content: center; border-radius: 50%; color: #fff; background: var(--tv-red); font-size: .8rem; }
+.logo-animate { transition: opacity .15s ease; }
+.logo-animate:hover { opacity: .85; }
 
-/* Estados Hover y Active */
-.navbar-nav .nav-link:hover, 
-.navbar-nav .nav-link.active {
-    color: #ffffff !important;
-}
-
-.navbar-nav .nav-link:hover i {
-    transform: translateY(-3px);
-    color: var(--accent);
-}
-
-.navbar-nav .nav-link.active {
-    background: var(--hover-bg);
-    border-radius: 8px;
-}
-
-/* 3. DROPDOWNS (El fix de estabilidad) */
-@media (min-width: 992px) {
-    /* Puente invisible para evitar que se cierre al mover el mouse */
-    .navbar .dropdown-menu::before {
-        content: "";
-        position: absolute;
-        top: -15px; 
-        left: 0;
-        right: 0;
-        height: 20px;
-        display: block;
-    }
-
-    .navbar .dropdown-menu {
-        display: block;
-        opacity: 0;
-        visibility: hidden;
-        background: var(--dropdown-bg) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
-        margin-top: 0 !important;
-        transform: translateY(10px);
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        padding: 8px 0;
-    }
-
-    /* Mostrar al pasar el mouse por el contenedor padre */
-    .navbar .nav-item.dropdown:hover > .dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-}
-
-/* Elementos del Dropdown */
-.dropdown-item {
-    color: rgba(255, 255, 255, 0.8) !important;
-    padding: 10px 20px !important;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    transition: background 0.2s ease;
-}
-
-.dropdown-item i {
-    width: 25px;
-    font-size: 1rem;
-    color: var(--accent);
-    margin-right: 10px;
-}
-
-.dropdown-item:hover {
-    background: var(--accent) !important;
-    color: #ffffff !important;
-}
-
-.dropdown-item:hover i {
-    color: #ffffff;
-}
-
-/* 4. PERFIL DE USUARIO (Pill Design) */
-.user-profile-pill {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50px;
-    padding: 5px 15px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    flex-direction: row !important; /* Texto a lado del icono */
-}
-
-.user-avatar-small {
-    width: 28px;
-    height: 28px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    color: white;
-}
-
-/* 5. DISEÑO RESPONSIVO (Móvil) */
-@media (max-width: 991px) {
-    .navbar-collapse {
-        background: var(--nav-bg);
-        margin-top: 10px;
-        padding: 15px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .navbar-nav .nav-link {
-        flex-direction: row !important; /* Icono al lado del texto en móvil */
-        justify-content: flex-start;
-        padding: 12px 15px !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .navbar-nav .nav-link i {
-        margin-bottom: 0;
-        margin-right: 15px;
-        width: 25px;
-        text-align: center;
-    }
-
-    .dropdown-menu {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding-left: 20px;
-    }
-    
-    .user-profile-pill {
-        margin-top: 15px;
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* Animación sutil para el logo */
-.logo-animate {
-    transition: all 0.3s ease;
-}
-
-.logo-animate:hover {
-    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
-    transform: scale(1.05);
+@media (max-width: 991.98px) {
+  .custom-navbar .navbar-collapse { max-height: calc(100vh - 78px); overflow-y: auto; margin-top: .45rem; padding: .5rem; background: var(--nav-bg); border-top: 1px solid #2c374b; }
+  .custom-navbar .navbar-nav .nav-link { width: 100%; justify-content: flex-start; }
+  .custom-navbar .navbar-nav .nav-link i { width: 21px; text-align: center; }
+  .custom-navbar .dropdown-menu { margin: .2rem 0 .4rem !important; padding-left: .5rem; background: #202b3e !important; border: 0 !important; box-shadow: none !important; }
+  .custom-navbar .dropdown-item { color: #e1e7ef !important; }
+  .custom-navbar .dropdown-item:hover,
+  .custom-navbar .dropdown-item:focus { background: #2a3549 !important; color: #fff !important; }
+  .user-profile-pill { width: 100%; justify-content: flex-start; }
 }

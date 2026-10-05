@@ -31,7 +31,7 @@ session_start();
     body {
       margin: 0;
       font-family: var(--tv-font, 'Inter', 'Segoe UI', sans-serif);
-      background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 45%, #0f172a 100%);
+      background: #172033;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -72,7 +72,7 @@ session_start();
       left: 0;
       right: 0;
       height: 5px;
-      background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+      background: var(--accent-color);
     }
 
     h2 {
@@ -129,7 +129,7 @@ session_start();
     button {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+      background: var(--primary-color);
       border: none;
       border-radius: var(--radius);
       color: #fff;
@@ -137,12 +137,12 @@ session_start();
       font-size: 15px;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 10px 20px -8px rgba(30, 58, 138, 0.55);
+      box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
     }
 
     button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 14px 24px -8px rgba(30, 58, 138, 0.6);
+      box-shadow: 0 6px 14px rgba(30, 58, 138, 0.25);
     }
 
     button:active {
