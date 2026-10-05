@@ -18,7 +18,7 @@ requerirModulo('usuarios');
 include(ROOT_PATH . 'admin/menu.php');
 
 // 5. Consulta de Datos
-$rolSesionActual = strtolower(trim((string) ($_SESSION['rol'] ?? '')));
+
 $sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC";
 $resultado = $conexion->query($sql);
 
@@ -272,7 +272,8 @@ function colorRol($rol) {
                   </span>
                 </td>
                 <td class="acciones">
-                  <?php if (strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
+                  <?php if (strtolower(trim((string) ($_SESSION['rol'] ?? ''))) === 'admin'
+                    && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
                     <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>
