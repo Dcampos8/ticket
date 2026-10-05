@@ -18,21 +18,8 @@ requerirModulo('usuarios');
 include(ROOT_PATH . 'admin/menu.php');
 
 // 5. Consulta de Datos
-$actorEsSuperAdmin = false;
-$idActor = (int) ($_SESSION['id'] ?? 0);
-if ($idActor > 0) {
-    $stmtActor = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
-    if ($stmtActor) {
-        $stmtActor->bind_param("i", $idActor);
-        $stmtActor->execute();
-        $rolActor = $stmtActor->get_result()->fetch_assoc()['rol'] ?? '';
-        $stmtActor->close();
-        $actorEsSuperAdmin = strtolower(trim((string) $rolActor)) === 'superadmin';
-    }
-}
-$sql = $actorEsSuperAdmin
-    ? "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC"
-    : "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios WHERE LOWER(TRIM(rol)) <> 'superadmin' ORDER BY nombre_completo ASC";
+$rolSesionActual = strtolower(trim((string) ($_SESSION['rol'] ?? '')));
+$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC";
 $resultado = $conexion->query($sql);
 
 // 6. Helper: iniciales para el avatar
@@ -285,7 +272,7 @@ function colorRol($rol) {
                   </span>
                 </td>
                 <td class="acciones">
-                  <?php if (strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin' && !$actorEsSuperAdmin): ?>
+                  <?php if ($rolSesionActual === 'admin' && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
                     <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>
