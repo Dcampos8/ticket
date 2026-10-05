@@ -1,0 +1,77 @@
+    /* Configuración General */
+    body { background-color: #f0f2f5; font-family: 'Segoe UI', Roboto, sans-serif; }
+    
+    .card { 
+        border: none; 
+        border-radius: 15px; 
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+        padding: 25px;
+        background: #fff;
+    }
+
+    h4 { 
+        color: #1e3a8a; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        border-left: 6px solid #e31e24; 
+        padding-left: 15px;
+    }
+
+    /* Tabla Estilo Corporativo */
+    .table { border-collapse: separate; border-spacing: 0 12px; }
+    .table thead th { 
+        background-color: #1e3a8a !important; 
+        color: #ffffff !important; 
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        padding: 15px;
+        border: none;
+        text-align: center;
+    }
+    .table thead th:first-child { border-radius: 10px 0 0 10px; }
+    .table thead th:last-child { border-radius: 0 10px 10px 0; }
+
+    .table tbody tr { 
+        background-color: #ffffff; 
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .table tbody tr:hover { 
+        transform: scale(1.01); 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background-color: #f8fafc;
+    }
+
+    .table td { 
+        padding: 15px !important; 
+        border: none !important; 
+        vertical-align: middle;
+        color: #334155;
+    }
+
+    /* Diseño de los Estatus (Badges) */
+    .status-activa { background: #dcfce7; color: #166534; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+    .status-resguardo { background: #fef9c3; color: #854d0e; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+    .status-suspendida { background: #fee2e2; color: #991b1b; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+    .status-baja { background: #f1f5f9; color: #475569; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; }
+
+    /* Botones Modernos */
+    .btn-success { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); border: none; font-weight: 600; border-radius: 8px; }
+    .btn-outline-primary { border: 2px solid #1e3a8a; color: #1e3a8a; font-weight: 700; border-radius: 8px; transition: 0.3s; }
+    .btn-outline-primary:hover { background: #1e3a8a; color: #fff; }
+    .btn-warning { background: #f59e0b; border: none; color: #fff; font-weight: 600; }
+    .btn-warning:hover { background: #d97706; color: #fff; }
+
+    /* Modales Pro */
+    .modal-content { border: none; border-radius: 20px; overflow: hidden; }
+    .modal-header { background: #1e3a8a; color: #fff; border: none; }
+    .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+    
+    /* Datatables Search */
+    .dataTables_filter input { 
+        border-radius: 10px; 
+        border: 1px solid #e2e8f0; 
+        padding: 5px 15px; 
+        margin-left: 10px;
+    }

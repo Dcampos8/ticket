@@ -1,0 +1,71 @@
+    body { 
+        background-color: #f4f7f6; 
+        font-family: 'Inter', sans-serif; 
+    }
+    .card-inventory { 
+        border: none; 
+        border-radius: 15px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        background: #ffffff; 
+    }
+    /* Cambio a degradado Rojo Corporativo */
+    .card-header-custom { 
+        background: linear-gradient(135deg, #8b0000 0%, #e31e24 100%); 
+        color: white; 
+        border-radius: 15px 15px 0 0 !important; 
+        padding: 20px; 
+    }
+    .form-label { 
+        font-weight: 600; 
+        color: #475569; 
+        font-size: 0.9rem; 
+        margin-bottom: 5px; 
+    }
+    .form-control, .form-select { 
+        border-radius: 8px; 
+        border: 1px solid #e2e8f0; 
+        padding: 10px 15px; 
+        transition: all 0.3s ease; 
+    }
+    /* Foco del input en rojo suave */
+    .form-control:focus { 
+        border-color: #e31e24; 
+        box-shadow: 0 0 0 3px rgba(227, 30, 36, 0.15); 
+    }
+    .input-group-text { 
+        background-color: #f8fafc; 
+        border-color: #e2e8f0; 
+        color: #64748b; 
+    }
+    /* Borde de sección en rojo */
+    .section-title { 
+        border-left: 4px solid #e31e24; 
+        padding-left: 10px; 
+        margin: 20px 0 15px 0; 
+        color: #1e293b; 
+        font-size: 1.1rem; 
+        font-weight: 600; 
+    }
+    /* Botón de guardado ajustado */
+    .btn-save { 
+        background: linear-gradient(135deg, #e31e24 0%, #b91c1c 100%); 
+        border: none; 
+        padding: 12px 30px; 
+        font-weight: 600; 
+        border-radius: 8px; 
+        color: white;
+        transition: transform 0.2s; 
+    }
+    .btn-save:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 5px 15px rgba(227, 30, 36, 0.3); 
+        color: white;
+    }
+    /* Badge de resguardo en tonos rojizos claros */
+    .resguardo-badge { 
+        background: #fef2f2; 
+        color: #991b1b; 
+        border: 1px solid #fecaca; 
+        font-family: 'Courier New', Courier, monospace; 
+        font-weight: bold; 
+    }

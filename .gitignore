@@ -1,0 +1,11 @@
+# Credenciales y entorno
+.env
+
+# Archivos de depuración
+debug_*.txt
+debug_*.log
+*.log
+
+# Uploads de usuarios (contenido dinámico, no versionar)
+/uploads/*
+!/uploads/.gitkeep

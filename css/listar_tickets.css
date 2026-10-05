@@ -1,0 +1,155 @@
+/* LISTAR_TICKETS.CSS - Transportes Valadez (Versión Optimizada) */
+
+/* 1. Título y Cabecera */
+.page-title {
+    color: #1e3a8a;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 1.6rem;
+    border-left: 6px solid #e31e24;
+    padding-left: 15px;
+}
+
+#contadorActualizacion {
+    background: #1e3a8a !important;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+}
+
+/* 2. Estructura de la Tabla (Control de Espacios) */
+.table-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+#tablaTickets {
+    table-layout: fixed; /* Fuerza el respeto de los anchos definidos */
+    width: 100%;
+    min-width: 1300px; /* Evita que las columnas se colapsen en pantallas chicas */
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+/* 3. Definición de Anchos por Columna (Evita empalmes) */
+#tablaTickets th:nth-child(1)  { width: 45px; }   /* # */
+#tablaTickets th:nth-child(2)  { width: 100px; }  /* Área */
+#tablaTickets th:nth-child(3)  { width: 140px; }  /* Nombre */
+#tablaTickets th:nth-child(4)  { width: 22%; }    /* Comentario Usuario (Ancho) */
+#tablaTickets th:nth-child(5)  { width: 100px; }  /* Tipo Ticket */
+#tablaTickets th:nth-child(6)  { width: 85px; }   /* Archivo User */
+#tablaTickets th:nth-child(7)  { width: 85px; }   /* Adjuntos Admin */
+#tablaTickets th:nth-child(8)  { width: 110px; }  /* Estatus */
+#tablaTickets th:nth-child(9)  { width: 115px; }  /* Fecha */
+#tablaTickets th:nth-child(10) { width: 18%; }    /* Comentario Admin (Ancho) */
+#tablaTickets th:nth-child(11) { width: 130px; }  /* Última actualización (Solución empalme) */
+#tablaTickets th:nth-child(12) { width: 80px; }   /* Acciones */
+
+/* 4. Estilo de Cabeceras */
+#tablaTickets thead th {
+    background-color: #f8fafc;
+    color: #1e3a8a;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem; /* Ligeramente más chico para que quepa el texto */
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 15px 8px;
+    white-space: normal; /* Permite que el texto largo salte de línea */
+    vertical-align: middle;
+}
+
+/* 5. Comentario Admin (Badge y Textarea) */
+.badge-admin {
+    display: block;
+    padding: 8px 12px;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.3;
+    word-wrap: break-word;
+    font-style: italic;
+    border-left: 3px solid #64748b;
+}
+
+.comentario-text {
+    font-size: 0.8rem;
+    width: 100%;
+    resize: none;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+/* 6. Comentario Usuario */
+.comentario {
+    width: 100%;
+    min-height: 60px;
+    font-size: 0.85rem;
+    resize: vertical;
+}
+
+.comentario-content {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #1e293b;
+    max-height: 100px;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+/* 7. Estatus y Filas */
+.estatus.form-select {
+    font-size: 0.8rem; /* Un pelín más grande para legibilidad */
+    font-weight: 700;
+    padding: 8px 25px 8px 10px; /* Aumentamos el padding derecho a 25px */
+    border-radius: 8px;
+    background-position: right 0.5rem center; /* Ajusta la posición de la flecha */
+    background-size: 12px 10px; /* Hace la flecha un poco más discreta */
+    min-width: 110px; /* Asegura que el selector tenga un cuerpo sólido */
+    line-height: 1.2;
+}
+
+#tablaTickets tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Colores laterales por estatus */
+tr:has(option[value="Pendiente"]:checked) { border-left: 4px solid #ffc107; }
+tr:has(option[value="En proceso"]:checked) { border-left: 4px solid #0d6efd; }
+tr:has(option[value="Finalizado"]:checked) { border-left: 4px solid #198754; }
+tr:has(option[value="Cancelado"]:checked) { border-left: 4px solid #dc3545; }
+
+/* 8. Iconos y Botones */
+.fa-file-pdf, .fa-file-zipper, .fa-file-word, .fa-file-excel {
+    font-size: 1.4rem;
+}
+
+label[for^="imagen_admin_"]:hover {
+    transform: scale(1.2);
+    color: #e31e24 !important;
+}
+
+.check-icon {
+    font-size: 1.1rem;
+    animation: bounceIn 0.5s;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 9. Responsive */
+@media (max-width: 1200px) {
+    .table-responsive {
+        overflow-x: auto; /* Activa el scroll horizontal si la pantalla es chica */
+    }
+}

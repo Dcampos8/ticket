@@ -1,0 +1,173 @@
+:root {
+        --primary: #0f172a;
+        --accent: #3b82f6;
+        --bg-main: #f1f5f9;
+        --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    body { 
+        background: var(--bg-main); 
+        font-family: 'Inter', 'Segoe UI', sans-serif; 
+        color: #1e293b;
+    }
+
+    #mainContent { padding: 25px; }
+
+    /* TITULO */
+    h2 { 
+        font-weight: 800; 
+        color: var(--primary); 
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* CARD CONTENEDOR FILTROS */
+    .filter-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        margin-bottom: 25px;
+    }
+
+    .filter-card label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+
+    /* KPIs MODERNOS */
+    .kpi {
+        background: white;
+        border-radius: 20px;
+        padding: 22px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255,255,255,0.7);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+    }
+
+    .kpi:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .kpi-info span {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .kpi-info strong {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+    }
+
+    /* VARIANTES DE COLOR KPI (GRADIENTES) */
+    .kpi-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+    .kpi-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+    .kpi-orange { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .kpi-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+    .kpi-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+    .kpi-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); color: white; }
+
+    /* TARJETAS DE GRÁFICAS */
+    .card-chart {
+        background: white;
+        border-radius: 20px;
+        border: none;
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+        height: 100%;
+    }
+
+    .card-chart h6 {
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-wrap { height: 250px; position: relative; }
+
+    /* RANKING LIST */
+    .rank-list { list-style: none; padding: 0; margin: 0; }
+    .rank-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        transition: 0.2s;
+    }
+
+    .rank-list li:hover {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+        transform: scale(1.01);
+    }
+
+    .rank-list span { font-weight: 500; color: #334155; }
+    
+    .rank-badge {
+        background: #0f172a;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    /* BOTONES */
+    .btn {
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-primary { background: #0f172a; border: none; }
+    .btn-primary:hover { background: #1e293b; transform: translateY(-2px); }
+    
+    .btn-success { background: #16a34a; border: none; }
+    .btn-success:hover { background: #15803d; transform: translateY(-2px); }

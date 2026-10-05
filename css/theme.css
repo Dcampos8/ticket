@@ -1,0 +1,271 @@
+/* =============================================================
+   TEMA GLOBAL — TRANSPORTES VALADEZ
+   Sistema de diseño unificado (rediseño visual completo)
+   -------------------------------------------------------------
+   Este archivo es la fuente única de verdad para colores,
+   tipografía, radios y componentes en TODO el sistema
+   (panel admin, panel usuario, login).
+
+   No modifica lógica ni estructura: solo aspecto visual.
+   Al redefinir las variables de Bootstrap 5 (--bs-*), el
+   rediseño se aplica automáticamente a cualquier página que
+   use clases estándar de Bootstrap (btn-primary, bg-primary,
+   badges, alerts, formularios, etc.) sin tener que tocar cada
+   archivo PHP uno por uno.
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* ---- Paleta de marca ---- */
+  --tv-ink: #0f172a;            /* Slate 900 - fondos oscuros (navbars, sidebars) */
+  --tv-ink-2: #1e293b;          /* Slate 800 - hover sobre fondo oscuro */
+  --tv-navy: #1e3a8a;           /* Azul corporativo - color primario/interactivo */
+  --tv-navy-dark: #172554;      /* Azul corporativo oscuro - hover */
+  --tv-red: #e31e24;            /* Rojo corporativo Transportes Valadez */
+  --tv-red-dark: #b91c1c;       /* Rojo oscuro - hover */
+  --tv-blue-soft: #3b82f6;      /* Azul secundario para acentos/KPIs */
+  --tv-success: #16a34a;
+  --tv-success-soft: #22c55e;
+  --tv-warning: #f59e0b;
+  --tv-warning-dark: #d97706;
+  --tv-danger: #dc2626;
+  --tv-info: #0ea5e9;
+
+  /* ---- Superficies y texto ---- */
+  --tv-bg: #f1f5f9;
+  --tv-surface: #ffffff;
+  --tv-border: #e2e8f0;
+  --tv-text: #1e293b;
+  --tv-text-muted: #64748b;
+
+  /* ---- Forma ---- */
+  --tv-radius-sm: 8px;
+  --tv-radius-md: 12px;
+  --tv-radius-lg: 16px;
+  --tv-radius-xl: 20px;
+  --tv-radius-pill: 999px;
+
+  /* ---- Sombras ---- */
+  --tv-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --tv-shadow-md: 0 10px 25px rgba(15, 23, 42, 0.08);
+  --tv-shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.12);
+
+  --tv-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* ---- Overrides de variables de Bootstrap 5 ----
+     Esto retinta automáticamente botones, badges, alerts,
+     enlaces, checkboxes, paginación, etc. en todo el sistema. */
+  --bs-primary: var(--tv-navy);
+  --bs-primary-rgb: 30, 58, 138;
+  --bs-primary-text-emphasis: var(--tv-navy-dark);
+  --bs-primary-bg-subtle: #e6ebf8;
+  --bs-primary-border-subtle: #b7c4e8;
+
+  --bs-danger: var(--tv-red);
+  --bs-danger-rgb: 227, 30, 36;
+  --bs-danger-text-emphasis: var(--tv-red-dark);
+  --bs-danger-bg-subtle: #fdeceb;
+  --bs-danger-border-subtle: #f6c2c1;
+
+  --bs-success: var(--tv-success);
+  --bs-success-rgb: 22, 163, 74;
+  --bs-warning: var(--tv-warning);
+  --bs-warning-rgb: 245, 158, 11;
+  --bs-info: var(--tv-info);
+  --bs-info-rgb: 14, 165, 233;
+  --bs-secondary: #64748b;
+  --bs-dark: var(--tv-ink);
+
+  --bs-body-font-family: var(--tv-font);
+  --bs-body-color: var(--tv-text);
+  --bs-body-bg: var(--tv-bg);
+  --bs-link-color: var(--tv-navy);
+  --bs-link-hover-color: var(--tv-navy-dark);
+  --bs-border-radius: var(--tv-radius-md);
+  --bs-border-radius-sm: var(--tv-radius-sm);
+  --bs-border-radius-lg: var(--tv-radius-lg);
+  --bs-border-radius-xl: var(--tv-radius-xl);
+  --bs-border-radius-pill: var(--tv-radius-pill);
+}
+
+/* ---- Base ---- */
+body {
+  font-family: var(--tv-font);
+  background-color: var(--tv-bg);
+  color: var(--tv-text);
+}
+
+/* Reduce el "salto" visual al cargar contenido por AJAX */
+#pageContent, main {
+  animation: tv-fade-in 0.25s ease;
+}
+
+@keyframes tv-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Tarjetas ---- */
+.card {
+  border: 1px solid var(--tv-border);
+  border-radius: var(--tv-radius-lg);
+  box-shadow: var(--tv-shadow-sm);
+}
+
+.card-header {
+  border-top-left-radius: var(--tv-radius-lg) !important;
+  border-top-right-radius: var(--tv-radius-lg) !important;
+  font-weight: 600;
+}
+
+/* ---- Botones ---- */
+.btn {
+  border-radius: var(--tv-radius-sm);
+  font-weight: 600;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background-color: var(--tv-navy);
+  border-color: var(--tv-navy);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--tv-navy-dark);
+  border-color: var(--tv-navy-dark);
+}
+
+.btn-danger {
+  background-color: var(--tv-red);
+  border-color: var(--tv-red);
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+  background-color: var(--tv-red-dark);
+  border-color: var(--tv-red-dark);
+}
+
+.btn-outline-primary {
+  color: var(--tv-navy);
+  border-color: var(--tv-navy);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--tv-navy);
+  border-color: var(--tv-navy);
+}
+
+/* ---- Formularios ---- */
+.form-control,
+.form-select {
+  border-radius: var(--tv-radius-sm);
+  border-color: var(--tv-border);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--tv-navy);
+  box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.15);
+}
+
+/* ---- Badges ---- */
+.badge {
+  font-weight: 600;
+  border-radius: var(--tv-radius-sm);
+}
+
+/* Badges de estatus reutilizables para tickets, líneas, inventario, etc. */
+.badge-pendiente   { background: #fef3c7; color: #92400e; }
+.badge-en-proceso  { background: #dbeafe; color: #1e40af; }
+.badge-finalizado  { background: #dcfce7; color: #166534; }
+.badge-cancelado   { background: #fee2e2; color: #991b1b; }
+
+/* ---- Tablas ---- */
+.table thead th {
+  color: var(--tv-navy);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  border-bottom-width: 2px;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* ---- Modales ---- */
+.modal-content {
+  border: none;
+  border-radius: var(--tv-radius-lg);
+  box-shadow: var(--tv-shadow-lg);
+}
+
+.modal-header {
+  border-top-left-radius: var(--tv-radius-lg);
+  border-top-right-radius: var(--tv-radius-lg);
+}
+
+/* ---- Alertas ---- */
+.alert {
+  border-radius: var(--tv-radius-sm);
+  border: none;
+}
+
+/* ---- Paginación ---- */
+.page-link {
+  color: var(--tv-navy);
+  border-radius: var(--tv-radius-sm);
+  margin: 0 2px;
+  border: 1px solid var(--tv-border);
+}
+
+.page-item.active .page-link {
+  background-color: var(--tv-navy);
+  border-color: var(--tv-navy);
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--tv-radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ---- Utilidades ---- */
+.tv-card {
+  background: var(--tv-surface);
+  border-radius: var(--tv-radius-lg);
+  box-shadow: var(--tv-shadow-md);
+  border: 1px solid var(--tv-border);
+}
+
+.tv-section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--tv-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--tv-border);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
