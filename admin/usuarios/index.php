@@ -18,7 +18,9 @@ requerirModulo('usuarios');
 include(ROOT_PATH . 'admin/menu.php');
 
 // 5. Consulta de Datos
-$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC";
+$sql = esSuperAdmin()
+    ? "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC"
+    : "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios WHERE LOWER(TRIM(rol)) <> 'superadmin' ORDER BY nombre_completo ASC";
 $resultado = $conexion->query($sql);
 
 // 6. Helper: iniciales para el avatar
@@ -271,7 +273,7 @@ function colorRol($rol) {
                   </span>
                 </td>
                 <td class="acciones">
-                  <?php if (($u['rol'] ?? '') === 'superadmin' && !esSuperAdmin()): ?>
+                  <?php if (strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin' && !esSuperAdmin()): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
                     <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>

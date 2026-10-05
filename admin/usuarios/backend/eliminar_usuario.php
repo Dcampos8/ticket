@@ -27,7 +27,7 @@ if (!esSuperAdmin()) {
     $check->execute();
     $rolObjetivo = $check->get_result()->fetch_assoc()['rol'] ?? null;
     $check->close();
-    if ($rolObjetivo === 'superadmin') {
+    if (strtolower(trim((string) $rolObjetivo)) === 'superadmin') {
         http_response_code(403);
         exit('No tienes permiso para eliminar esta cuenta.');
     }

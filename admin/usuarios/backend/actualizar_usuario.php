@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         http_response_code(404);
         exit("Usuario no encontrado");
     }
-    if (($usuarioActual['rol'] ?? '') === 'superadmin' && !esSuperAdmin()) {
+    if (strtolower(trim((string) ($usuarioActual['rol'] ?? ''))) === 'superadmin' && !esSuperAdmin()) {
         http_response_code(403);
         exit("No tienes permiso para modificar esta cuenta");
     }
