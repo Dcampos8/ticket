@@ -1,9 +1,4 @@
 <?php
-// 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
-
-// 2. Conexión a la base de datos (Usando ROOT_PATH definido en config.php)
-require_once(ROOT_PATH . 'backend/conexion.php');
 
 // 3. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -16,6 +11,14 @@ echo '<pre>' . htmlspecialchars(print_r([
     'usuario' => $_SESSION['usuario'] ?? null,
 ], true), ENT_QUOTES, 'UTF-8') . '</pre>';
 exit;
+
+// 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
+require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+
+// 2. Conexión a la base de datos (Usando ROOT_PATH definido en config.php)
+require_once(ROOT_PATH . 'backend/conexion.php');
+
+
 
 // 3b. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
