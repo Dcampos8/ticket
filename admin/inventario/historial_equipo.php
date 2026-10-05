@@ -23,6 +23,7 @@ ORDER BY fecha_movimiento DESC
 
 <h3>Historial del Equipo</h3>
 
+<div class="table-responsive mb-3">
 <table class="table">
 
 <tr>
@@ -49,5 +50,6 @@ ORDER BY fecha_movimiento DESC
 <?php } ?>
 
 </table>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

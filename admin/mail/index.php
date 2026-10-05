@@ -483,14 +483,13 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
 
 <style>
     :root { --dark-valadez: #1e293b; --accent-valadez: #ef4444; --bg-light: #f8fafc; }
-    body { background-color: var(--bg-light); font-family: 'Segoe UI', Roboto, sans-serif; margin-top: 100px; }
+    body { background-color: var(--bg-light); font-family: 'Segoe UI', Roboto, sans-serif; margin-top: 0; }
     a, a:hover { text-decoration: none !important; }
     .pro-card { background: white; border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 20px; }
     .pro-header { background: white; padding: 15px 20px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
     .indicator { width: 5px; height: 16px; background: var(--accent-valadez); border-radius: 10px; margin-right: 10px; }
     .correo-html-body { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; max-height: 45vh; overflow-y: auto; word-break: break-word; }
     .subfolder-item { background-color: #fbfbfb; }
-    .modal { margin-top: 100px; }
     .correo-no-leido { font-weight: bold; background-color: #f8fafc; border-left: 4px solid var(--accent-valadez); }
     
     #custom-context-menu {
@@ -777,6 +776,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
                                         <div id="<?= $collapseId; ?>" class="accordion-collapse collapse <?= ($index === 0) ? 'show' : ''; ?>" aria-labelledby="<?= $headingId; ?>" data-bs-parent="#accordionReglas">
                                             <div class="accordion-body p-0">
                                                 <?php if (count($reglas_de_carpeta) > 0): ?>
+                                                    <div class="table-responsive">
                                                     <table class="table table-hover align-middle mb-0">
                                                         <thead class="table-light text-secondary small">
                                                             <tr>
@@ -815,6 +815,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
                                                             <?php endforeach; ?>
                                                         </tbody>
                                                     </table>
+                                                    </div>
                                                 <?php else: ?>
                                                     <div class="p-3 text-center text-muted small">
                                                         No hay reglas automáticas asignadas a esta carpeta.
@@ -846,6 +847,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
                         </div>
                     </div>
                     <div class="card-body p-4">
+                        <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead class="table-light"><tr><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Empresa</th><th>Acciones</th></tr></thead>
                             <tbody>
@@ -864,6 +866,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>

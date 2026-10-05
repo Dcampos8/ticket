@@ -141,7 +141,7 @@ if(isset($_POST['generar'])){
     .section-divider { margin-top: 50px; }
     
     .container-fluid.mt-100 {
-    margin-top: 100px !important;
+    margin-top: 0 !important;
     }
 </style>
 

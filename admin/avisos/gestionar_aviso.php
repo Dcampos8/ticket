@@ -32,7 +32,7 @@ $aviso_actual = $res_actual->fetch_assoc();
         --bg-light: #f8fafc;
     }
 
-    body { background-color: var(--bg-light); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin-top:100px;}
+    body { background-color: var(--bg-light); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
     /* Tarjeta Principal */
     .pro-card {

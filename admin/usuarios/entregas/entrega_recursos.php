@@ -503,7 +503,7 @@ include(ROOT_PATH . 'admin/menu.php');
         body {
             background-color: #f8f9fa;
             font-size: 0.9rem;
-            margin-top: 100px;
+            margin-top: 0;
         }
 
 

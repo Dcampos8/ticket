@@ -47,7 +47,7 @@ li.paginate_button.page-item {
     background-color: #f3f4f6;
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
-    margin-top: 100px;
+    margin-top: 0;
     padding: 0;
 }
 
@@ -90,7 +90,7 @@ td.fecha {
     /* evita que el contenido se vaya bajo el menú */
     .content-area {
         margin-left: 0 !important;
-        padding-top: 90px !important;  /* deja espacio para menú superior móvil */
+        padding-top: 1rem !important;
         padding-left: 1rem !important;
         padding-right: 1rem !important;
     }
@@ -125,7 +125,7 @@ td.fecha {
 @media (max-width: 576px) {
 
     .content-area {
-        padding-top: 100px !important;
+        padding-top: 1rem !important;
     }
 
     h2 {

@@ -180,7 +180,7 @@ $rol = $_SESSION['rol'] ?? 'usuario';
     }
 </style>
 
-<div id="mainContent" class="container py-4" style="margin-top: 100px;">
+<div id="mainContent" class="container py-4">
     <div class="profile-card">
         
         <div class="profile-header">

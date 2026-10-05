@@ -17,11 +17,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
 
 <style>
   /* ===== CONTENEDOR PRINCIPAL ===== */
-  body{
-      margin-top: 100px;
-  }
   .content {
-    margin-top: 56px;
     padding: 1.5rem 2rem;
     min-height: calc(100vh - 56px);
     background: #fff;

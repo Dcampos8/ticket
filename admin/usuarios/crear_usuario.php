@@ -34,7 +34,7 @@ $puedeAsignarRoles = esSuperAdmin();
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      margin-top: 100px;
+      margin-top: 0;
     }
 
     .card {

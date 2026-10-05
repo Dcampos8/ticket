@@ -45,14 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_empleado'])) {
 // Obtener lista
 $result = $conexion->query("SELECT id, employee_id, employee_name, puesto, created_at FROM employees ORDER BY employee_name ASC");
 ?>
-<style>
-    body{
-        margin-top:100px;
-    }
-</style>
-
 <div class="content" style=" padding-top: 20px;">
-    <div class="container-fluid mt-5">
+    <div class="container-fluid mt-3">
         <h3 class="mb-4"><i class="fa-solid fa-users-gear me-2"></i>Lista de Empleados</h3>
 
         <?php if($msg): ?>

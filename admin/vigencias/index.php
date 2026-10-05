@@ -131,7 +131,7 @@ $stats = $conexion->query("
 ?>
 
 <style>
-    body { margin-top: 100px; }
+    body { margin-top: 0; }
 
     .lic-page {
         --lic-bg: #f8fafc;

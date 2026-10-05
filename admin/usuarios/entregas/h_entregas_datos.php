@@ -107,7 +107,7 @@ $resultado = mysqli_query($conexion, "SELECT * FROM checklist_entregas ORDER BY 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .table th { background-color: #1e293b !important; color: #fff !important; }
-        body { margin-top: 100px; }
+        body { margin-top: 0; }
     </style>
 </head>
 <body class="bg-light">

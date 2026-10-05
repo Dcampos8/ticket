@@ -263,7 +263,7 @@ $stats = $conexion->query("
 ")->fetch_assoc();
 ?>
 <style>
-    body{ margin-top: 100px; }
+    body{ margin-top: 0; }
 
     /* ===== Cotizaciones — tema neutro / moderno, aislado bajo .cotz-page ===== */
     .cotz-page {

@@ -38,7 +38,7 @@ $stats = mysqli_fetch_assoc(mysqli_query($conexion, "
 .estrellas-view i { color: #f5b301; }
 .estrellas-view i.vacia { color: #e2e8f0; }
 .card-stat { border-radius: 14px; }
-#calif{margin-top:100px !important;}
+#calif{margin-top:0 !important;}
 </style>
 
 <div class="container-fluid px-4 py-4" id="calif" name="calif">

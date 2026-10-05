@@ -42,7 +42,7 @@ if (!$data) {
 ?>
 
 <style>
-    #editar { margin-top: 100px !important; }
+    #editar { margin-top: 0 !important; }
 </style>
 
 <div class="container-fluid" id="editar" name="editar">

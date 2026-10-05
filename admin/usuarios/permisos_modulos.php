@@ -35,7 +35,7 @@ $result = $conexion->query("SELECT id, usuario, nombre_completo, rol, modulos_pe
         padding: 20px;
         background-color: #f1f5f9;
         min-height: 100vh;
-        margin-top: 100px;
+        margin-top: 0;
     }
     h1 {
         color: #1e3a8a;

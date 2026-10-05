@@ -57,7 +57,7 @@ if (strtolower(trim((string) ($usuario['rol'] ?? ''))) === 'superadmin' && !$act
 $modulosUsuario = parsearModulos($usuario['modulos_permitidos'] ?? null);
 ?>
 
-<div class="content" style=" padding-top: 80px; min-height: calc(100vh - 56px); background-color: #f5f5f5;">
+<div class="content" style="padding-top: 20px; min-height: calc(100vh - 56px); background-color: #f5f5f5;">
   <div class="d-flex justify-content-center align-items-start px-3">
     <!-- El action ahora usa BASE_URL para no fallar nunca -->
     <form action="<?= BASE_URL ?>admin/usuarios/backend/actualizar_usuario.php" method="POST" class="bg-white p-4 shadow-sm rounded" style="width: 100%; max-width: 600px;">

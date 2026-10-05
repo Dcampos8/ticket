@@ -53,7 +53,7 @@ $totalHistorial = $result->num_rows;
 <style>
     :root { --primary-red: #E30613; --dark-gray: #1a1a1a; }
     body {
-        margin-top: 100px;
+        margin-top: 0;
         background-color: #f8f9fa;
     }
     

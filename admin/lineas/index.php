@@ -1933,7 +1933,6 @@ if ($kpi_otros > 0) {
             --box-shadow-custom: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         }
         body {
-            margin-top: 100px;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;

@@ -95,14 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['archivo_csv'])) {
 }
 ?>
 
-<style>
-    body {
-        margin-top: 100px;
-    }
-</style>
-
-<div class="content" style="margin-left: 220px; padding-top: 20px;">
-    <div class="container-fluid mt-5">
+<div class="content" style="margin-left: 0; padding-top: 20px;">
+    <div class="container-fluid mt-3">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-7">
                 <div class="card shadow-sm border-0">

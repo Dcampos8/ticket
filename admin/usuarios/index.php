@@ -53,7 +53,6 @@ function colorRol($rol) {
   body {
     font-family: 'Segoe UI', sans-serif;
     background-color: #f6f7f9;
-    margin-top: 100px;
   }
 
   .container {

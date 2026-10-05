@@ -77,7 +77,7 @@ $tipos_q = $conexion->query("SELECT DISTINCT tipo_dispositivo FROM inventario_eq
 
 <style>
     .contenedor-inventario {
-        margin-top: 90px !important; 
+        margin-top: 0 !important;
         padding: 20px;
     }
     .tabla-valadez thead {

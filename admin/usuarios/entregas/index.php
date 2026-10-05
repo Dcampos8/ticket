@@ -20,11 +20,10 @@ requerirModulo('usuarios');
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
         .card-captura {
             max-width: 800px;
-            margin: 50px auto;
+            margin: 24px auto;
             border: none;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            margin-top: 100px !important;
         }
         .card-header-custom {
             background: #1a1a1a;

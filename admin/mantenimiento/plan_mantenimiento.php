@@ -84,7 +84,7 @@ $planes = $conexion->query("
 
 <style>
     :root { --primary-red: #E30613; --dark-gray: #1a1a1a; }
-    body { margin-top: 100px; background-color: #f8f9fa; }
+    body { margin-top: 0; background-color: #f8f9fa; }
     .mantenimiento-content { padding: 20px; min-height: 100vh; }
     .main-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 30px; border-top: 5px solid var(--primary-red); }
     .table thead { background: var(--dark-gray); color: #fff; }

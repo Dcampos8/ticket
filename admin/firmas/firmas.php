@@ -22,7 +22,7 @@ $usuarios = $conexion->query("
         padding: 30px; 
         border-radius: 20px; 
         box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-        margin-top: 135px !important;
+        margin-top: 0 !important;
     }
 
     h4 { 
@@ -106,6 +106,7 @@ $usuarios = $conexion->query("
 <div class="container">
 <h4>Generar firma de correo</h4>
 
+<div class="table-responsive mb-3">
 <table class="table table-bordered table-sm">
 <thead class="table-dark">
 <tr>
@@ -169,4 +170,5 @@ Generar y enviar
 
 </tbody>
 </table>
+</div>
 </div>

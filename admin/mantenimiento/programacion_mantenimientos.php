@@ -24,7 +24,7 @@ if(file_exists(ROOT_PATH . 'admin/header.php')){
 ?>
 
 <style>
-    body { background-color: #f8fafc; margin-top:100px;}
+    body { background-color: #f8fafc; margin-top:0;}
 
     /* Contenedor principal para respetar el menú lateral */
     .calendar-main-content {
