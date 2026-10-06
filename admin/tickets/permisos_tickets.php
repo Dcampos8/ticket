@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -15,7 +15,7 @@ requerirModulo('tickets');
 require_once(ROOT_PATH . 'backend/conexion.php');
 
 // 5. Cargar el menú y headers usando rutas absolutas
-include($_SERVER['DOCUMENT_ROOT']  . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 // Nota: He movido el header debajo del menú si es necesario, 
 // pero usualmente el header contiene los estilos globales.
 
@@ -161,7 +161,6 @@ $result = $conexion->query("SELECT usuario, nombre_completo, rol, puede_ver_todo
 </div>
 
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
         $(".permiso-toggle").change(function() {

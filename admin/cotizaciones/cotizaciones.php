@@ -1,8 +1,7 @@
 <?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('cotizaciones');
-include ($_SERVER['DOCUMENT_ROOT'] .'/admin/menu.php');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -261,6 +260,8 @@ $stats = $conexion->query("
         COALESCE(SUM(CASE WHEN currency = 'USD' THEN total ELSE 0 END), 0) AS total_usd
     FROM quotations
 ")->fetch_assoc();
+// Renderizar navegación después de los handlers: guardar/eliminar redirigen.
+include (ROOT_PATH . 'admin/menu.php');
 ?>
 <style>
     body{ margin-top: 0; }
@@ -786,7 +787,6 @@ $stats = $conexion->query("
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
 $(document).ready(function(){
     let c = 0;

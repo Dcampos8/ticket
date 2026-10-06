@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('America/Mexico_City');
 // 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Conexión a la base de datos (Usando ROOT_PATH definido en config.php)
 require_once(ROOT_PATH . 'backend/conexion.php');
@@ -207,13 +207,6 @@ td.fecha {
   </div>
 </div>
 <!-- Scripts de DataTables y exportación -->
-
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
 <script>
   $(document).ready(function () {

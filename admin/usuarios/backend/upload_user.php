@@ -1,12 +1,8 @@
 <?php
-session_start();
-include '../../menu.php';
-require '../../../backend/conexion.php';
-
-if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'admin') {
-    header("Location: login.php");
-    exit();
-}
+require_once __DIR__ . '/../../../config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirAdmin();
+requerirModulo('usuarios');
 
 $msg = '';
 $errors = [];
@@ -66,17 +62,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_csv'])) {
         $errors[] = "Debe seleccionar un archivo CSV válido.";
     }
 }
+include ROOT_PATH . 'admin/menu.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Subir CSV de Empleados</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
+<main class="container-fluid mt-4">
     <h3 class="mb-4">Subir CSV de Empleados</h3>
 
     <?php if($msg): ?>
@@ -106,7 +95,6 @@ employee_id,employee_name,puesto
 12346,Ana López,Administración
 12347,Carlos Ruiz,Operativo
     </pre>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</main>
 </body>
 </html>

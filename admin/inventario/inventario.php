@@ -20,7 +20,6 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('inventario');
 
-include(ROOT_PATH . 'admin/header.php');
 include(ROOT_PATH . 'admin/menu.php');
 
 /* ================= FILTROS Y SANITIZACIÓN ================= */

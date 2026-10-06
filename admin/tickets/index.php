@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 */
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -105,7 +105,7 @@ $total_paginas = (int)ceil($total_registros / $registros_por_pagina);
 $stmtTotal->close();
 
 // 3. Cargar el menú
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 // 4. Consulta de Datos (respetando filtros + paginación)
 $sql = "SELECT t.*, u.nombre_completo, u.area
@@ -818,7 +818,6 @@ function claseTipoTicket($tipo) {
     </div>
 </div>
 <!-- Scripts (Única inclusión limpia) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 // Filtros: los selects y fechas se auto-envían al cambiar de valor
 document.querySelectorAll('#formFiltros .auto-submit').forEach(function (el) {

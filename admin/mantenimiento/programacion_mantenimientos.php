@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -18,9 +18,6 @@ require_once(ROOT_PATH . 'backend/conexion.php');
 
 // 5. Cargar el menú y headers
 include(ROOT_PATH . 'admin/menu.php');
-if(file_exists(ROOT_PATH . 'admin/header.php')){
-    include(ROOT_PATH . 'admin/header.php');
-}
 ?>
 
 <style>

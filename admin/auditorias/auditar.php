@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('auditorias');
 
@@ -65,14 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-include $_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php';
+include ROOT_PATH . 'admin/menu.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Checklist Auditoría | Solutek</title>
     <style>
         body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
         .audit-card {
@@ -139,9 +133,6 @@ include $_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php';
         }
         .btn-save:hover { background: #e31e24; }
     </style>
-</head>
-<body>
-
 <div class="audit-card">
     <div class="audit-header">
         <h2>Checklist de Auditoría</h2>
@@ -182,6 +173,3 @@ include $_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php';
         <button type="submit" name="guardar" class="btn-save">Guardar Auditoría</button>
     </form>
 </div>
-
-</body>
-</html>

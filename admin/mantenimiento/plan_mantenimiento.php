@@ -14,7 +14,6 @@ if (session_status() === PHP_SESSION_NONE) {
 $ruta_config   = __DIR__ . '/../../config.php';
 $ruta_conexion = __DIR__ . '/../../backend/conexion.php';
 $ruta_menu     = __DIR__ . '/../menu.php';
-$ruta_header   = __DIR__ . '/../header.php';
 
 if (!file_exists($ruta_config)) {
     die("<div style='padding:20px; background:#f8d7da; color:#721c24; font-family:sans-serif;'><strong>Error Crítico:</strong> No se pudo localizar 'config.php' usando la ruta: <br><code>" . htmlspecialchars($ruta_config) . "</code></div>");
@@ -29,13 +28,20 @@ require_once($ruta_conexion);
 // 4. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('mantenimiento');
+requerirAdmin();
+
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$csrf_token = $_SESSION['csrf_token'];
+$flash_msg = $_SESSION['flash_msg'] ?? '';
+unset($_SESSION['flash_msg']);
 
 // Asegurar codificación utf8
 $conexion->set_charset("utf8");
 
 // 5. Carga opcional de maquetación visual
 if (file_exists($ruta_menu)) { include($ruta_menu); }
-if (file_exists($ruta_header)) { include($ruta_header); }
 
 
 // --- LÓGICA DE QUERIES: SOLO EQUIPOS PRINCIPALES (PC, LAPTOP, SERVIDOR) ---
@@ -94,6 +100,10 @@ $planes = $conexion->query("
 
 <div class="mantenimiento-content">
     <div class="container-fluid mt-4">
+
+        <?php if ($flash_msg !== ''): ?>
+            <div class="alert alert-info" role="status"><?= htmlspecialchars($flash_msg, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
         
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
@@ -109,6 +119,7 @@ $planes = $conexion->query("
         <div class="main-card text-dark">
             <h5 class="mb-3 fw-bold"><i class="bi bi-plus-circle-fill me-2"></i>Nuevo Plan de Mantenimiento</h5>
             <form method="POST" action="backend/guardar_plan.php" class="row g-3">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
                 
                 <!-- Selector Dinámico de Hardware Informático -->
                 <div class="col-md-4">
@@ -208,11 +219,11 @@ $planes = $conexion->query("
                             <td class="text-end">
                                 <div class="btn-group shadow-sm">
                                     <a href="backend/editar_plan.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-dark text-white">Editar</a>
-                                    <a href="backend/eliminar_plan.php?id=<?= $p['id'] ?>" 
-                                       class="btn btn-sm btn-light border text-danger" 
-                                       onclick="return confirm('¿Está seguro de eliminar este plan?')">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </a>
+                                    <form method="POST" action="backend/eliminar_plan.php" class="d-inline" onsubmit="return confirm('¿Está seguro de eliminar este plan?')">
+                                        <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+                                        <button type="submit" class="btn btn-sm btn-light border text-danger"><i class="bi bi-trash"></i> Eliminar</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

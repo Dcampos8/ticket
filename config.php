@@ -11,7 +11,9 @@ if (!defined('ROOT_PATH')) {
 
 // 2. URL Base
 if (!defined('BASE_URL')) {
-    define('BASE_URL', 'https://ticket.transportesvaladez.com/');
+    require_once __DIR__ . '/config/env.php';
+    $baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
+    define('BASE_URL', $baseUrl);
 }
 
 // 3. Conexión a BD (Solo si el archivo existe)

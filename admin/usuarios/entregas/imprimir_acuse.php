@@ -1,9 +1,9 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
 ?><?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../../config.php');
 
 // Validamos que venga el ID por la URL
 if (!isset($_GET['id']) || empty($_GET['id'])) {

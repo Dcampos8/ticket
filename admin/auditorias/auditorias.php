@@ -1,10 +1,10 @@
 <?php
 // 1. Cargar configuración y constantes (BASE_URL)
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('auditorias');
 // 5. Cargar Interfaz (menu.php ya incluye header.php)
-include ($_SERVER['DOCUMENT_ROOT'] .'/admin/menu.php'); 
+include (ROOT_PATH . 'admin/menu.php');
 
 // GENERAR AUDITORIAS
 if(isset($_POST['generar'])){

@@ -4,7 +4,7 @@ ini_set('log_errors', 1);
 ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -16,18 +16,12 @@ require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
 
 // 4. Cargar el menú usando la ruta absoluta
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 $puedeAsignarRoles = esSuperAdmin();
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Crear Usuario - Transportes Valadez</title>
   <style>
-    body {
+     .create-user-page {
       background: #f3f5f8;
       min-height: 100vh;
       display: flex;
@@ -79,13 +73,10 @@ $puedeAsignarRoles = esSuperAdmin();
     @media (max-width: 576px) {
       h3 { font-size: 1.2rem; }
       .card { border-radius: 0.8rem; }
-      body { padding: 0.5rem; }
+       .create-user-page { padding: 0.5rem; }
     }
   </style>
-</head>
-<body>
-
-<div class="container-fluid">
+<div class="container-fluid create-user-page">
   <div class="row justify-content-center">
     <div class="col-sm-10 col-md-7 col-lg-5 col-xl-4">
       <div class="card shadow-lg">
@@ -204,6 +195,3 @@ $puedeAsignarRoles = esSuperAdmin();
   actualizarBloqueModulos();
 </script>
 <?php endif; ?>
-
-</body>
-</html>

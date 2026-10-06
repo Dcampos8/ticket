@@ -1,14 +1,31 @@
 <?php
-// En admin/menu.php
-$config_path = $_SERVER['DOCUMENT_ROOT'] . 'backend/config.php';
-if (file_exists($config_path)) {
-    include_once($config_path);
+// El menú también puede cargarse desde subcarpetas; asegurar configuración base.
+if (!defined('ROOT_PATH')) {
+    require_once __DIR__ . '/../config.php';
 }
 
 // Helper de roles/módulos (superadmin ve todo; admin solo sus módulos)
 require_once ROOT_PATH . 'shared/permisos.php';
 
-include_once 'header.php';
+include_once __DIR__ . '/header.php';
+
+// Librerías JavaScript compartidas del panel: mantener una sola carga aquí.
+if (!defined('ADMIN_SHARED_JS_LOADED')):
+    define('ADMIN_SHARED_JS_LOADED', true);
+?>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php
+endif;
 
 // 1. Captura la URL actual limpia de parámetros GET
 $currentUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -19,7 +36,7 @@ $dropdowns = [
     'mantto'    => ['admin/mantenimiento/plan_mantenimiento.php', 'admin/mantenimiento/programacion_mantenimientos.php', 'admin/mantenimiento/historial_mantenimientos.php'],
     'tickets'   => ['admin/tickets/'],
     'usuarios'  => ['admin/usuarios/', 'admin/employees.php', 'admin/add_empleado.php'],
-    'perfil'    => ['admin/usuarios/perfil.php', 'admin/aviso/'],
+    'perfil'    => ['admin/usuarios/perfil.php', 'admin/avisos/'],
     'licencias' => ['admin/vigencias/'],
     'config'    => ['admin/correo/']
 ];
@@ -49,7 +66,7 @@ $submenusModulos = [
         ['ruta' => 'admin/usuarios/subir_usuarios.php', 'icon' => 'fa-file-upload', 'label' => 'Carga Masiva'],
         ['superadmin' => true, 'ruta' => 'admin/usuarios/permisos_modulos.php', 'icon' => 'fa-shield-halved', 'label' => 'Permisos de Módulos'],
         ['divider' => true],
-        ['ruta' => 'admin/employees/', 'icon' => 'fa-id-card', 'label' => 'Empleados'],
+        ['ruta' => 'admin/usuarios/employees/', 'icon' => 'fa-id-card', 'label' => 'Empleados'],
         ['ruta' => 'admin/usuarios/employees/add_empleado.php', 'icon' => 'fa-user-tag', 'label' => 'Alta Empleado'],
         ['ruta' => 'admin/usuarios/employees/subir_employees.php', 'icon' => 'fa-file-csv', 'label' => 'Alta Empleados CSV']
     ]

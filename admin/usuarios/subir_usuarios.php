@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -12,7 +12,7 @@ require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
 
 // 4. Cargar el menú usando la ruta absoluta
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 ?>
 
 <style>

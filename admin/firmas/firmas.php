@@ -1,10 +1,10 @@
 <?php
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('firmas');
 
-include '../menu.php';
+require_once ROOT_PATH . 'admin/menu.php';
 
 $usuarios = $conexion->query("
   SELECT id, nombre_completo, area

@@ -1,9 +1,9 @@
 <?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('calificaciones');
 
-include '../menu.php';
+require_once ROOT_PATH . 'admin/menu.php';
 
 // Marcamos como vistas todas las que estén pendientes al entrar a esta pantalla
 mysqli_query($conexion, "UPDATE encuestas_satisfaccion SET vista_admin = 1 WHERE vista_admin = 0");

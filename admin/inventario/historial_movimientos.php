@@ -9,7 +9,6 @@ if (!isset($_SESSION['logueado'])) {
     exit();
 }
 
-include(ROOT_PATH . 'admin/header.php');
 include(ROOT_PATH . 'admin/menu.php');
 
 /* VALIDAR ID */

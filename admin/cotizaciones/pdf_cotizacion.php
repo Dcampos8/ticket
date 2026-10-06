@@ -8,7 +8,7 @@ ob_start();
 
 // Mismo control de acceso que cotizaciones.php: sin esto, cualquiera con el
 // link (o adivinando el ?id=) podía generar PDFs sin haber iniciado sesión.
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('cotizaciones');
 

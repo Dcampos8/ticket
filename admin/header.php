@@ -18,6 +18,7 @@
     <!-- DataTables y FullCalendar -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <!-- 3. ESTILOS PROPIOS (Con BASE_URL y anti-caché) -->
     <!-- Tema global del rediseño: se carga primero para que las páginas
@@ -26,15 +27,5 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>css/menu.css?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/redesign.css?v=<?= time() ?>">
 
-    <!-- 4. SCRIPTS (Cargar jQuery primero es vital) -->
-    <!-- jQuery único y moderno -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    
-    <!-- Bootstrap 5 Bundle (Incluye Popper.js necesario para menús desplegables) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Plugins adicionales -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 </head>
 <body class="admin-shell">

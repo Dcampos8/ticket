@@ -1,12 +1,12 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirAdmin();
 ?><?php
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/config/env.php');
 
 $hostname = '{imap.hostinger.com:993/imap/ssl}INBOX';

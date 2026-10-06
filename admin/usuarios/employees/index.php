@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../../config.php');
 
 // 2. Conexión a la base de datos (Usando ROOT_PATH)
 require_once(ROOT_PATH . 'backend/conexion.php');
@@ -17,7 +17,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'admin') {
 }
 
 // 5. Cargar el menú
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 $msg = '';
 

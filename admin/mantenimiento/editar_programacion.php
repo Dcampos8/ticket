@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar configuración y conexión usando la ruta raíz del servidor
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Validación de sesión
 if (!isset($_SESSION['logueado'])) {
@@ -9,7 +9,7 @@ if (!isset($_SESSION['logueado'])) {
 }
 
 // 3. Incluir el menú principal con la misma ruta absoluta
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 // 4. Obtención y validación del parámetro ID
 $id = isset($_GET['id']) ? intval($_GET['id']) : null;

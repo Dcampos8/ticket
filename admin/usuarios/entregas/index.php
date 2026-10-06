@@ -1,21 +1,9 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
-?><?php
-    // 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
-    require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
-    // 4. Cargar el menú (Usando ROOT_PATH para asegurar que lo encuentre)
-    include(ROOT_PATH . 'admin/menu.php'); 
+include_once ROOT_PATH . 'admin/menu.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Captura de Credenciales - Transportes Valadez</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
         .card-captura {
@@ -47,9 +35,6 @@ requerirModulo('usuarios');
             margin-bottom: 15px;
         }
     </style>
-</head>
-<body>
-
 <div class="container">
     <div class="card card-captura">
         <div class="card-header card-header-custom">
@@ -202,6 +187,3 @@ document.getElementById('formCredenciales').addEventListener('submit', function(
     window.open(urlImpresion, '_blank');
 });
 </script>
-
-</body>
-</html>

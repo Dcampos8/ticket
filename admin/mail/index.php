@@ -1,11 +1,11 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirAdmin();
 ?><?php
 // Cargar la configuración global y el menú
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
-require_once($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+require_once(__DIR__ . '/../../config.php');
+require_once(ROOT_PATH . 'admin/menu.php');
 
 // 1. Crear tablas e infraestructura base si no existen
 $conexion->query("CREATE TABLE IF NOT EXISTS correo_carpetas (

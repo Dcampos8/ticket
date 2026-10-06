@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -40,7 +40,6 @@ $fecha_actual_local = date('Y-m-d\TH:i');
 
 <!-- Uso de BASE_URL para el CSS -->
 <link rel="stylesheet" href="<?= BASE_URL ?>css/ticket_form.css?v=<?= time() ?>">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     /* Ajuste para que el contenido respete el menú lateral del admin */

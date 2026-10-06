@@ -1,10 +1,10 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('avisos');
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+require_once(ROOT_PATH . 'admin/menu.php');
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['publicar'])) {

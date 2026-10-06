@@ -1,8 +1,8 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+require_once(ROOT_PATH . 'admin/menu.php');
 
 if (!isset($_SESSION['logueado'])) {
     header("Location: ../login.php");

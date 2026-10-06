@@ -1,4 +1,5 @@
-<?phprequire_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+<?php
+require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
 function val($campo){

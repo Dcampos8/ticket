@@ -1,6 +1,6 @@
 <?php
-require '../../../backend/conexion.php';
-include('../../menu.php');
+require_once __DIR__ . '/../../../config.php';
+require_once ROOT_PATH . 'backend/conexion.php';
 
 // POST: registrar devolución
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -81,17 +81,9 @@ $entregas = $conexion->query("
 if (!$entregas) {
     die("<div class='alert alert-danger'>Error en la consulta: " . $conexion->error . "</div>");
 }
+require_once ROOT_PATH . 'admin/menu.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Registrar Devolución de Celular</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="../../../css/devolucion.css">
-</head>
-<body class="p-4">
+<link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL, ENT_QUOTES, 'UTF-8') ?>css/devolucion.css">
 
 <form method="POST">
 <h3 class="mb-4">Registrar Devolución de Equipo Celular</h3>
@@ -164,5 +156,3 @@ function mostrarDatosEntrega(employee_id) {
 }
 </script>
 
-</body>
-</html>

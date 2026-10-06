@@ -9,7 +9,7 @@ if (!isset($_SESSION['logueado'])) {
     exit();
 }
 
-include '../header.php';
+require_once ROOT_PATH . 'admin/menu.php';
 
 /* ==========================================================================
    VALIDACIÓN DE ID

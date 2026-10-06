@@ -1,5 +1,5 @@
 <?php
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('licencias');
 
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_licencia']
 /* =========================================================
    2. CARGA DE MENÚ Y SALIDA HTML
    ========================================================= */
-include ($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include (ROOT_PATH . 'admin/menu.php');
 
 $msg = $_SESSION['flash_msg'] ?? '';
 unset($_SESSION['flash_msg']);
@@ -545,7 +545,6 @@ $stats = $conexion->query("
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
 $(document).ready(function(){
     // Buscador interactivo en tiempo real

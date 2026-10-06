@@ -1,7 +1,8 @@
-<?phprequire_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+<?php
+require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../../config.php');
 include(ROOT_PATH . 'admin/menu.php');
 
 // 1. Procesar la actualización de baja
@@ -97,20 +98,11 @@ if (isset($_GET['eliminar'])) {
 
 $resultado = mysqli_query($conexion, "SELECT * FROM checklist_entregas ORDER BY id DESC");
 ?>
-
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Historial - Transportes Valadez</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .table th { background-color: #1e293b !important; color: #fff !important; }
         body { margin-top: 0; }
     </style>
-</head>
-<body class="bg-light">
 <div class="container py-4">
     <div class="card shadow border-0" style="border-radius: 12px; overflow: hidden;">
         <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center p-3">
@@ -356,7 +348,6 @@ $resultado = mysqli_query($conexion, "SELECT * FROM checklist_entregas ORDER BY 
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function abrirModalBaja(id, nombre) {
     document.getElementById('id_registro').value = id;
@@ -403,5 +394,3 @@ function abrirModalEditar(datos) {
     new bootstrap.Modal(document.getElementById('modalEditar')).show();
 }
 </script>
-</body>
-</html>

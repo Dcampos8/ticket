@@ -4,7 +4,7 @@ ini_set('log_errors', 1);
 ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -24,7 +24,7 @@ if (!isset($_SESSION['logueado']) || !esSuperAdmin()) {
 require_once(ROOT_PATH . 'backend/conexion.php');
 
 // 6. Cargar el menú
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 // 7. Obtener administradores (superadmin incluido, solo para mostrarlo)
 $result = $conexion->query("SELECT id, usuario, nombre_completo, rol, modulos_permitidos FROM usuarios WHERE rol IN ('admin','superadmin') ORDER BY rol DESC, nombre_completo ASC");
@@ -174,7 +174,6 @@ $result = $conexion->query("SELECT id, usuario, nombre_completo, rol, modulos_pe
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function () {
     $('.modulo-check').change(function () {

@@ -429,8 +429,6 @@ Exportar Excel
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     /* ================= MODAL TICKETS POR ESTATUS ================= */
 

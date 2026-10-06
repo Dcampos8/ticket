@@ -6,7 +6,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('lineas');
 
@@ -762,7 +762,7 @@ if (isset($_GET['obtener_historial_stock'])) {
     }
     exit();
 }
-include ($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include (ROOT_PATH . 'admin/menu.php');
 echo '<link rel="stylesheet" href="' . BASE_URL . 'css/lineas.css?v=' . time() . '">';
 $msg = '';
 /* =========================================================
@@ -1898,13 +1898,6 @@ if ($kpi_otros > 0) {
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Líneas y Responsivas</title>
-
     <style>
         :root {
             /* Paleta alineada a css/theme.css (colores de marca de Transportes
@@ -2624,8 +2617,6 @@ if ($kpi_otros > 0) {
         }
         .lt-timeline-autor i { color: var(--lt-primary); }
     </style>
-</head>
-<body>
 <div class="container-fluid px-4 mb-5">
     <!-- NOTIFICACIONES -->
     <?php if($msg): ?>
@@ -4521,5 +4512,3 @@ function confirmarEliminarLinea(id, telefono, usuario) {
     modal.show();
 }
 </script>
-</body>
-</html>

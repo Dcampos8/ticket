@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global (Ajusta la ruta si config.php está en otro nivel)
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Conexión a la base de datos (Usando ROOT_PATH definido en config.php)
 require_once(ROOT_PATH . 'backend/conexion.php');
@@ -45,9 +45,6 @@ function colorRol($rol) {
     return $mapa[$rol] ?? ['bg' => '#eef2f7', 'text' => '#475569'];
 }
 ?>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.5/sweetalert2.all.min.js"></script>
 
 <style>
   body {

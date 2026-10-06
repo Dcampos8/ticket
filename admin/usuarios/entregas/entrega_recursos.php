@@ -1,5 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
+require_once __DIR__ . '/../../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
 ?><?php
@@ -8,7 +8,7 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../../config.php');
 
 set_time_limit(300);
 ini_set('memory_limit', '512M');
@@ -459,30 +459,7 @@ if (isset($_GET['guardado']) && $_GET['guardado'] == '1') {
 include(ROOT_PATH . 'admin/menu.php');
 
 ?>
-
-<!DOCTYPE html>
-
-<html lang="es">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Checklist Digital - Solutek</title>
-
-
     <!-- Bootstrap -->
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
 
     <!-- Animate -->
 
@@ -576,13 +553,6 @@ include(ROOT_PATH . 'admin/menu.php');
         }
 
     </style>
-
-</head>
-
-
-<body>
-
-
 <div class="container py-4">
 
     <div class="row justify-content-center">
@@ -1340,15 +1310,3 @@ function toggleBox(id, sw) {
 }
 
 </script>
-
-
-<!-- Bootstrap JS -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-></script>
-
-
-</body>
-
-</html>

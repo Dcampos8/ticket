@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Conexión a la base de datos
 require_once(ROOT_PATH . 'backend/conexion.php');
@@ -15,7 +15,7 @@ require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
 
 // 5. Cargar el menú
-include($_SERVER['DOCUMENT_ROOT'] . '/admin/menu.php');
+include(ROOT_PATH . 'admin/menu.php');
 
 $actorEsSuperAdmin = false;
 $idActor = (int) ($_SESSION['id'] ?? 0);

@@ -1,6 +1,6 @@
 <?php
 // 1. Cargar la configuración global
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../config.php');
 
 // 2. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -17,9 +17,6 @@ $conexion->set_charset("utf8");
 
 // 5. Cargar el menú y headers usando rutas absolutas
 include(ROOT_PATH . 'admin/menu.php');
-if(file_exists(ROOT_PATH . 'admin/header.php')){
-    include(ROOT_PATH . 'admin/header.php');
-}
 
 /* ================= CONSULTA BASE ================= */
 $query = "

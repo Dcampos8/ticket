@@ -2,7 +2,7 @@
 // Ruta: ticket/admin/usuarios/backend/eliminar_usuario.php
 
 // 1. Config global y sesión (igual que index.php)
-require_once($_SERVER['DOCUMENT_ROOT'] . '/config.php');
+require_once(__DIR__ . '/../../../config.php');
 require_once(ROOT_PATH . 'backend/conexion.php');
 
 if (session_status() === PHP_SESSION_NONE) {

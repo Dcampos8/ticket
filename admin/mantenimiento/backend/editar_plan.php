@@ -1,52 +1,44 @@
 <?php
-// Modo diagnóstico temporal: muestra errores en pantalla en vez de página en blanco.
-// (Quitar estas 3 líneas una vez confirmado que todo funciona)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+require_once __DIR__ . '/../../../config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirAdmin();
+requerirModulo('mantenimiento');
 
-// Rutas relativas blindadas (mismo patrón que plan_mantenimiento.php).
-// OJO: antes este archivo no cargaba config.php, así que BASE_URL/ROOT_PATH
-// no existían cuando header.php (incluido vía menu.php) los usaba -> error
-// fatal de "constante indefinida" y página en blanco en producción.
-$ruta_config = __DIR__ . '/../../../config.php';
-
-if (!file_exists($ruta_config)) {
-    die("<div style='padding:20px; background:#f8d7da; color:#721c24; font-family:sans-serif;'><strong>Error Crítico:</strong> No se pudo localizar 'config.php' usando la ruta: <br><code>" . htmlspecialchars($ruta_config) . "</code></div>");
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-require_once($ruta_config); // Ya inicia la sesión, define BASE_URL/ROOT_PATH y carga backend/conexion.php
-
-include('../../menu.php');
-
-if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'admin') {
-    header("Location: " . BASE_URL . "login.php");
-    exit();
-}
+$csrf_token = $_SESSION['csrf_token'];
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
-    die("<div style='padding:20px; background:#f8d7da; color:#721c24; font-family:sans-serif;'>ID de plan inválido.</div>");
+    http_response_code(400);
+    exit('ID de plan inválido.');
 }
 
-$plan = $conexion->query("
-    SELECT *
-    FROM plan_mantenimiento
-    WHERE id = $id
-")->fetch_assoc();
+$stmtPlan = $conexion->prepare('SELECT * FROM plan_mantenimiento WHERE id = ? LIMIT 1');
+$stmtPlan->bind_param('i', $id);
+$stmtPlan->execute();
+$plan = $stmtPlan->get_result()->fetch_assoc();
+$stmtPlan->close();
 
 if (!$plan) {
-    die("<div style='padding:20px; background:#fff3cd; color:#856404; font-family:sans-serif;'>No se encontró ningún plan con ID $id.</div>");
+    http_response_code(404);
+    exit('No se encontró el plan solicitado.');
 }
 
 $usuarios = $conexion->query("SELECT id, nombre_completo FROM usuarios ORDER BY nombre_completo");
 $equipos  = $conexion->query("SELECT id, marca, modelo, no_serie FROM inventario_equipos WHERE tipo_dispositivo IN ('PC','Laptop','Servidor') ORDER BY marca, modelo");
+
+// El menú incluye el documento HTML; debe aparecer después de validar y consultar.
+include ROOT_PATH . 'admin/menu.php';
 ?>
 <style>
-    body { margin-top: 100px; }
+    body { margin-top: 0; }
 </style>
 <form method="POST" action="actualizar_plan.php" class="row g-3 p-4">
 
 <input type="hidden" name="id" value="<?= $plan['id'] ?>">
+<input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
 
 <div class="col-md-4">
   <label class="form-label small fw-bold text-muted text-uppercase">Equipo</label>
@@ -54,7 +46,7 @@ $equipos  = $conexion->query("SELECT id, marca, modelo, no_serie FROM inventario
     <?php while($e = $equipos->fetch_assoc()) { ?>
       <option value="<?= $e['id'] ?>"
         <?= $e['id'] == $plan['id_equipo'] ? 'selected' : '' ?>>
-        <?= $e['marca'].' '.$e['modelo'].' ('.$e['no_serie'].')' ?>
+        <?= htmlspecialchars($e['marca'].' '.$e['modelo'].' ('.$e['no_serie'].')', ENT_QUOTES, 'UTF-8') ?>
       </option>
     <?php } ?>
   </select>

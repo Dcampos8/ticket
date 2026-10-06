@@ -20,7 +20,6 @@ if (!isset($_SESSION['logueado'])) {
 }
 
 // 3. COMPONENTES DE INTERFAZ
-include(ROOT_PATH . 'admin/header.php');
 include(ROOT_PATH . 'admin/menu.php');
 
 /* ================= VALIDAR ID Y OBTENER DATOS ================= */
@@ -235,5 +234,3 @@ estadoSelect.addEventListener('change', function() {
     if(this.value === 'Reparacion') campoReparacion.style.display = 'block';
 });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
