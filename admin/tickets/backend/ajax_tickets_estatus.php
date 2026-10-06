@@ -28,7 +28,7 @@ if($res->num_rows == 0){
     exit;
 }
 
-echo "<table class='table table-bordered'>";
+echo "<div class='table-responsive'><table class='table table-bordered'>";
 echo "<thead>
 <tr>
 <th>ID</th>
@@ -50,5 +50,5 @@ while($r = $res->fetch_assoc()){
     </tr>";
 }
 
-echo "</tbody></table>";
+echo "</tbody></table></div>";
 ?>

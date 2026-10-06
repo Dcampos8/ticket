@@ -135,7 +135,7 @@ if(isset($_POST['generar'])){
     .btn-revisar:hover { background-color: #b91c1c; box-shadow: 0 2px 8px rgba(227, 30, 36, 0.3); }
 
     /* Estilo para las Observaciones */
-    .obs-text { color: #64748b; font-style: italic; font-size: 0.85rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .obs-text { color: #64748b; font-style: italic; font-size: 0.85rem; max-width: 250px; overflow-wrap: anywhere; white-space: normal; }
 
     /* Ajuste de Espaciado */
     .section-divider { margin-top: 50px; }

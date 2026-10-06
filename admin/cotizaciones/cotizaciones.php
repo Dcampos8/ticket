@@ -755,7 +755,7 @@ $stats = $conexion->query("
                                     <?= htmlspecialchars($row['client_name']) ?>
                                 </div>
                             </td>
-                            <td class="small text-muted" style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <td class="small text-muted" style="max-width: 300px; white-space: normal; overflow-wrap: anywhere;">
                                 <?= htmlspecialchars($row['lista_productos']) ?>
                             </td>
                             <td class="fw-bold">$<?= number_format($row['total'], 2) ?></td>
