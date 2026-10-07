@@ -195,16 +195,8 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
             <textarea name="descripcion" required rows="4" placeholder="Describe brevemente el problema..."></textarea>
         </div>
         <div class="campo">
-            <label>Tipo / Motivo <span style="color:red">*</span></label>
-            <select name="tipo_ticket" required>
-                <option value="">Selecciona una opción</option>
-                <option value="Soporte">Soporte</option>
-                <option value="Capacitacion">Capacitación</option>
-                <option value="Ajuste facturas">Ajuste facturas</option>
-                <option value="Camaras">Cámaras</option>
-                <option value="Diseño">Diseño</option>
-                <option value="Otra Actividad">Otra Actividad</option>
-            </select>
+            <label>Tipo de solicitud</label>
+            <p class="text-muted mb-0">Lo asignaremos automáticamente según la descripción que escribas.</p>
         </div>
         <div class="campo">
             <label>Imagen (opcional)</label>
