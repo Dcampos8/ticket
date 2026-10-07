@@ -192,7 +192,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
         </div>
         <div class="campo">
             <label>Tipo de solicitud</label>
-            <p class="text-muted mb-0">Lo asignaremos automáticamente según la descripción que escribas.</p>
+            <p class="text-muted mb-0">La IA analizará la descripción y asignará la categoría más adecuada.</p>
         </div>
         <div class="campo">
             <label>Imagen (opcional)</label>

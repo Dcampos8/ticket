@@ -540,7 +540,7 @@ function claseTipoTicket($tipo) {
         .filtros-acciones .btn-limpiar { flex: 1; text-align: center; }
     }
 </style>
-<div class="container-fluid px-4 mb-5" style="margin-top:0;">
+<div class="container px-4 mb-5" style="margin-top:0;">
     <div class="table-container-custom">
         <div class="tickets-header">
             <div>

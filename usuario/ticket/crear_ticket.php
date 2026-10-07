@@ -196,7 +196,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
         </div>
         <div class="campo">
             <label>Tipo de solicitud</label>
-            <p class="text-muted mb-0">Lo asignaremos automáticamente según la descripción que escribas.</p>
+            <p class="text-muted mb-0">La IA analizará la descripción y asignará la categoría más adecuada.</p>
         </div>
         <div class="campo">
             <label>Imagen (opcional)</label>
@@ -247,11 +247,15 @@ $(document).ready(function() {
                     $('.nav-link[data-page="ticket/mis_tickets.php"]').trigger('click');
                 }, 1500);
             },
-            error: function() {
+            error: function(xhr) {
                 // 3. Error: Reactivar botón y quitar bloqueo
                 enviando = false;
                 $btn.prop('disabled', false).text('Enviar Ticket');
-                $('#respuestaCrear').html("<div class='alert alert-danger'>Error al enviar. Intenta de nuevo.</div>");
+                let mensaje = 'Error al enviar. Intenta de nuevo.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    mensaje = xhr.responseJSON.error;
+                }
+                $('#respuestaCrear').html($('<div>', { class: 'alert alert-danger', text: mensaje }));
             }
         });
     });
