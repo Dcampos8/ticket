@@ -45,15 +45,7 @@ $fecha_actual_local = date('Y-m-d\TH:i');
 <!-- Uso de BASE_URL para el CSS -->
 <link rel="stylesheet" href="<?= BASE_URL ?>css/ticket_form.css?v=<?= time() ?>">
 
-<style>
-    /* Ajuste para que el contenido respete el menú lateral del admin */
-    .ticket-admin-content {
-        margin-left: 0;
-        padding: 20px;
-        background-color: #f8f9fa;
-        min-height: 100vh;
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__crear_ticket_admin.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__crear_ticket_admin.css') ?>">
 
 <div class="ticket-admin-content">
     <div class="ticket-page">

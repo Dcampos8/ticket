@@ -60,40 +60,7 @@ $usuarios = $conexion->query("
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
-<style>
-body{
-    background:#f1f5f9 !important;
-    font-family:'Inter', sans-serif;
-}
-
-.card-mov{
-    border:none;
-    border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,.05);
-}
-
-.section-title{
-    border-left:5px solid #0d6efd;
-    padding-left:12px;
-    margin-bottom:20px;
-    font-weight:700;
-    color:#1e293b;
-    font-size:1.1rem;
-}
-
-.form-label{
-    font-weight:600;
-    color:#475569;
-    font-size:.85rem;
-}
-
-.info-box{
-    background:#f8fafc;
-    border-radius:10px;
-    padding:15px;
-    border:1px solid #e2e8f0;
-}
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__movimiento_equipo.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__movimiento_equipo.css') ?>">
 
 <div class="container py-5">
 <div class="row justify-content-center">

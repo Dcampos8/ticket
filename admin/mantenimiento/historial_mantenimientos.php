@@ -47,55 +47,7 @@ $result = $conexion->query($query);
 $totalHistorial = $result->num_rows;
 ?>
 
-<style>
-    :root { --primary-red: #E30613; --dark-gray: #1a1a1a; }
-    body {
-        margin-top: 0;
-        background-color: #f8f9fa;
-    }
-    
-    /* Contenedor principal unificado */
-    .historial-content {
-        padding: 20px;
-        background-color: #f8f9fa;
-        min-height: 100vh;
-    }
-
-    .modal { z-index: 2000; }
-    
-    .main-card { 
-        background: #fff; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-        padding: 25px; 
-        margin-bottom: 30px; 
-        border-top: 5px solid var(--primary-red); 
-    }
-    
-    .table thead { 
-        background: var(--dark-gray); 
-        color: #fff; 
-    }
-    
-    .btn-primary { 
-        background-color: var(--primary-red); 
-        border-color: var(--primary-red); 
-    }
-    
-    .btn-primary:hover { 
-        background-color: #b3050f; 
-        border-color: #b3050f; 
-    }
-
-    @media (max-width: 992px) {
-        .historial-content { margin-left: 0; }
-    }
-    
-    /* Estilos para impresión dentro del modal */
-    #contenidoHoja {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__historial_mantenimientos.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__historial_mantenimientos.css') ?>">
 
 <div class="historial-content">
     <div class="container-fluid mt-4">
@@ -221,13 +173,6 @@ function imprimirHoja() {
         <head>
             <title>Hoja de Servicio - IT</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                body { padding: 20px; background: white !important; font-size: 12px; }
-                .no-print { display: none; }
-                @media print {
-                    .modal-footer, .btn-close { display: none; }
-                }
-            </style>
         </head>
         <body>
             ${contenido}

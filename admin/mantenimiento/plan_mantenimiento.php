@@ -88,15 +88,7 @@ $planes = $conexion->query("
 ");
 ?>
 
-<style>
-    :root { --primary-red: #E30613; --dark-gray: #1a1a1a; }
-    body { margin-top: 0; background-color: #f8f9fa; }
-    .mantenimiento-content { padding: 20px; min-height: 100vh; }
-    .main-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 30px; border-top: 5px solid var(--primary-red); }
-    .table thead { background: var(--dark-gray); color: #fff; }
-    .btn-primary { background-color: var(--primary-red); border-color: var(--primary-red); }
-    .btn-primary:hover { background-color: #b3050f; border-color: #b3050f; }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__plan_mantenimiento.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__plan_mantenimiento.css') ?>">
 
 <div class="mantenimiento-content">
     <div class="container-fluid mt-4">

@@ -20,62 +20,7 @@ include(ROOT_PATH . 'admin/menu.php');
 
 $puedeAsignarRoles = esSuperAdmin();
 ?>
-  <style>
-     .create-user-page {
-      background: #f3f5f8;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      margin-top: 0;
-    }
-
-    .card {
-      animation: fadeIn 0.6s ease-in-out;
-      border-radius: 1rem;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6c757d;
-      font-size: 1rem;
-      z-index: 10; /* Asegura que el icono esté arriba */
-    }
-
-    .input-group .form-control {
-      padding-left: 2.5rem; /* Ajuste ligero para que no choque con el icono */
-    }
-
-    #bloqueModulos {
-      border: 1px solid #dee2e6;
-      border-radius: 0.6rem;
-      padding: 0.9rem;
-      background: #f8f9fa;
-    }
-
-    #bloqueModulos .form-check { margin-bottom: 0.4rem; }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      h3 { font-size: 1.4rem; }
-      .card-body { padding: 1.5rem; }
-    }
-
-    @media (max-width: 576px) {
-      h3 { font-size: 1.2rem; }
-      .card { border-radius: 0.8rem; }
-       .create-user-page { padding: 0.5rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__crear_usuario.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__usuarios__crear_usuario.css') ?>">
 <div class="container-fluid create-user-page">
   <div class="row justify-content-center">
     <div class="col-sm-10 col-md-7 col-lg-5 col-xl-4">

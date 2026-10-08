@@ -258,27 +258,7 @@ $slaResolucionPorcentaje = (int) $slaResolucionStats['evaluables'] > 0
     ? round(((int) $slaResolucionStats['dentro'] / (int) $slaResolucionStats['evaluables']) * 100, 2) : 0;
 
 ?>
-<style>
-    body{
-        margin-top: 0;
-    }
-    div#modalTicketsEstatus {
-    margin-top: 66;
-}
-#modalTicketsEstatus .modal-dialog{
-    max-width: 95%;
-}
-
-#modalTicketsEstatus .modal-content{
-    height: 85vh;
-}
-
-#modalTicketsEstatus .modal-body{
-    overflow-y: auto;
-    max-height: calc(85vh - 70px);
-}
-
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__index.css?v=<?= filemtime(__DIR__ . '/../css/pages/admin__index.css') ?>">
 <?php
 $dashboardCssPath = ROOT_PATH . 'css/dashboard.css';
 $dashboardCssVersion = is_file($dashboardCssPath) ? (string) filemtime($dashboardCssPath) : (string) time();

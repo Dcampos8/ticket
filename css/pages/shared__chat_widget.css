@@ -1,0 +1,103 @@
+/* Estilos extraídos de shared\chat_widget.php */
+
+.civ-chat-burbuja {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #e31e24;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    cursor: pointer;
+    z-index: 2000;
+    border: none;
+}
+.civ-chat-burbuja .civ-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ffc107;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid #fff;
+}
+.civ-chat-panel {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    width: 340px;
+    height: 460px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.3);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2000;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.civ-chat-panel.civ-abierto { display: flex; }
+.civ-chat-header {
+    background: #0f172a;
+    color: #fff;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.civ-chat-header b { font-size: 14px; }
+.civ-chat-header .civ-iconos { display: flex; gap: 10px; align-items: center; }
+.civ-chat-header i { cursor: pointer; font-size: 15px; opacity: .85; }
+.civ-chat-header i:hover { opacity: 1; }
+.civ-chat-tabs { display: flex; border-bottom: 1px solid #eee; }
+.civ-chat-tabs button {
+    flex: 1;
+    border: none;
+    background: #f7f7f9;
+    padding: 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+    position: relative;
+}
+.civ-chat-tabs button.civ-activo { background: #fff; color: #e31e24; border-bottom: 2px solid #e31e24; }
+.civ-chat-tabs .civ-mini-badge {
+    background: #e31e24; color: #fff; font-size: 10px; border-radius: 8px;
+    padding: 1px 5px; margin-left: 4px;
+}
+.civ-chat-body { flex: 1; overflow-y: auto; padding: 10px 12px; background: #fafafa; }
+.civ-chat-msg { max-width: 78%; margin-bottom: 8px; padding: 7px 10px; border-radius: 12px; font-size: 13px; line-height: 1.35; word-wrap: break-word; }
+.civ-chat-msg.civ-propio { background: #e31e24; color: #fff; margin-left: auto; border-bottom-right-radius: 2px; }
+.civ-chat-msg.civ-otro { background: #eef0f4; color: #222; margin-right: auto; border-bottom-left-radius: 2px; }
+.civ-chat-msg .civ-autor { font-size: 10px; opacity: .7; display: block; margin-bottom: 2px; font-weight: 600; }
+.civ-chat-msg .civ-hora { font-size: 9px; opacity: .6; display: block; margin-top: 2px; text-align: right; }
+.civ-chat-input { display: flex; border-top: 1px solid #eee; padding: 8px; gap: 6px; }
+.civ-chat-input input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 7px 12px; font-size: 13px; outline: none; }
+.civ-chat-input button { background: #e31e24; color: #fff; border: none; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; }
+.civ-chat-lista-usuarios { padding: 4px 0; }
+.civ-chat-buscar { padding: 8px; border-bottom: 1px solid #eee; }
+.civ-chat-buscar input { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
+.civ-chat-item-usuario {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 14px; cursor: pointer; border-bottom: 1px solid #f2f2f2; font-size: 13px;
+}
+.civ-chat-item-usuario:hover { background: #f7f7f9; }
+.civ-chat-item-usuario .civ-nombre { font-weight: 600; color: #222; }
+.civ-chat-item-usuario .civ-rol { font-size: 11px; color: #888; display: block; }
+.civ-chat-volver { padding: 8px 12px; font-size: 12px; color: #e31e24; cursor: pointer; border-bottom: 1px solid #eee; background: #fff; }
+.civ-chat-vacio { text-align: center; color: #999; font-size: 12px; padding: 30px 10px; }

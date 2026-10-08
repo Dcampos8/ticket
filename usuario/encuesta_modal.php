@@ -1,25 +1,5 @@
 <!-- Modal de Encuesta de Satisfacción (tickets finalizados / mantenimientos realizados) -->
-<style>
-.estrellas-encuesta {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-    gap: 6px;
-    font-size: 34px;
-    margin: 10px 0 20px;
-}
-.estrellas-encuesta input { display: none; }
-.estrellas-encuesta label {
-    color: #d1d5db;
-    cursor: pointer;
-    transition: color .15s;
-}
-.estrellas-encuesta input:checked ~ label,
-.estrellas-encuesta label:hover,
-.estrellas-encuesta label:hover ~ label {
-    color: #f5b301;
-}
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__encuesta_modal.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__encuesta_modal.css') ?>">
 
 <div class="modal fade" id="modalEncuesta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">

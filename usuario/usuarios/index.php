@@ -15,46 +15,7 @@ $sql = "SELECT nombre_completo, email,phone FROM usuarios WHERE email IS NOT NUL
 $resultado = $conexion->query($sql);
 ?>
 
-<style>
-    .directorio-card {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-    .table thead {
-        background: #2c3e50 !important;
-        color: white;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 1px;
-    }
-    .table tbody tr {
-        transition: all 0.3s ease;
-    }
-    .table tbody tr:hover {
-        background-color: #f8f9fa !important;
-        transform: scale(1.01);
-    }
-    .email-link {
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .email-link:hover {
-        text-decoration: underline;
-    }
-    .icon-badge {
-        width: 35px;
-        height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: #eef2f7;
-        margin-right: 10px;
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__usuarios__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/usuario__usuarios__index.css') ?>">
 
 <link rel="icon" href="https://https://ticket.transportesvaladez.com/img/icono.png">
 

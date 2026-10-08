@@ -48,12 +48,7 @@ if (!$data) {
 <head>
 <meta charset="UTF-8">
 <title>Formato de Devolución de Celular</title>
-<style>
-body { font-family: Arial, sans-serif; margin: 40px; }
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-td, th { border: 1px solid #000; padding: 8px; }
-h2 { text-align: center; }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__backend__formato_devolucion.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__backend__formato_devolucion.css') ?>">
 </head>
 <body>
 

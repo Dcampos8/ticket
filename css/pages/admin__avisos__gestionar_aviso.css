@@ -1,0 +1,108 @@
+/* Estilos extraídos de admin\avisos\gestionar_aviso.php */
+
+:root {
+        --dark-valadez: #1e293b; /* Azul oscuro elegante */
+        --accent-valadez: #ef4444; /* Rojo para detalles */
+        --bg-light: #f8fafc;
+    }
+
+    body { background-color: var(--bg-light); font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+    /* Tarjeta Principal */
+    .pro-card {
+        background: white;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    /* Encabezados con Estilo */
+    .pro-header {
+        background: white;
+        padding: 25px 30px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+    }
+
+    .pro-header h4 {
+        margin: 0;
+        font-weight: 700;
+        color: var(--dark-valadez);
+        font-size: 1.25rem;
+        letter-spacing: -0.025em;
+        text-transform: uppercase;
+    }
+
+    /* Indicador de color lateral en el título */
+    .indicator {
+        width: 6px;
+        height: 24px;
+        background: var(--accent-valadez);
+        border-radius: 10px;
+        margin-right: 15px;
+    }
+
+    /* Formulario */
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .form-control-custom {
+        border: 2px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .form-control-custom:focus {
+        border-color: #cbd5e1;
+        box-shadow: none;
+        outline: none;
+        background-color: #fff;
+    }
+
+    /* Botón */
+    .btn-valadez {
+        background: var(--dark-valadez);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-valadez:hover {
+        background: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        color: white;
+    }
+
+    /* Vista Previa */
+    .preview-box {
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        background: #f1f5f9;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 10px; }

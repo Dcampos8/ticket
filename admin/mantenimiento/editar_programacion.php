@@ -41,9 +41,7 @@ if (!$data) {
 }
 ?>
 
-<style>
-    #editar { margin-top: 0 !important; }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__editar_programacion.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__editar_programacion.css') ?>">
 
 <div class="container-fluid" id="editar" name="editar">
     <div class="card p-4 mb-4 shadow-sm" style="max-width: 800px; margin: 0 auto;">

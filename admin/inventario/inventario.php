@@ -74,61 +74,7 @@ $result = $stmt->get_result();
 $tipos_q = $conexion->query("SELECT DISTINCT tipo_dispositivo FROM inventario_equipos WHERE tipo_dispositivo IS NOT NULL AND tipo_dispositivo != '' ORDER BY tipo_dispositivo ASC");
 ?>
 
-<style>
-    .contenedor-inventario {
-        margin-top: 0 !important;
-        padding: 20px;
-    }
-    .tabla-valadez thead {
-        background-color: #2c3e50 !important;
-        color: white !important;
-        font-size: 11px;
-        letter-spacing: 0.5px;
-    }
-    .btn-acciones {
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        padding: 0;
-        text-align: center;
-        border-radius: 6px;
-        color: white;
-        margin: 0 2px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.15s ease, opacity 0.15s ease;
-        text-decoration: none;
-    }
-    .btn-acciones:hover {
-        color: #fff;
-        transform: translateY(-2px);
-        opacity: 0.9;
-    }
-    .header-acciones {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    .badge-estatus {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 6px 12px;
-        border-radius: 50px;
-    }
-    .tech-spec {
-        font-size: 11px;
-        color: #495057;
-        background-color: #e9ecef;
-        padding: 2px 6px;
-        border-radius: 4px;
-        display: inline-block;
-        margin-top: 2px;
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__inventario.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__inventario.css') ?>">
 
 <div class="contenedor-inventario">
     <div class="container-fluid">

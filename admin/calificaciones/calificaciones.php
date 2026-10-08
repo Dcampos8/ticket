@@ -34,12 +34,7 @@ $stats = mysqli_fetch_assoc(mysqli_query($conexion, "
 "));
 ?>
 
-<style>
-.estrellas-view i { color: #f5b301; }
-.estrellas-view i.vacia { color: #e2e8f0; }
-.card-stat { border-radius: 14px; }
-#calif{margin-top:0 !important;}
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__calificaciones__calificaciones.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__calificaciones__calificaciones.css') ?>">
 
 <div class="container-fluid px-4 py-4" id="calif" name="calif">
     <h3 class="fw-bold mb-4"><i class="fa-solid fa-star text-warning me-2"></i>Calificaciones de Satisfacción</h3>

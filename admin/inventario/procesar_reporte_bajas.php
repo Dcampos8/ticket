@@ -32,14 +32,7 @@ if ($resultado->num_rows > 0) {
     <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:x='urn:schemas-microsoft-com:office:excel' xmlns='http://www.w3.org/TR/REC-html40'>
     <head>
         <meta http-equiv='Content-type' content='text/html;charset=utf-8' />
-        <style>
-            table { border-collapse: collapse; }
-            th { background-color: #000000; color: #ffffff; font-family: Arial; font-size: 11pt; border: 0.5pt solid #000; }
-            td { border: 0.5pt solid #000; font-family: Arial; font-size: 10pt; }
-            /* ESTA CLASE FUERZA EL FORMATO TEXTO EN EXCEL */
-            .formato-texto { mso-number-format:'\@'; } 
-            .header-solicitud { font-weight: bold; font-size: 14pt; text-align: center; background-color: #F2F2F2; }
-        </style>
+        <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__procesar_reporte_bajas.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__procesar_reporte_bajas.css') ?>">
     </head>
     <body>
     <table>

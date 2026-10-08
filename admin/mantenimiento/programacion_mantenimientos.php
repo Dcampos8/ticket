@@ -20,52 +20,7 @@ require_once(ROOT_PATH . 'backend/conexion.php');
 include(ROOT_PATH . 'admin/menu.php');
 ?>
 
-<style>
-    body { background-color: #f8fafc; margin-top:0;}
-
-    /* Contenedor principal para respetar el menú lateral */
-    .calendar-main-content {
-        padding: 30px;
-        transition: all 0.3s;
-    }
-
-    .fc { 
-        background: #ffffff; 
-        padding: 25px; 
-        border-radius: 15px; 
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-        border: none;
-    }
-
-    .btn-email-main {
-        background: #1e3a8a;
-        border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; color: white;
-        transition: transform 0.2s;
-    }
-    .btn-email-main:hover { transform: translateY(-2px); color: #fff; opacity: 0.9; }
-
-    /* Estilo para el botón de Excel */
-    .btn-excel-main {
-        background: #187443;
-        border: none; padding: 12px 25px; border-radius: 10px; font-weight: 700; color: white;
-        transition: transform 0.2s;
-    }
-    .btn-excel-main:hover { transform: translateY(-2px); color: #fff; opacity: 0.9; }
-
-    .section-title { 
-        color: #1e3a8a; 
-        font-weight: 800; 
-        border-left: 6px solid #e31e24; 
-        padding-left: 15px; 
-        text-transform: uppercase; 
-    }
-
-    .modal-xl-custom { max-width: 95%; }
-
-    @media (max-width: 992px) {
-        .calendar-main-content { margin-left: 0; padding: 15px; }
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__programacion_mantenimientos.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__programacion_mantenimientos.css') ?>">
 
 <div class="calendar-main-content">
     <div class="container-fluid">

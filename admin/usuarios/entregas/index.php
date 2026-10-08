@@ -4,37 +4,7 @@ require_once ROOT_PATH . 'shared/permisos.php';
 requerirModulo('usuarios');
 include_once ROOT_PATH . 'admin/menu.php';
 ?>
-    <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        .card-captura {
-            max-width: 800px;
-            margin: 24px auto;
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .card-header-custom {
-            background: #1a1a1a;
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 20px;
-        }
-        .form-label { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; color: #555; }
-        .section-title {
-            border-left: 4px solid #d32f2f;
-            padding-left: 10px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #1a1a1a;
-        }
-        .contpaq-box {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__index.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__index.css') ?>">
 <div class="container">
     <div class="card card-captura">
         <div class="card-header card-header-custom">

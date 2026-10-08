@@ -5,23 +5,7 @@ $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
 ?>
 <link rel="icon" href="<?= htmlspecialchars($userBaseUrl) ?>img/icono.png">
 <link rel="stylesheet" href="<?= htmlspecialchars($userBaseUrl) ?>css/redesign.css?v=<?= time() ?>">
-<style>
-    .sidebar { width: 250px; min-height: 100vh; height: 100vh; position: fixed; inset: 0 auto 0 0; z-index: 1000; overflow-y: auto; padding-top: 8px; }
-    .sidebar .logo-animate { display: block; width: min(78%, 190px); max-height: 70px; object-fit: contain; margin: 15px auto; }
-    .sidebar .nav-link { padding: 11px 16px !important; margin: 2px 10px; width: calc(100% - 20px); font-size: .9rem; font-weight: 500; text-decoration: none; }
-    .sidebar .nav-link i { flex: 0 0 22px; width: 22px; margin-right: 10px; text-align: center; }
-    .sidebar .collapse .nav-link { padding-left: 24px !important; font-size: .86rem; }
-    .sidebar .collapse .nav-link p { display: flex; align-items: center; margin: 0; }
-    .sidebar .nav-link.text-danger { color: #f1a7aa !important; }
-    .sidebar .nav-link.text-danger:hover { background: #3a2934 !important; color: #fff !important; }
-    #pageContent { min-height: 100vh; margin-left: 250px; padding: 28px !important; }
-    @media (max-width: 768px) {
-        .d-flex:has(> .sidebar) { flex-direction: column; }
-        .sidebar { width: 100%; height: auto; min-height: 0; position: relative; }
-        .sidebar .logo-animate { max-height: 55px; }
-        #pageContent { margin-left: 0; padding: 20px !important; }
-    }
-</style>
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">
 
 <nav class="sidebar d-flex flex-column">
     <img src="<?= htmlspecialchars($userBaseUrl) ?>img/Camion%20Cont%20Der.png" class="logo-animate" alt="Transportes Valadez">

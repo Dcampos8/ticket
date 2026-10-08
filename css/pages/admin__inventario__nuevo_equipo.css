@@ -1,0 +1,28 @@
+/* Estilos extraídos de admin\inventario\nuevo_equipo.php */
+
+body{
+    background-color:#f1f5f9 !important;
+}
+.card-edit{
+    border:none;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+.section-title{
+    border-left:5px solid #0d6efd;
+    padding-left:12px;
+    margin-bottom:20px;
+    font-weight:700;
+    color:#1e293b;
+    font-size:1.1rem;
+}
+.form-label{
+    font-weight:600;
+    color:#475569;
+    font-size:.85rem;
+}
+.readonly-custom{
+    background-color:#f8fafc !important;
+    font-weight:bold;
+    color:#0d6efd;
+}
