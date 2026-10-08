@@ -8,7 +8,6 @@ $csrf = asegurarTokenCsrf();
 $mensaje = '';
 $error = '';
 $campos = [
-    'APP_BASE_URL' => ['Aplicación', 'URL base', false, 'url'],
     'MAIL_MENSAJERIA_HOST' => ['Correo de mensajería', 'Servidor SMTP', false, 'text'],
     'MAIL_MENSAJERIA_USER' => ['Correo de mensajería', 'Usuario', false, 'text'],
     'MAIL_MENSAJERIA_PASS' => ['Correo de mensajería', 'Contraseña', true, 'password'],
@@ -54,12 +53,12 @@ include ROOT_PATH . 'admin/menu.php';
     <?php $grupoActual = ''; foreach ($campos as $clave => [$grupo, $etiqueta, $secreto, $tipo]): ?>
       <?php if ($grupo !== $grupoActual): if ($grupoActual !== '') echo '</div></section>'; $grupoActual = $grupo; ?>
       <section class="card integration-card mb-4"><div class="card-body"><h2 class="h5 mb-3"><?= htmlspecialchars($grupo) ?></h2><div class="row g-3">
-      <?php endif; $valorPredeterminado = $clave === 'GEMINI_MODEL' ? 'gemini-3.5-flash-lite' : ($clave === 'APP_BASE_URL' ? 'https://ticket.transportesvaladez.com/' : ($clave === 'MAIL_SISTEMAS_HOST' ? '{imap.hostinger.com:993/imap/ssl}INBOX' : '')); $valor = obtenerConfiguracionIntegracion($clave, $valorPredeterminado); ?>
+      <?php endif; $valorPredeterminado = $clave === 'GEMINI_MODEL' ? 'gemini-3.5-flash-lite' : ($clave === 'MAIL_SISTEMAS_HOST' ? '{imap.hostinger.com:993/imap/ssl}INBOX' : ''); $valor = obtenerConfiguracionIntegracion($clave, $valorPredeterminado); ?>
       <div class="col-12 col-md-6"><label class="form-label" for="<?= $clave ?>"><?= htmlspecialchars($etiqueta) ?></label>
         <?php if ($secreto): ?><input class="form-control" type="password" id="<?= $clave ?>" name="<?= $clave ?>" autocomplete="new-password" placeholder="<?= $valor !== '' ? 'Configurado; vacío conserva el valor actual' : 'Sin configurar' ?>" <?= !$keyCifradoConfigurado ? 'disabled' : '' ?>>
         <?php else: ?><input class="form-control" type="<?= $tipo ?>" id="<?= $clave ?>" name="<?= $clave ?>" value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>" <?= $clave === 'INTRANET_TICKET_API_SECRET' ? 'minlength="32"' : '' ?>><?php endif; ?>
       </div>
-    <?php endforeach; ?></div></div></section><?php endif; ?>
+    <?php endforeach; ?></div></div></section>
     <div class="d-flex justify-content-end"><button class="btn btn-danger px-4" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar configuración</button></div>
   </form>
 </main>

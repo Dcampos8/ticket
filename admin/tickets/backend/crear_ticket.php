@@ -282,7 +282,7 @@ if (!$guardado) {
 }
 $ticketId = $stmt->insert_id;
 $escapeHtml = static fn(string $valor): string => htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$baseUrl = rtrim((string) obtenerConfiguracionIntegracion('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
+$baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
 $urlImagen = $nombre_imagen !== null ? $baseUrl . 'uploads/' . rawurlencode($nombre_imagen) : '';
 
 // ===============================

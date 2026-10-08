@@ -104,7 +104,7 @@ if (mysqli_stmt_execute($stmt)) {
                 <p><b>Calificación:</b> $calificacion / 5</p>
                 <p><b>¿Resuelto?:</b> $resuelto</p>
                 <p><b>Comentarios:</b> " . nl2br(htmlspecialchars($comentarios ?: 'Sin comentarios')) . "</p>
-                <p><a href='" . obtenerConfiguracionIntegracion('APP_BASE_URL', 'https://ticket.transportesvaladez.com/') . "admin/calificaciones/calificaciones.php'>Ver todas las calificaciones</a></p>
+                <p><a href='" . env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/') . "admin/calificaciones/calificaciones.php'>Ver todas las calificaciones</a></p>
             ";
             $mail->send();
         } catch (Exception $e) {
