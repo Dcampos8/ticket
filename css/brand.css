@@ -1,0 +1,98 @@
+/* Paleta global de Transportes Valadez: rojo, grafito y blanco. */
+:root {
+  --tv-ink: #373739 !important;
+  --tv-ink-2: #29292b !important;
+  --tv-navy: #ed1c24 !important;
+  --tv-navy-dark: #c81019 !important;
+  --tv-red: #ed1c24 !important;
+  --tv-red-dark: #c81019 !important;
+  --tv-bg: #f4f4f5 !important;
+  --tv-surface: #fff !important;
+  --tv-border: #dedee0 !important;
+  --tv-text: #373739 !important;
+  --tv-text-muted: #707074 !important;
+  --ui-canvas: #f4f4f5 !important;
+  --ui-paper: #fff !important;
+  --ui-ink: #373739 !important;
+  --ui-muted: #707074 !important;
+  --ui-line: #dedee0 !important;
+  --ui-brand: #ed1c24 !important;
+  --ui-brand-hover: #c81019 !important;
+  --ui-accent: #ed1c24 !important;
+  --primary: #ed1c24 !important;
+  --primary-dark: #373739 !important;
+  --primary-soft: #fde9ea !important;
+  --accent: #ed1c24 !important;
+  --accent-soft: #fde9ea !important;
+  --nav-bg: #373739 !important;
+  --nav-bg-hover: #505054 !important;
+  --nav-line: #555559 !important;
+  --accent-valadez: #ed1c24 !important;
+  --cotz-accent: #ed1c24 !important;
+  --cotz-accent-dark: #c81019 !important;
+  --cotz-accent-light: #fde9ea !important;
+
+  --bs-primary: #ed1c24 !important;
+  --bs-primary-rgb: 237, 28, 36 !important;
+  --bs-primary-text-emphasis: #a70d14 !important;
+  --bs-primary-bg-subtle: #fde9ea !important;
+  --bs-primary-border-subtle: #f4b5b8 !important;
+  --bs-link-color: #c81019 !important;
+  --bs-link-hover-color: #a70d14 !important;
+  --bs-dark: #373739 !important;
+}
+
+html, body { background-color: #f4f4f5 !important; color: #373739; }
+a:not(.btn):not(.nav-link) { color: #c81019; }
+a:not(.btn):not(.nav-link):hover { color: #a70d14; }
+
+.custom-navbar, .sidebar, .admin-shell .navbar,
+.tickets-header, .page-hero, .dashboard-hero, .hero,
+.table thead th, .table-container thead th, .table-scroll thead th {
+  background-color: #373739 !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+.custom-navbar .nav-link.active, .sidebar .nav-link.active,
+.custom-navbar .nav-link:hover, .sidebar .nav-link:hover {
+  background-color: #505054 !important;
+  box-shadow: inset 3px 0 0 #ed1c24 !important;
+  color: #fff !important;
+}
+
+.btn-primary, .btn-primary:focus, .btn-primary:hover,
+.btn-outline-primary:hover, .btn-filtrar, .btn-save, .btn-guardar,
+.btn-revisar, .btn-agregar, .btn-nuevo, .page-item.active .page-link,
+.dropdown-item.active, .dropdown-item:active,
+.progress-bar.bg-primary, .badge.bg-primary, .bg-primary {
+  background-color: #ed1c24 !important;
+  border-color: #ed1c24 !important;
+  color: #fff !important;
+}
+.btn-primary:hover, .btn-outline-primary:hover, .btn-filtrar:hover,
+.btn-save:hover, .btn-guardar:hover, .btn-revisar:hover,
+.btn-agregar:hover, .btn-nuevo:hover {
+  background-color: #c81019 !important;
+  border-color: #c81019 !important;
+}
+.btn-outline-primary { color: #c81019 !important; border-color: #ed1c24 !important; }
+.text-primary, .link-primary, .border-primary { color: #c81019 !important; }
+.border-primary { border-color: #ed1c24 !important; }
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus,
+.form-check-input:checked {
+  border-color: #ed1c24 !important;
+  box-shadow: 0 0 0 .2rem rgba(237, 28, 36, .16) !important;
+}
+.form-check-input:checked { background-color: #ed1c24 !important; }
+
+.page-title, .section-title, .form-header h1, .form-header h2 { color: #373739; }
+.tickets-header .page-title { color: #fff !important; }
+.area-pill { color: #a70d14 !important; background-color: #fde9ea !important; }
+.kpi-icon.kpi-blue, .kpi-icon.kpi-green, .kpi-icon.kpi-orange,
+.kpi-icon.kpi-purple, .kpi-icon.kpi-yellow { background-color: #555559 !important; color: #fff !important; }
+.kpi-icon.kpi-red { background-color: #ed1c24 !important; color: #fff !important; }
+.kpi-blue, .kpi-green, .kpi-orange, .kpi-purple, .kpi-yellow {
+  background-image: none !important;
+}
+
+::selection { color: #fff; background: #ed1c24; }

@@ -40,6 +40,7 @@ $nip_almacen  = val('nip_almacen');
 <title>Entrega de Credenciales - Transportes Valadez</title>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__formato_imprimir.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__formato_imprimir.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 </head>
 <body>
 

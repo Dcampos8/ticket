@@ -168,6 +168,7 @@ function claseTipoTicket($tipo) {
 <!-- Estilos personalizados -->
 <link rel="stylesheet" href="<?= BASE_URL ?>css/listar_tickets.css?v=<?= time() ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container px-4 mb-5" style="margin-top:0;">
     <div class="table-container-custom">
         <div class="tickets-header">

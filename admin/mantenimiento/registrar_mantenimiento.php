@@ -56,7 +56,7 @@ $data = $res->fetch_assoc();
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__registrar_mantenimiento.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__registrar_mantenimiento.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="main-container px-3">
     <div class="card card-custom">
         <div class="card-header-val">

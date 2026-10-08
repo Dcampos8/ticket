@@ -1899,6 +1899,7 @@ if ($kpi_otros > 0) {
 }
 ?>
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__lineas__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__lineas__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid px-4 mb-5">
     <!-- NOTIFICACIONES -->
     <?php if($msg): ?>

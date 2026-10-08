@@ -21,6 +21,7 @@ include(ROOT_PATH . 'admin/menu.php');
 $puedeAsignarRoles = esSuperAdmin();
 ?>
   <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__crear_usuario.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__usuarios__crear_usuario.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid create-user-page">
   <div class="row justify-content-center">
     <div class="col-sm-10 col-md-7 col-lg-5 col-xl-4">

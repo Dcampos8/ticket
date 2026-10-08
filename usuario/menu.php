@@ -6,7 +6,7 @@ $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
 <link rel="icon" href="<?= htmlspecialchars($userBaseUrl) ?>img/icono.png">
 <link rel="stylesheet" href="<?= htmlspecialchars($userBaseUrl) ?>css/redesign.css?v=<?= time() ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <nav class="sidebar d-flex flex-column">
     <img src="<?= htmlspecialchars($userBaseUrl) ?>img/Camion%20Cont%20Der.png" class="logo-animate" alt="Transportes Valadez">
     <div class="sidebar-user">

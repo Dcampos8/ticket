@@ -4,7 +4,7 @@ if (!isset($_SESSION['logueado'])) { return; }
 $chat_base = defined('BASE_URL') ? BASE_URL : '/';
 ?>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/shared__chat_widget.css?v=<?= filemtime(__DIR__ . '/../css/pages/shared__chat_widget.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <button class="civ-chat-burbuja" id="civChatBurbuja" title="Chat interno">
     <i class="fa-solid fa-comments"></i>
     <span class="civ-badge" id="civChatBadgeTotal" style="display:none;">0</span>

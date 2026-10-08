@@ -40,7 +40,7 @@ $resultado = $stmtReporte->get_result();?>
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__reportes__ver_reportes.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__reportes__ver_reportes.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="content-area">
   <h2>📄 Reportes Generales</h2>
 

@@ -5,6 +5,7 @@ requerirModulo('usuarios');
 include_once ROOT_PATH . 'admin/menu.php';
 ?>
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__index.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 <div class="container">
     <div class="card card-captura">
         <div class="card-header card-header-custom">

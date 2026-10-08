@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include ROOT_PATH . 'admin/menu.php';
 ?>
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__auditorias__auditar.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__auditorias__auditar.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="audit-card">
     <div class="audit-header">
         <h2>Checklist de Auditoría</h2>

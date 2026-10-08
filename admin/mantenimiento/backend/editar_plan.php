@@ -33,6 +33,7 @@ $equipos  = $conexion->query("SELECT id, marca, modelo, no_serie FROM inventario
 include ROOT_PATH . 'admin/menu.php';
 ?>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__backend__editar_plan.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__mantenimiento__backend__editar_plan.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 <form method="POST" action="actualizar_plan.php" class="row g-3 p-4">
 
 <input type="hidden" name="id" value="<?= $plan['id'] ?>">

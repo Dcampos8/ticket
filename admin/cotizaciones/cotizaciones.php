@@ -264,7 +264,7 @@ $stats = $conexion->query("
 include (ROOT_PATH . 'admin/menu.php');
 ?>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__cotizaciones__cotizaciones.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__cotizaciones__cotizaciones.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid mt-4 cotz-page">
 
     <!-- Tarjetas de resumen -->

@@ -35,7 +35,7 @@ $stats = mysqli_fetch_assoc(mysqli_query($conexion, "
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__calificaciones__calificaciones.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__calificaciones__calificaciones.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid px-4 py-4" id="calif" name="calif">
     <h3 class="fw-bold mb-4"><i class="fa-solid fa-star text-warning me-2"></i>Calificaciones de Satisfacción</h3>
 

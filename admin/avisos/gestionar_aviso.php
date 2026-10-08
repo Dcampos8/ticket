@@ -26,6 +26,7 @@ $aviso_actual = $res_actual->fetch_assoc();
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__avisos__gestionar_aviso.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__avisos__gestionar_aviso.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <br>
 <div class="container mt-5">
     <div class="row">

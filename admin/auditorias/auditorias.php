@@ -61,7 +61,7 @@ if(isset($_POST['generar'])){
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__auditorias__auditorias.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__auditorias__auditorias.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid mt-100">
     <div class="container-auditoria">
         

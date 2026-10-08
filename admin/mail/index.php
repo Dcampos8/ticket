@@ -482,7 +482,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mail__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mail__index.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <!-- Menú contextual flotante -->
 <div id="custom-context-menu">
     <form method="POST" id="form-menu-contextual" style="margin:0;">

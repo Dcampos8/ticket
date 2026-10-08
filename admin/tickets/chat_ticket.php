@@ -26,6 +26,7 @@ $csrfToken = asegurarTokenCsrf();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__chat_ticket.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__chat_ticket.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 </head>
 <body>
 

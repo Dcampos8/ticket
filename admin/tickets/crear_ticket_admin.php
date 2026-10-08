@@ -46,7 +46,7 @@ $fecha_actual_local = date('Y-m-d\TH:i');
 <link rel="stylesheet" href="<?= BASE_URL ?>css/ticket_form.css?v=<?= time() ?>">
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__crear_ticket_admin.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__crear_ticket_admin.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="ticket-admin-content">
     <div class="ticket-page">
         <div class="form-container shadow-sm">

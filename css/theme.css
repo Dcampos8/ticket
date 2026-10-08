@@ -3,22 +3,22 @@
 
 :root {
   color-scheme: light;
-  --tv-ink: #172033;
-  --tv-ink-2: #202d45;
-  --tv-navy: #1e3a8a;
-  --tv-navy-dark: #172554;
-  --tv-red: #c9252d;
-  --tv-red-dark: #a51f26;
+  --tv-ink: #373739;
+  --tv-ink-2: #29292b;
+  --tv-navy: #ed1c24;
+  --tv-navy-dark: #c81019;
+  --tv-red: #ed1c24;
+  --tv-red-dark: #c81019;
   --tv-blue-soft: #2563eb;
   --tv-success: #15803d;
   --tv-warning: #b45309;
   --tv-danger: #b91c1c;
   --tv-info: #0369a1;
-  --tv-bg: #f4f6f9;
+  --tv-bg: #f4f4f5;
   --tv-surface: #fff;
-  --tv-border: #dfe4ec;
-  --tv-text: #202a3b;
-  --tv-text-muted: #647084;
+  --tv-border: #dedee0;
+  --tv-text: #373739;
+  --tv-text-muted: #707074;
   --tv-radius-sm: 7px;
   --tv-radius-md: 10px;
   --tv-radius-lg: 13px;
@@ -30,7 +30,7 @@
   --tv-font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   --bs-primary: var(--tv-navy);
-  --bs-primary-rgb: 30, 58, 138;
+  --bs-primary-rgb: 237, 28, 36;
   --bs-primary-text-emphasis: var(--tv-navy-dark);
   --bs-primary-bg-subtle: #e8edf8;
   --bs-primary-border-subtle: #c5d0eb;

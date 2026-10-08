@@ -131,7 +131,7 @@ $stats = $conexion->query("
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__vigencias__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__vigencias__index.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid mt-4 lic-page">
 
     <!-- Tarjetas de Resumen -->

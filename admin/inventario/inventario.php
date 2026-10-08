@@ -75,7 +75,7 @@ $tipos_q = $conexion->query("SELECT DISTINCT tipo_dispositivo FROM inventario_eq
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__inventario.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__inventario.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="contenedor-inventario">
     <div class="container-fluid">
         

@@ -16,7 +16,7 @@ $rol = $_SESSION['rol'] ?? 'usuario';
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__perfil.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__usuarios__perfil.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div id="mainContent" class="container py-4">
     <div class="profile-card">
         

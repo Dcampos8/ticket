@@ -19,6 +19,7 @@ $usuarios = $conexion->query("
 ");
 ?>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__firmas__firmas.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__firmas__firmas.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container">
 <h4>Generar firma de correo</h4>
 

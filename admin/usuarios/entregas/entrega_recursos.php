@@ -470,6 +470,7 @@ include(ROOT_PATH . 'admin/menu.php');
 
 
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__entrega_recursos.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__entrega_recursos.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 <div class="container py-4">
 
     <div class="row justify-content-center">

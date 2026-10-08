@@ -1,8 +1,0 @@
-/* Estilos extraídos de admin\inventario\procesar_reporte_bajas.php */
-
-table { border-collapse: collapse; }
-            th { background-color: #000000; color: #ffffff; font-family: Arial; font-size: 11pt; border: 0.5pt solid #000; }
-            td { border: 0.5pt solid #000; font-family: Arial; font-size: 10pt; }
-            /* ESTA CLASE FUERZA EL FORMATO TEXTO EN EXCEL */
-            .formato-texto { mso-number-format:'\@'; } 
-            .header-solicitud { font-weight: bold; font-size: 14pt; text-align: center; background-color: #F2F2F2; }

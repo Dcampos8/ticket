@@ -43,6 +43,7 @@ $equipos_devueltos = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin hardwa
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__imprimir_baja.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__imprimir_baja.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 </head>
 <body>
 

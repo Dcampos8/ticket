@@ -21,7 +21,7 @@ include(ROOT_PATH . 'admin/menu.php');
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__mantenimiento__programacion_mantenimientos.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__mantenimiento__programacion_mantenimientos.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="calendar-main-content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mb-4">

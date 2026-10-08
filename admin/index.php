@@ -259,11 +259,13 @@ $slaResolucionPorcentaje = (int) $slaResolucionStats['evaluables'] > 0
 
 ?>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__index.css?v=<?= filemtime(__DIR__ . '/../css/pages/admin__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <?php
 $dashboardCssPath = ROOT_PATH . 'css/dashboard.css';
 $dashboardCssVersion = is_file($dashboardCssPath) ? (string) filemtime($dashboardCssPath) : (string) time();
 ?>
 <link rel="stylesheet" href="../css/dashboard.css?v=<?= htmlspecialchars($dashboardCssVersion, ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 
 <div id="mainContent">
 

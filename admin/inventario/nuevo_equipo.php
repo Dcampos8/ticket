@@ -61,7 +61,7 @@ if ($ultimo && !empty($ultimo['numero_resguardo'])) {
 <link rel="stylesheet" href="<?= BASE_URL ?>css/inventario_ne.css">
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__nuevo_equipo.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__nuevo_equipo.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container py-5">
 <div class="row justify-content-center">
 <div class="col-lg-10">

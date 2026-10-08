@@ -1,6 +1,6 @@
 <!-- Modal de Encuesta de Satisfacción (tickets finalizados / mantenimientos realizados) -->
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__encuesta_modal.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__encuesta_modal.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <div class="modal fade" id="modalEncuesta" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">

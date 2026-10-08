@@ -61,7 +61,7 @@ $usuarios = $conexion->query("
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__inventario__movimiento_equipo.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__inventario__movimiento_equipo.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container py-5">
 <div class="row justify-content-center">
 <div class="col-lg-8">

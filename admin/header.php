@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/menu.css?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= BASE_URL ?>css/redesign.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="<?= BASE_URL ?>css/brand.css?v=<?= filemtime(ROOT_PATH . 'css/brand.css') ?>">
 
 </head>
 <body class="admin-shell">

@@ -47,7 +47,7 @@ function colorRol($rol) {
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__usuarios__index.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid">
   <div class="container-fluid">
     <h2 class="titulo">👥 Lista de Usuarios</h2>

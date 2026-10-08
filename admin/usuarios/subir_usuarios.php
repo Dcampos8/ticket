@@ -16,7 +16,7 @@ include(ROOT_PATH . 'admin/menu.php');
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__subir_usuarios.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__usuarios__subir_usuarios.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="content">
   <h1><i class="fa-solid fa-file-csv me-2"></i>Subir Usuarios masivamente</h1>
 

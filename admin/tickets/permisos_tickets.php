@@ -31,7 +31,7 @@ $result = $conexion->query("SELECT usuario, nombre_completo, rol, puede_ver_todo
 ?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__permisos_tickets.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__permisos_tickets.css') ?>">
-
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="ticket-admin-content">
     <div class="container-fluid">
         <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
