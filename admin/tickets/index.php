@@ -61,12 +61,12 @@ $tiposParam  = '';
 
 if ($filtros['busqueda'] !== '') {
     $like = '%' . $filtros['busqueda'] . '%';
-    $condiciones[] = "(u.nombre_completo LIKE ? OR u.area LIKE ? OR t.descripcion LIKE ? OR t.comentario_admin LIKE ?)";
+    $condiciones[] = "(COALESCE(u.nombre_completo, t.nombre_completo) LIKE ? OR COALESCE(u.area, t.area) LIKE ? OR t.descripcion LIKE ? OR t.comentario_admin LIKE ?)";
     array_push($parametros, $like, $like, $like, $like);
     $tiposParam .= 'ssss';
 }
 if ($filtros['area'] !== '') {
-    $condiciones[] = "u.area = ?";
+    $condiciones[] = "COALESCE(u.area, t.area) = ?";
     $parametros[] = $filtros['area'];
     $tiposParam .= 's';
 }
@@ -112,7 +112,7 @@ $stmtTotal->close();
 include(ROOT_PATH . 'admin/menu.php');
 
 // 4. Consulta de Datos (respetando filtros + paginación)
-$sql = "SELECT t.*, u.nombre_completo, u.area
+$sql = "SELECT t.*, u.nombre_completo AS usuario_nombre_completo, u.area AS usuario_area
         FROM tickets t
         LEFT JOIN usuarios u ON t.nombre = u.usuario
         $whereSql
@@ -680,8 +680,8 @@ function claseTipoTicket($tipo) {
                             ?>
                             <tr data-id="<?= $f['id'] ?>">
                                 <td><span class="id-pill">#<?= $f['id'] ?></span></td>
-                                <td><span class="area-pill"><?= htmlspecialchars($f['area'] ?? 'N/A') ?></span></td>
-                                <td><span class="nombre-usuario"><?= htmlspecialchars($f['nombre_completo'] ?? 'N/A') ?></span></td>
+                                <td><span class="area-pill"><?= htmlspecialchars($f['usuario_area'] ?: ($f['area'] ?? 'N/A')) ?></span></td>
+                                <td><span class="nombre-usuario"><?= htmlspecialchars($f['usuario_nombre_completo'] ?: ($f['nombre_completo'] ?? 'N/A')) ?></span></td>
 
                                 <td style="min-width: 200px;">
                                     <?php if ($esFinalizado): ?>
