@@ -9,10 +9,18 @@ if (!isset($GLOBALS['db_conexion'])) {
     $contrasena = env('DB_PASS');
     $basedatos = env('DB_NAME');
 
-    $conn = new mysqli($host, $usuario, $contrasena, $basedatos);
+    try {
+        $conn = new mysqli($host, $usuario, $contrasena, $basedatos);
+    } catch (mysqli_sql_exception $e) {
+        error_log('Conexión a base de datos fallida (código ' . $e->getCode() . ').');
+        http_response_code(503);
+        exit('El servicio no está disponible temporalmente.');
+    }
 
     if ($conn->connect_error) {
-        die("Error de conexión: " . $conn->connect_error);
+        error_log('Conexión a base de datos fallida (código ' . $conn->connect_errno . ').');
+        http_response_code(503);
+        exit('El servicio no está disponible temporalmente.');
     }
     $conn->set_charset("utf8mb4");
     $GLOBALS['db_conexion'] = $conn;

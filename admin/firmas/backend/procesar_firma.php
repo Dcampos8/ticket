@@ -2,6 +2,15 @@
 require_once(__DIR__ . '/../../../config.php');
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('firmas');
+require_once ROOT_PATH . 'shared/security.php';
+if (!esAdminOSuperior() || !tieneModulo('firmas')) {
+    http_response_code(403);
+    exit('No autorizado');
+}
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf()) {
+    http_response_code(403);
+    exit('La sesión expiró. Recarga la página e intenta de nuevo.');
+}
 
 /* ================= 2. RECEPCIÓN Y LIMPIEZA DE DATOS ================= */
 $userId   = intval($_POST['user_id'] ?? 0);
@@ -109,14 +118,14 @@ imagettftext($img, 11, 0, $xInicio, $yContacto, $rojo_tv, $fontPath, mb_strtolow
 $dirTmp = __DIR__.'/../tmp';
 if (!is_dir($dirTmp)) { mkdir($dirTmp, 0755, true); }
 
-$nombreArchivo = 'firma_'.$userId.'_'.time().'.jpg';
+$nombreArchivo = 'firma_' . $userId . '_' . bin2hex(random_bytes(12)) . '.jpg';
 $rutaFirma = $dirTmp.'/'.$nombreArchivo;
 
 imagejpeg($img, $rutaFirma, 95);
 imagedestroy($img);
 
 // Preparar Email
-$boundary = md5(time());
+$boundary = bin2hex(random_bytes(24));
 $subject  = "Firma - Transportes Valadez";
 $headers  = "MIME-Version: 1.0\r\n";
 $headers .= "From: Sistemas TV <sistemas@transportesvaladez.com>\r\n";
@@ -133,7 +142,9 @@ $mensaje .= "Content-Transfer-Encoding: base64\r\n";
 $mensaje .= "Content-Disposition: attachment; filename=\"$nombreArchivo\"\r\n\r\n";
 $mensaje .= $file_content . "\r\n--$boundary--";
 
-if(mail($correo, $subject, $mensaje, $headers)) {
+$correoEnviado = mail($correo, $subject, $mensaje, $headers);
+@unlink($rutaFirma);
+if($correoEnviado) {
     header("Location: " . BASE_URL . "admin/firmas/firmas.php?ok=1");
 } else {
     echo "Error al enviar el correo.";

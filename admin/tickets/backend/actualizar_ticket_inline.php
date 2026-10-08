@@ -4,21 +4,24 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 header('Content-Type: application/json');
-
-// Cargar permisos de forma segura
-$permisosPath = __DIR__ . '/../../../shared/permisos.php';
-if (file_exists($permisosPath)) {
-    require_once($permisosPath);
-}
+require_once __DIR__ . '/../../../shared/permisos.php';
+require_once __DIR__ . '/../../../shared/security.php';
 
 // Verificar sesión y rol
-if (!isset($_SESSION['logueado']) || (function_exists('esAdminOSuperior') && !esAdminOSuperior())) {
+if (empty($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) {
+    http_response_code(403);
     echo json_encode(['status' => 'error', 'success' => false, 'message' => 'No autorizado']);
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
     echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Método no permitido']);
+    exit;
+}
+if (!validarTokenCsrf()) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'success' => false, 'message' => 'La sesión expiró; recarga la página.']);
     exit;
 }
 
@@ -35,6 +38,16 @@ $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : null;
 
 if ($id <= 0) {
     echo json_encode(['status' => 'error', 'success' => false, 'message' => 'ID inválido']);
+    exit;
+}
+if ($estatus !== null && !in_array($estatus, ['Pendiente', 'En proceso', 'Finalizado', 'Cancelado'], true)) {
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'success' => false, 'message' => 'Estatus no válido']);
+    exit;
+}
+if ($descripcion !== null && mb_strlen((string) $descripcion, 'UTF-8') > 10000) {
+    http_response_code(422);
+    echo json_encode(['status' => 'error', 'success' => false, 'message' => 'La descripción supera el límite permitido']);
     exit;
 }
 

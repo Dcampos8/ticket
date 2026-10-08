@@ -21,6 +21,7 @@ $conexion_path = ROOT_PATH . 'backend/conexion.php';
 if (file_exists($conexion_path)) {
     require_once $conexion_path;
 } else {
-    // Esto te ayudará a saber si la ruta está mal sin dar error 500
-    die("Error técnico: No se encontró la conexión en: " . $conexion_path);
+    error_log('No se encontró el archivo de conexión de la aplicación.');
+    http_response_code(503);
+    die('El servicio no está disponible temporalmente.');
 }

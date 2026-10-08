@@ -3,9 +3,16 @@ session_start();
 
 require('../../../backend/conexion.php');
 require_once '../../../shared/permisos.php';
+require_once '../../../shared/security.php';
 
-if (!isset($_SESSION['logueado']) || !esAdminOSuperior()) {
+if (!isset($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) {
+    http_response_code(403);
     echo json_encode(['status' => 'error', 'message' => 'No autorizado']);
+    exit();
+}
+if (!validarTokenCsrf()) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'La sesión expiró; recarga la página.']);
     exit();
 }
 

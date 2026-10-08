@@ -13,6 +13,10 @@ if (session_status() === PHP_SESSION_NONE) {
 // 2. Verificar Sesión y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('tickets');
+if (!esAdminOSuperior()) {
+    http_response_code(403);
+    exit('No autorizado');
+}
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -898,7 +902,7 @@ $(document).ready(function() {
         $.ajax({
             url: 'backend/actualizar_ticket_inline.php',
             type: 'POST',
-            data: { id: idTicket, estatus: nuevoEstatus },
+            data: { id: idTicket, estatus: nuevoEstatus, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
             dataType: 'json',
             success: function(response) {
                 fila.removeClass('saving-row');
@@ -929,7 +933,7 @@ $(document).ready(function() {
         $.ajax({
             url: 'backend/actualizar_comentario.php',
             type: 'POST',
-            data: { ticket_id: id, comentario_admin: texto },
+            data: { ticket_id: id, comentario_admin: texto, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
             dataType: 'json',
             success: function(r) {
                 if (r.status === 'ok' || r.success) {
@@ -957,7 +961,7 @@ $(document).ready(function() {
         $.ajax({
             url: 'backend/actualizar_descripcion.php',
             type: 'POST',
-            data: { ticket_id: id, descripcion: texto },
+            data: { ticket_id: id, descripcion: texto, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
             dataType: 'json',
             success: function(r) {
                 if (r.status !== 'ok' && !r.success) {
@@ -974,7 +978,7 @@ function eliminarTicket(id) {
     $.ajax({
         url: 'backend/eliminar_ticket.php',
         type: 'POST',
-        data: { ticket_id: id },
+        data: { ticket_id: id, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
         dataType: 'json',
         success: function(r) {
             if (r.status === 'ok' || r.success) {

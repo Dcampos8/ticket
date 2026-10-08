@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once '../../shared/security.php';
+asegurarTokenCsrf();
 
 if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
     http_response_code(403);
@@ -207,7 +209,8 @@ $result = $stmt->get_result();
 <link rel="icon" href="https://ticket.transportesvaladez.com/img/icono.png">
 <script>
 window.ticketActual = null;
-window.usuarioActual = "<?php echo $_SESSION['usuario']; ?>";
+window.usuarioActual = <?= json_encode((string) ($_SESSION['usuario'] ?? ''), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+window.ticketCsrfToken = <?= json_encode(asegurarTokenCsrf()) ?>;
 
 function abrirChat(id) {
     ticketActual = id;
@@ -232,7 +235,7 @@ function cargarChat() {
             data.forEach(m => {
                 let div = document.createElement("div");
                 div.className = "chat-message " + (m.usuario === usuarioActual ? "user" : "admin");
-                div.innerHTML = m.mensaje;
+                div.textContent = m.mensaje;
                 cont.appendChild(div);
             });
 
@@ -388,7 +391,7 @@ function cancelarTicket(id){
     fetch("../../admin/tickets/backend/cancelar_ticket.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "id=" + id
+        body: new URLSearchParams({ id: String(id), csrf_token: window.ticketCsrfToken })
     })
     .then(r => r.json())
     .then(res => {

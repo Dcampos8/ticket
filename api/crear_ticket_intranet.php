@@ -97,6 +97,7 @@ $_POST = [
     'descripcion' => $descripcion,
 ];
 $_FILES = [];
+define('TICKET_CREATION_TRUSTED_API', true);
 
 chdir(__DIR__ . '/../admin/tickets/backend');
 require __DIR__ . '/../admin/tickets/backend/crear_ticket.php';

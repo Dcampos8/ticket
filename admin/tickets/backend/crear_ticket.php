@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../../shared/security.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -11,17 +12,76 @@ require '../../../backend/PHPMailer/src/SMTP.php';
 date_default_timezone_set('America/Mexico_City');
 $fecha_creacion = date("Y-m-d H:i:s");
 
-include('../../../backend/conexion.php');
+// ===============================
+// 🔹 AUTENTICACIÓN E IDENTIDAD
+// ===============================
+$esApiIntranet = defined('TICKET_CREATION_TRUSTED_API') && TICKET_CREATION_TRUSTED_API === true;
+if (!$esApiIntranet) {
+    header('Content-Type: application/json; charset=utf-8');
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        http_response_code(405);
+        header('Allow: POST');
+        echo json_encode(['status' => 'error', 'error' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if (empty($_SESSION['logueado']) || ($_SESSION['rol'] ?? '') !== 'usuario') {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'error' => 'Inicia sesión como usuario para crear un ticket.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if (!validarTokenCsrf()) {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'error' => 'La sesión del formulario expiró. Recarga la página e intenta de nuevo.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    // La identidad del formulario siempre sale de la sesión, no de campos ocultos editables.
+    $usuario = (string) ($_SESSION['usuario'] ?? '');
+    $area = (string) ($_SESSION['area'] ?? '');
+    $nombre = (string) ($_SESSION['nombre_completo'] ?? '');
+} else {
+    $usuario = trim((string) ($_POST['usuario'] ?? ''));
+    $area = trim((string) ($_POST['area'] ?? ''));
+    $nombre = trim((string) ($_POST['nombre'] ?? ''));
+}
 
-// ===============================
-// 🔹 DATOS DEL FORMULARIO
-// ===============================
-$usuario      = $_POST['usuario'] ?? '';
-$area         = $_POST['area'] ?? '';
-$nombre       = $_POST['nombre'] ?? '';
-$descripcion  = $_POST['descripcion'] ?? '';
-$tipo_ticket  = clasificarSolicitud($descripcion);
+$descripcion = trim((string) ($_POST['descripcion'] ?? ''));
 $nombre_imagen = null;
+$imagenExtension = null;
+$limiteImagen = 5 * 1024 * 1024;
+if ($usuario === '' || $area === '' || $nombre === '' || $descripcion === ''
+    || mb_strlen($usuario, 'UTF-8') > 100 || mb_strlen($area, 'UTF-8') > 150
+    || mb_strlen($nombre, 'UTF-8') > 150 || mb_strlen($descripcion, 'UTF-8') > 10000) {
+    http_response_code(422);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'error' => 'Revisa que los datos estén completos y dentro de los límites permitidos.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if (isset($_FILES['imagen']) && (int) ($_FILES['imagen']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+    $archivo = $_FILES['imagen'];
+    $tamanioReal = isset($archivo['tmp_name']) ? @filesize($archivo['tmp_name']) : false;
+    $infoImagen = isset($archivo['tmp_name']) && is_uploaded_file($archivo['tmp_name']) ? @getimagesize($archivo['tmp_name']) : false;
+    $extensionesPermitidas = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+    ];
+    $mimeImagen = is_array($infoImagen) ? ($infoImagen['mime'] ?? '') : '';
+    $anchoImagen = is_array($infoImagen) ? (int) ($infoImagen[0] ?? 0) : 0;
+    $altoImagen = is_array($infoImagen) ? (int) ($infoImagen[1] ?? 0) : 0;
+    if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
+        || $tamanioReal === false || $tamanioReal < 1 || $tamanioReal > $limiteImagen
+        || !isset($extensionesPermitidas[$mimeImagen])
+        || $anchoImagen < 1 || $altoImagen < 1 || ($anchoImagen * $altoImagen) > 30000000) {
+        http_response_code(422);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => 'error', 'error' => 'La imagen debe ser JPG, PNG o WebP y no superar 5 MB.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $imagenExtension = $extensionesPermitidas[$mimeImagen];
+}
+
+$tipo_ticket = clasificarSolicitud($descripcion);
 
 if ($tipo_ticket === null) {
     http_response_code(503);
@@ -33,11 +93,13 @@ if ($tipo_ticket === null) {
     exit;
 }
 
+require_once __DIR__ . '/../../../backend/conexion.php';
+
 // DEBUG OPCIONAL
 // error_log(print_r($_POST, true));
 // error_log("TIPO_TICKET RECIBIDO: " . $tipo_ticket);
 
-/** Clasifica exclusivamente con OpenAI; si la API falla, no inventa una categoría. */
+/** Clasifica exclusivamente con Gemini; si la API falla, no inventa una categoría. */
 function clasificarSolicitud(string $descripcion): ?string
 {
     $categorias = [
@@ -133,15 +195,16 @@ function clasificarSolicitud(string $descripcion): ?string
 // ===============================
 // 🖼️ SUBIR IMAGEN (SI EXISTE)
 // ===============================
-if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+if ($imagenExtension !== null) {
     $archivo_tmp = $_FILES['imagen']['tmp_name'];
-    $nombre_archivo = basename($_FILES['imagen']['name']);
-    $extension = pathinfo($nombre_archivo, PATHINFO_EXTENSION);
-    $nombre_imagen = uniqid('ticket_') . '.' . $extension;
-    $ruta_destino = '../../../uploads/' . $nombre_imagen;
+    $nombre_imagen = 'ticket_' . bin2hex(random_bytes(16)) . '.' . $imagenExtension;
+    $ruta_destino = __DIR__ . '/../../../uploads/' . $nombre_imagen;
     if (!move_uploaded_file($archivo_tmp, $ruta_destino)) {
-        error_log("Error al mover archivo subido a: " . $ruta_destino);
-        $nombre_imagen = null;
+        error_log('Crear ticket: no se pudo guardar el archivo adjunto.');
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['status' => 'error', 'error' => 'No se pudo guardar la imagen adjunta. Intenta de nuevo.'], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 }
 
@@ -154,6 +217,17 @@ $stmt = $conexion->prepare("
     VALUES (?, ?, ?, ?, ?, 'Pendiente', ?, ?)
 ");
 
+if (!$stmt) {
+    if ($nombre_imagen !== null) {
+        @unlink(__DIR__ . '/../../../uploads/' . $nombre_imagen);
+    }
+    error_log('Crear ticket: no se pudo preparar el registro en la base de datos.');
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'error' => 'No se pudo registrar el ticket. Intenta de nuevo.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $stmt->bind_param(
     "sssssss",
     $usuario,
@@ -165,8 +239,21 @@ $stmt->bind_param(
     $nombre_imagen
 );
 
-$stmt->execute();
+$guardado = $stmt->execute();
+if (!$guardado) {
+    if ($nombre_imagen !== null) {
+        @unlink(__DIR__ . '/../../../uploads/' . $nombre_imagen);
+    }
+    error_log('Crear ticket: falló el registro en la base de datos.');
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => 'error', 'error' => 'No se pudo registrar el ticket. Intenta de nuevo.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 $ticketId = $stmt->insert_id;
+$escapeHtml = static fn(string $valor): string => htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+$baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
+$urlImagen = $nombre_imagen !== null ? $baseUrl . 'uploads/' . rawurlencode($nombre_imagen) : '';
 
 // ===============================
 // 📧 ENVÍO DE CORREO
@@ -184,23 +271,22 @@ try {
     $mail->Port = 465;
 
     $mail->setFrom('noreply@mensajeriatv.site', 'Transportes Valadez');
-    $mail->addAddress('sistemas@transportesvaladez.com');
+    $destinatarioTickets = trim((string) env('MAIL_TICKETS_TO', '')) ?: 'sistemas@transportesvaladez.com';
+    $mail->addAddress($destinatarioTickets);
 
     $mail->isHTML(true);
     $mail->Subject = "Nuevo Ticket - $tipo_ticket";
 
-    $mail->Body = "
-    <h3 style='background:#B72128;color:#fff;padding:15px'>📝 Nuevo Ticket</h3>
-    <p><b>Usuario:</b> $usuario</p>
-    <p><b>Área:</b> $area</p>
-    <p><b>Nombre:</b> $nombre</p>
-    <p><b>Tipo:</b> $tipo_ticket</p>
-    <p><b>Descripción:</b> $descripcion</p>
-    <p><b>Fecha:</b> $fecha_creacion</p>
-    " . ($nombre_imagen
-        ? "<p><a href='https://transportesvaladez.com/uploads/$nombre_imagen' target='_blank'>📷 Ver imagen</a></p>"
-        : ""
-    );
+    $mail->Body = "<h3 style='background:#B72128;color:#fff;padding:15px'>📝 Nuevo Ticket</h3>"
+        . '<p><b>Usuario:</b> ' . $escapeHtml($usuario) . '</p>'
+        . '<p><b>Área:</b> ' . $escapeHtml($area) . '</p>'
+        . '<p><b>Nombre:</b> ' . $escapeHtml($nombre) . '</p>'
+        . '<p><b>Tipo:</b> ' . $escapeHtml($tipo_ticket) . '</p>'
+        . '<p><b>Descripción:</b><br>' . nl2br($escapeHtml($descripcion)) . '</p>'
+        . '<p><b>Fecha:</b> ' . $escapeHtml($fecha_creacion) . '</p>'
+        . ($nombre_imagen !== null
+            ? '<p><a href="' . $escapeHtml($urlImagen) . '" target="_blank" rel="noopener">📷 Ver imagen</a></p>'
+            : '');
 
     $mail->send();
 } catch (Exception $e) {
@@ -216,16 +302,16 @@ $chatId   = env('TELEGRAM_CHAT_ID');
 
 // Construir el mensaje con formato HTML
 $mensajeTelegram = "📝 <b>NUEVO TICKET REPORTE #{$ticketId}</b>\n\n"
-    . "👤 <b>Usuario:</b> $usuario\n"
-    . "🏢 <b>Área:</b> $area\n"
-    . "💼 <b>Nombre:</b> $nombre\n"
-    . "📌 <b>Tipo:</b> $tipo_ticket\n"
-    . "📄 <b>Descripción:</b>\n$descripcion\n\n"
-    . "📅 <b>Fecha:</b> $fecha_creacion";
+    . "👤 <b>Usuario:</b> {$escapeHtml($usuario)}\n"
+    . "🏢 <b>Área:</b> {$escapeHtml($area)}\n"
+    . "💼 <b>Nombre:</b> {$escapeHtml($nombre)}\n"
+    . "📌 <b>Tipo:</b> {$escapeHtml($tipo_ticket)}\n"
+    . "📄 <b>Descripción:</b>\n" . $escapeHtml(mb_substr($descripcion, 0, 3000, 'UTF-8')) . "\n\n"
+    . "📅 <b>Fecha:</b> " . $escapeHtml($fecha_creacion);
 
 // Si subieron imagen, agregamos el enlace directo
 if ($nombre_imagen) {
-    $mensajeTelegram .= "\n\n📷 <a href='https://transportesvaladez.com/uploads/$nombre_imagen'>Ver Imagen Adjunta</a>";
+    $mensajeTelegram .= "\n\n📷 <a href='" . $escapeHtml($urlImagen) . "'>Ver Imagen Adjunta</a>";
 }
 
 $urlTelegram = "https://api.telegram.org/bot{$botToken}/sendMessage";

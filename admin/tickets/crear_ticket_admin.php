@@ -13,6 +13,10 @@ if (empty($_SESSION['csrf_token'])) {
 // 3. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('tickets');
+if (!esAdminOSuperior()) {
+    http_response_code(403);
+    exit('No autorizado');
+}
 
 // 4. Conexión a la base de datos (Usando ROOT_PATH)
 require_once(ROOT_PATH . 'backend/conexion.php');
