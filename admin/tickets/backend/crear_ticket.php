@@ -283,7 +283,9 @@ if (!$guardado) {
 $ticketId = $stmt->insert_id;
 $escapeHtml = static fn(string $valor): string => htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
-$urlImagen = $nombre_imagen !== null ? $baseUrl . 'uploads/' . rawurlencode($nombre_imagen) : '';
+$rutaBaseUrl = rtrim((string) parse_url($baseUrl, PHP_URL_PATH), '/');
+$prefijoTicket = preg_match('~/ticket$~i', $rutaBaseUrl) ? '' : 'ticket/';
+$urlImagen = $nombre_imagen !== null ? $baseUrl . $prefijoTicket . 'uploads/' . rawurlencode($nombre_imagen) : '';
 
 // ===============================
 // 📧 ENVÍO DE CORREO
