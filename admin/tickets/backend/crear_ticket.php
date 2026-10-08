@@ -213,8 +213,11 @@ if ($imagenExtension !== null) {
 // ===============================
 $stmt = $conexion->prepare("
     INSERT INTO tickets
-    (nombre, nombre_completo, area, tipo_ticket, descripcion, estatus, fecha_creacion, imagen)
-    VALUES (?, ?, ?, ?, ?, 'Pendiente', ?, ?)
+    (nombre, nombre_completo, area, tipo_ticket, prioridad, objetivo_respuesta_minutos, objetivo_resolucion_minutos, descripcion, estatus, fecha_creacion, imagen)
+    VALUES (?, ?, ?, ?, 'Normal',
+        COALESCE((SELECT respuesta_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 480),
+        COALESCE((SELECT resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 2880),
+        ?, 'Pendiente', ?, ?)
 ");
 
 if (!$stmt) {

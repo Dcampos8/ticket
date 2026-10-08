@@ -36,6 +36,7 @@ $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
             <div class="collapse" id="ticketsMenu">
                 <a href="#" class="nav-link" data-page="ticket/crear_ticket.php"><p><i class="fa fa-plus"></i> <label>Crear</label></p></a>
                 <a href="#" class="nav-link" data-page="ticket/mis_tickets.php"><p><i class="fa fa-list"></i> <label>Mis Tickets</label></p></a>
+                <a href="#" class="nav-link" data-page="ticket/ayuda.php"><p><i class="fa fa-circle-question"></i> <label>Centro de ayuda</label></p></a>
             </div>
         </li>
         <li class="nav-item">

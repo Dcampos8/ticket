@@ -17,3 +17,9 @@
 /admin/firmas/tmp/*
 !/admin/firmas/tmp/.gitkeep
 /backend/twilio_log.txt
+
+# Volcados de base de datos con datos personales/credenciales; conservar solo migraciones versionables.
+/sql/*.sql
+!/sql/migrations/
+/sql/migrations/*.sql
+!/sql/migrations/*.sql

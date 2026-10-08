@@ -47,6 +47,12 @@ $stmt = $conexion->prepare("INSERT INTO ticket_chat (ticket_id, usuario, mensaje
 $stmt->bind_param("iss", $ticket_id, $usuario, $mensaje);
 
 if ($stmt->execute()) {
+    if (esAdminOSuperior()) {
+        $respuesta = $conexion->prepare('UPDATE tickets SET fecha_primera_respuesta = COALESCE(fecha_primera_respuesta, NOW()) WHERE id = ?');
+        $respuesta->bind_param('i', $ticket_id);
+        $respuesta->execute();
+        $respuesta->close();
+    }
     echo json_encode(['status' => 'ok']);
 } else {
     http_response_code(500);

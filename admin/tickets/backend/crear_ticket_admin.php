@@ -114,8 +114,11 @@ foreach ([$imgUser, $imgAdmin, $docAdmin] as $archivoGuardado) {
 }
 
 $stmt = $conexion->prepare(
-    'INSERT INTO tickets (nombre, nombre_completo, area, puesto, descripcion, tipo_ticket, estatus, fecha_creacion, comentario_admin, imagen, imagen_admin, archivo_admin)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    "INSERT INTO tickets (nombre, nombre_completo, area, puesto, descripcion, tipo_ticket, estatus, prioridad, objetivo_respuesta_minutos, objetivo_resolucion_minutos, fecha_creacion, comentario_admin, imagen, imagen_admin, archivo_admin)
+     VALUES (?, ?, ?, ?, ?, ?, ?, 'Normal',
+        COALESCE((SELECT respuesta_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 480),
+        COALESCE((SELECT resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 2880),
+        ?, ?, ?, ?, ?)"
 );
 if (!$stmt) {
     foreach ($archivosGuardados as $ruta) {

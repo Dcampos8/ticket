@@ -17,8 +17,16 @@ Aplicación PHP para registrar y administrar tickets, evidencias y módulos admi
 1. Usa PHP 8.x con `mysqli` y `curl` habilitados, más una base de datos MySQL/MariaDB.
 2. Crea `.env` a partir de `.env.example` y configura las credenciales de base de datos y correo que realmente use la instalación.
 3. Nunca subas `.env`, contraseñas, tokens ni claves al repositorio. Si una credencial estuvo en un commit compartido, revócala y genera una nueva.
-4. Configura la base de datos del sistema. Este repositorio no incluye un volcado SQL completo; para instalaciones nuevas primero hay que preparar y documentar el esquema vigente.
+4. Configura la base de datos del sistema. Los respaldos completos con datos reales no se versionan; guarda únicamente migraciones incrementales revisadas en `sql/migrations/`.
 5. Asegura que `uploads/` exista, sea escribible por PHP y no permita ejecutar scripts subidos.
+
+## Tickets: asignación, SLA y ayuda
+
+- Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.
+- La migración conserva los tickets existentes, añade responsables, prioridades, tiempos medibles y las tablas para artículos de ayuda.
+- El SLA inicial se mide en minutos corridos (24/7); los objetivos por prioridad se pueden ajustar en `ticket_sla_politicas`.
+- La base de conocimiento se administra en el menú Tickets del panel; los artículos publicados aparecen en Centro de ayuda para usuarios.
+- No publiques ni agregues al repositorio el volcado completo de la base: contiene información personal y hashes de contraseñas.
 
 ## Despliegue en Hostinger
 

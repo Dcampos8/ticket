@@ -55,17 +55,17 @@ AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
 $ticketsAtendidos = $conexion->query("
 SELECT COUNT(*) total
 FROM tickets
-WHERE fecha_modificacion IS NOT NULL
+WHERE fecha_primera_respuesta IS NOT NULL
 AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
 ")->fetch_assoc()['total'] ?? 0;
 
 /* ================= PROMEDIO ATENCION ================= */
 
 $promedioMin = $conexion->query("
-SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_modificacion)),2) promedio
+SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_resolucion)),2) promedio
 FROM tickets
 WHERE estatus='Finalizado'
-AND fecha_modificacion IS NOT NULL
+AND fecha_resolucion IS NOT NULL
 AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
 ")->fetch_assoc()['promedio'] ?? 0;
 
@@ -145,17 +145,29 @@ if($ticketsMesAnterior > 0){
     $crecimiento = round((($ticketsMes - $ticketsMesAnterior) / $ticketsMesAnterior) * 100, 2);
 }
 
-/* ================= SLA 24 HORAS ================= */
+/* ================= CUMPLIMIENTO SLA ================= */
 
-$sla = $conexion->query("
-SELECT COUNT(*) total
+$slaRespuestaStats = $conexion->query("
+SELECT
+    SUM(fecha_primera_respuesta IS NOT NULL OR (estatus IN ('Pendiente','En proceso') AND NOW() > DATE_ADD(fecha_creacion, INTERVAL objetivo_respuesta_minutos MINUTE))) evaluables,
+    SUM(fecha_primera_respuesta IS NOT NULL AND TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_primera_respuesta) <= objetivo_respuesta_minutos) dentro
 FROM tickets
-WHERE estatus='Finalizado'
-AND TIMESTAMPDIFF(HOUR,fecha_creacion,fecha_modificacion) <= 24
-AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
-")->fetch_assoc()['total'] ?? 0;
+WHERE DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
+");
+$slaRespuestaStats = $slaRespuestaStats ? $slaRespuestaStats->fetch_assoc() : ['evaluables' => 0, 'dentro' => 0];
 
-$slaPorcentaje = $ticketsCerrados > 0 ? round(($sla/$ticketsCerrados)*100,2) : 0;
+$slaResolucionStats = $conexion->query("
+SELECT
+    SUM(fecha_resolucion IS NOT NULL OR (estatus IN ('Pendiente','En proceso') AND NOW() > DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE))) evaluables,
+    SUM(fecha_resolucion IS NOT NULL AND TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_resolucion) <= objetivo_resolucion_minutos) dentro
+FROM tickets
+WHERE DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
+");
+$slaResolucionStats = $slaResolucionStats ? $slaResolucionStats->fetch_assoc() : ['evaluables' => 0, 'dentro' => 0];
+$slaRespuestaPorcentaje = (int) $slaRespuestaStats['evaluables'] > 0
+    ? round(((int) $slaRespuestaStats['dentro'] / (int) $slaRespuestaStats['evaluables']) * 100, 2) : 0;
+$slaResolucionPorcentaje = (int) $slaResolucionStats['evaluables'] > 0
+    ? round(((int) $slaResolucionStats['dentro'] / (int) $slaResolucionStats['evaluables']) * 100, 2) : 0;
 
 ?>
 <style>
@@ -266,7 +278,7 @@ Exportar Excel
 <div class="kpi">
 <div class="kpi-icon kpi-purple">⏱</div>
 <div class="kpi-info">
-<span>Promedio Atención</span>
+<span>Promedio de resolución</span>
 <strong><?=$promedioHoras?> hrs</strong>
 </div>
 </div>
@@ -294,8 +306,8 @@ Exportar Excel
 <div class="kpi-icon kpi-green">⚡</div>
 
 <div class="kpi-info">
-<span>SLA 24h</span>
-<strong><?=$slaPorcentaje?>%</strong>
+<span>SLA primera respuesta</span>
+<strong><?=$slaRespuestaPorcentaje?>%</strong>
 </div>
 
 </div>
@@ -306,8 +318,8 @@ Exportar Excel
 <div class="kpi">
 <div class="kpi-icon kpi-orange">🛠</div>
 <div class="kpi-info">
-<span>% Atención Soporte</span>
-<strong><?=$porcentajeAtendidos?>%</strong>
+<span>SLA de resolución</span>
+<strong><?=$slaResolucionPorcentaje?>%</strong>
 </div>
 </div>
 </div>

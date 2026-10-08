@@ -55,6 +55,7 @@ $submenusModulos = [
     'tickets' => [
         ['ruta' => 'admin/tickets/', 'icon' => 'fa-stream', 'label' => 'Ver Todos'],
         ['ruta' => 'admin/tickets/crear_ticket_admin.php', 'icon' => 'fa-plus-circle', 'label' => 'Crear Nuevo'],
+        ['ruta' => 'admin/tickets/conocimiento.php', 'icon' => 'fa-book-open', 'label' => 'Base de conocimiento'],
         ['ruta' => 'admin/tickets/permisos_tickets.php', 'icon' => 'fa-user-lock', 'label' => 'Permisos']
     ],
     'usuarios' => [

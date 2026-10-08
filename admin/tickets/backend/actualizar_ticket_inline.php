@@ -68,9 +68,21 @@ $nueva_descripcion = $descripcion !== null ? $descripcion : $ticket['descripcion
 $nuevo_estatus = $estatus !== null ? $estatus : $ticket['estatus'];
 $fecha_actualizacion = date('Y-m-d H:i:s');
 
-$updateQuery = "UPDATE tickets SET descripcion = ?, estatus = ?, fecha_modificacion = ? WHERE id = ?";
+$updateQuery = "UPDATE tickets
+    SET descripcion = ?, estatus = ?, fecha_modificacion = ?,
+        fecha_primera_respuesta = CASE
+            WHEN ? = 'En proceso' AND fecha_primera_respuesta IS NULL THEN ?
+            ELSE fecha_primera_respuesta
+        END,
+        fecha_resolucion = CASE
+            WHEN ? = 'Finalizado' AND fecha_resolucion IS NULL THEN ?
+            WHEN ? IN ('Pendiente','En proceso') THEN NULL
+            ELSE fecha_resolucion
+        END
+    WHERE id = ?";
 $stmt = $conexion->prepare($updateQuery);
-$stmt->bind_param("sssi", $nueva_descripcion, $nuevo_estatus, $fecha_actualizacion, $id);
+$stmt->bind_param("ssssssssi", $nueva_descripcion, $nuevo_estatus, $fecha_actualizacion,
+    $nuevo_estatus, $fecha_actualizacion, $nuevo_estatus, $fecha_actualizacion, $nuevo_estatus, $id);
 
 if ($stmt->execute()) {
     // Si el estatus cambia a Finalizado o Cerrado

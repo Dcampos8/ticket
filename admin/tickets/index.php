@@ -141,6 +141,15 @@ if ($resTipos) {
     }
 }
 $estatusDisponibles = ['Pendiente', 'En proceso', 'Finalizado', 'Cancelado'];
+$usuariosSoporte = [];
+$resSoporte = $conexion->query("SELECT usuario, nombre_completo, rol, modulos_permitidos FROM usuarios WHERE rol IN ('admin','superadmin') ORDER BY nombre_completo");
+if ($resSoporte) {
+    while ($usuarioSoporte = $resSoporte->fetch_assoc()) {
+        if ($usuarioSoporte['rol'] === 'superadmin' || in_array('tickets', parsearModulos($usuarioSoporte['modulos_permitidos'] ?? ''), true)) {
+            $usuariosSoporte[] = $usuarioSoporte;
+        }
+    }
+}
 
 // Asigna una clase de color al badge de "Tipo" según palabras clave.
 // Es solo visual: el valor guardado en BD (tipo_ticket) no se toca.
@@ -642,6 +651,7 @@ function claseTipoTicket($tipo) {
                             <th>Nombre</th>
                             <th>Comentario</th>
                             <th>Tipo</th>
+                            <th>Responsable / prioridad</th>
                             <th>User Adj.</th>
                             <th>Admin Adj.</th>
                             <th>Estatus</th>
@@ -689,6 +699,35 @@ function claseTipoTicket($tipo) {
                                 </td>
 
                                 <td><span class="tipo-badge <?= claseTipoTicket($f['tipo_ticket'] ?? '') ?>"><?= htmlspecialchars($f['tipo_ticket'] ?? 'N/A') ?></span></td>
+
+                                <td class="ticket-asignacion">
+                                    <?php if (!$esFinalizado): ?>
+                                        <select class="form-select form-select-sm ticket-responsable mb-1" aria-label="Responsable del ticket">
+                                            <option value="">Sin asignar</option>
+                                            <?php foreach ($usuariosSoporte as $usuarioSoporte): ?>
+                                                <option value="<?= htmlspecialchars($usuarioSoporte['usuario'], ENT_QUOTES, 'UTF-8') ?>" <?= ($f['asignado_a'] ?? '') === $usuarioSoporte['usuario'] ? 'selected' : '' ?>><?= htmlspecialchars($usuarioSoporte['nombre_completo'] ?: $usuarioSoporte['usuario']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <select class="form-select form-select-sm ticket-prioridad" aria-label="Prioridad del ticket">
+                                            <?php foreach (['Baja','Normal','Alta','Urgente'] as $prioridad): ?>
+                                                <option value="<?= $prioridad ?>" <?= ($f['prioridad'] ?? 'Normal') === $prioridad ? 'selected' : '' ?>><?= $prioridad ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <?php if (!empty($f['fecha_resolucion']) || in_array($f['estatus'], ['Finalizado','Cancelado'], true)): ?>
+                                            <small class="text-muted">Resuelto: <?= !empty($f['fecha_resolucion']) ? date('d/m/y H:i', strtotime($f['fecha_resolucion'])) : 'sin registro previo' ?></small>
+                                        <?php elseif (!empty($f['fecha_primera_respuesta'])): ?>
+                                            <small class="text-muted">1a respuesta: <?= date('d/m/y H:i', strtotime($f['fecha_primera_respuesta'])) ?></small>
+                                        <?php else: ?>
+                                            <?php $limiteRespuesta = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_respuesta_minutos'] ?? 480) * 60); ?>
+                                            <small class="<?= time() > $limiteRespuesta ? 'text-danger fw-semibold' : 'text-muted' ?>">
+                                                <?= time() > $limiteRespuesta ? 'Respuesta vencida' : 'Responder antes de ' . date('d/m H:i', $limiteRespuesta) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span><?= htmlspecialchars($f['asignado_a'] ?? 'Sin asignar') ?></span><br>
+                                        <span class="badge bg-light text-dark"><?= htmlspecialchars($f['prioridad'] ?? 'Normal') ?></span>
+                                    <?php endif; ?>
+                                </td>
 
                                 <!-- Adjunto Usuario -->
                                 <td class="text-center">
@@ -774,7 +813,7 @@ function claseTipoTicket($tipo) {
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="11" class="text-center py-5 text-muted">
+                            <tr><td colspan="12" class="text-center py-5 text-muted">
                                 <?= $hayFiltrosActivos ? 'No hay tickets que coincidan con los filtros aplicados.' : 'No hay tickets registrados.' ?>
                             </td></tr>
                         <?php endif; ?>
@@ -892,6 +931,17 @@ function verHistorial(id) {
     });
 }
 $(document).ready(function() {
+    function guardarAsignacion(select) {
+        const fila = select.closest('tr');
+        const responsable = fila.find('.ticket-responsable').val();
+        const prioridad = fila.find('.ticket-prioridad').val();
+        $.ajax({
+            url: 'backend/actualizar_asignacion.php', type: 'POST', dataType: 'json',
+            data: { ticket_id: fila.data('id'), asignado_a: responsable, prioridad: prioridad, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            error: function(xhr) { alert(xhr.responseJSON?.message || 'No se pudo guardar responsable y prioridad.'); }
+        });
+    }
+    $(document).on('change', '.ticket-responsable, .ticket-prioridad', function() { guardarAsignacion($(this)); });
     // 1. ACTUALIZAR ESTATUS
     $(document).on('change', '.estatus', function() {
         let select = $(this);

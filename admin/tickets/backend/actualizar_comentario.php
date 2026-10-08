@@ -50,10 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conexion->prepare("
         UPDATE tickets
         SET comentario_admin = ?,
-            fecha_modificacion = NOW()
+            fecha_modificacion = NOW(),
+            fecha_primera_respuesta = CASE
+                WHEN ? <> '' AND fecha_primera_respuesta IS NULL THEN NOW()
+                ELSE fecha_primera_respuesta
+            END
         WHERE id = ?
     ");
-    $stmt->bind_param("si", $comentario, $ticket_id);
+    $stmt->bind_param("ssi", $comentario, $comentario, $ticket_id);
 
     if ($stmt->execute()) {
 
