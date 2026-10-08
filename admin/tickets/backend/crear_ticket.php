@@ -59,7 +59,7 @@ function clasificarSolicitud(string $descripcion): ?string
         return null;
     }
 
-    $model = trim((string) env('GEMINI_MODEL', '')) ?: 'gemini-2.5-flash-lite';
+    $model = trim((string) env('GEMINI_MODEL', '')) ?: 'gemini-3.5-flash-lite';
     $payload = [
             'systemInstruction' => [
                 'parts' => [[
