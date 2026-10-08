@@ -271,7 +271,11 @@ $slaResolucionPorcentaje = (int) $slaResolucionStats['evaluables'] > 0
 }
 
 </style>
-<link rel="stylesheet" href="../css/dashboard.css">
+<?php
+$dashboardCssPath = ROOT_PATH . 'css/dashboard.css';
+$dashboardCssVersion = is_file($dashboardCssPath) ? (string) filemtime($dashboardCssPath) : (string) time();
+?>
+<link rel="stylesheet" href="../css/dashboard.css?v=<?= htmlspecialchars($dashboardCssVersion, ENT_QUOTES, 'UTF-8') ?>">
 
 <div id="mainContent">
 
