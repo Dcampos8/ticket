@@ -22,6 +22,22 @@ $validarFecha = static function ($valor, $predeterminada): string {
 };
 $fecha_inicio = $validarFecha($_GET['fecha_inicio'] ?? '', date('Y-m-01'));
 $fecha_fin = $validarFecha($_GET['fecha_fin'] ?? '', date('Y-m-d'));
+if ($fecha_inicio > $fecha_fin) {
+    [$fecha_inicio, $fecha_fin] = [$fecha_fin, $fecha_inicio];
+}
+$fechaInicioObj = new DateTimeImmutable($fecha_inicio);
+$fechaFinObj = new DateTimeImmutable($fecha_fin);
+$diasPeriodo = $fechaInicioObj->diff($fechaFinObj)->days + 1;
+$rangoLimitado = $diasPeriodo > 366;
+if ($rangoLimitado) {
+    $fechaInicioObj = $fechaFinObj->modify('-365 days');
+    $fecha_inicio = $fechaInicioObj->format('Y-m-d');
+    $diasPeriodo = 366;
+}
+$finPeriodoAnterior = $fechaInicioObj->modify('-1 day');
+$inicioPeriodoAnterior = $finPeriodoAnterior->modify('-' . ($diasPeriodo - 1) . ' days');
+$inicioAnteriorSql = $inicioPeriodoAnterior->format('Y-m-d');
+$finAnteriorSql = $finPeriodoAnterior->format('Y-m-d');
 
 /* ================= KPIs ================= */
 
@@ -52,6 +68,31 @@ WHERE estatus='Cancelado'
 AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
 ")->fetch_assoc()['total'] ?? 0;
 
+$ticketsResueltosPeriodo = $conexion->query("
+SELECT COUNT(*) total
+FROM tickets
+WHERE fecha_resolucion IS NOT NULL
+AND DATE(fecha_resolucion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
+")->fetch_assoc()['total'] ?? 0;
+
+$ticketsVencidos = $conexion->query("
+SELECT COUNT(*) total
+FROM tickets
+WHERE estatus IN ('Pendiente','En proceso')
+AND NOW() > DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)
+")->fetch_assoc()['total'] ?? 0;
+$backlogActual = $conexion->query("SELECT COUNT(*) total FROM tickets WHERE estatus IN ('Pendiente','En proceso')")->fetch_assoc()['total'] ?? 0;
+
+$antiguedadTickets = $conexion->query("
+SELECT
+    SUM(DATEDIFF(CURDATE(), DATE(fecha_creacion)) <= 1) AS hasta_un_dia,
+    SUM(DATEDIFF(CURDATE(), DATE(fecha_creacion)) BETWEEN 2 AND 3) AS dos_a_tres_dias,
+    SUM(DATEDIFF(CURDATE(), DATE(fecha_creacion)) BETWEEN 4 AND 7) AS cuatro_a_siete_dias,
+    SUM(DATEDIFF(CURDATE(), DATE(fecha_creacion)) > 7) AS mas_de_siete_dias
+FROM tickets
+WHERE estatus IN ('Pendiente','En proceso')
+")->fetch_assoc() ?: ['hasta_un_dia' => 0, 'dos_a_tres_dias' => 0, 'cuatro_a_siete_dias' => 0, 'mas_de_siete_dias' => 0];
+
 $ticketsAtendidos = $conexion->query("
 SELECT COUNT(*) total
 FROM tickets
@@ -61,15 +102,29 @@ AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
 
 /* ================= PROMEDIO ATENCION ================= */
 
-$promedioMin = $conexion->query("
-SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_resolucion)),2) promedio
+$tiemposResolucion = $conexion->query("
+SELECT TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_resolucion) minutos
 FROM tickets
 WHERE estatus='Finalizado'
 AND fecha_resolucion IS NOT NULL
-AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
-")->fetch_assoc()['promedio'] ?? 0;
+AND DATE(fecha_resolucion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
+");
+$muestrasResolucion = [];
+if ($tiemposResolucion) {
+    while ($muestra = $tiemposResolucion->fetch_assoc()) $muestrasResolucion[] = max(0, (int) $muestra['minutos']);
+}
+sort($muestrasResolucion, SORT_NUMERIC);
+$calcularPercentil = static function (array $valores, float $percentil): float {
+    $n = count($valores);
+    if ($n === 0) return 0;
+    $indice = (int) ceil($percentil * $n) - 1;
+    return (float) $valores[max(0, min($n - 1, $indice))];
+};
+$promedioMin = count($muestrasResolucion) > 0 ? array_sum($muestrasResolucion) / count($muestrasResolucion) : 0;
 
 $promedioHoras = round($promedioMin/60,2);
+$medianaHoras = round($calcularPercentil($muestrasResolucion, 0.50) / 60, 2);
+$percentil90Horas = round($calcularPercentil($muestrasResolucion, 0.90) / 60, 2);
 
 /* ================= LINEAS ================= */
 
@@ -95,10 +150,11 @@ GROUP BY estatus
 ");
 
 $ticketsPorDia = $conexion->query("
-SELECT DAY(fecha_creacion) dia, COUNT(*) total
+SELECT DATE(fecha_creacion) fecha, COUNT(*) total
 FROM tickets
 WHERE DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'
-GROUP BY DAY(fecha_creacion)
+GROUP BY DATE(fecha_creacion)
+ORDER BY DATE(fecha_creacion)
 ");
 
 $ticketsTipo = $conexion->query("
@@ -126,24 +182,48 @@ ORDER BY total DESC
 LIMIT 5
 ");
 
-/* ================= MES ANTERIOR ================= */
+$cargaResponsables = $conexion->query("
+SELECT COALESCE(NULLIF(u.nombre_completo, ''), NULLIF(t.asignado_a, ''), 'Sin asignar') responsable,
+       COUNT(*) abiertos,
+       SUM(NOW() > DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)) vencidos
+FROM tickets t
+LEFT JOIN usuarios u ON u.usuario = t.asignado_a
+WHERE t.estatus IN ('Pendiente','En proceso')
+GROUP BY t.asignado_a, u.nombre_completo
+ORDER BY abiertos DESC, responsable ASC
+LIMIT 8
+");
 
-$inicioMesAnterior = date('Y-m-01', strtotime('first day of last month'));
-$finMesAnterior    = date('Y-m-t', strtotime('last day of last month'));
+$mapaTicketsPorDia = [];
+if ($ticketsPorDia) {
+    while ($registroDia = $ticketsPorDia->fetch_assoc()) $mapaTicketsPorDia[$registroDia['fecha']] = (int) $registroDia['total'];
+}
+$labelsDias = [];
+$valoresDias = [];
+for ($dia = $fechaInicioObj; $dia <= $fechaFinObj; $dia = $dia->modify('+1 day')) {
+    $fechaDia = $dia->format('Y-m-d');
+    $labelsDias[] = $dia->format('d/m/Y');
+    $valoresDias[] = $mapaTicketsPorDia[$fechaDia] ?? 0;
+}
 
-$ticketsMesAnterior = $conexion->query("
+$ticketsEstadoDatos = $ticketsEstado ? $ticketsEstado->fetch_all(MYSQLI_ASSOC) : [];
+$ticketsTipoDatos = $ticketsTipo ? $ticketsTipo->fetch_all(MYSQLI_ASSOC) : [];
+
+/* ============ PERIODO ANTERIOR DE LA MISMA DURACION ============ */
+
+$ticketsPeriodoAnterior = $conexion->query("
 SELECT COUNT(*) total
 FROM tickets
-WHERE DATE(fecha_creacion) BETWEEN '$inicioMesAnterior' AND '$finMesAnterior'
+WHERE DATE(fecha_creacion) BETWEEN '$inicioAnteriorSql' AND '$finAnteriorSql'
 ")->fetch_assoc()['total'] ?? 0;
 
 /* ================= CRECIMIENTO ================= */
 
 $crecimiento = 0;
 
-if($ticketsMesAnterior > 0){
-    $crecimiento = round((($ticketsMes - $ticketsMesAnterior) / $ticketsMesAnterior) * 100, 2);
-}
+$crecimiento = $ticketsPeriodoAnterior > 0
+    ? round((($ticketsMes - $ticketsPeriodoAnterior) / $ticketsPeriodoAnterior) * 100, 2)
+    : ($ticketsMes > 0 ? null : 0);
 
 /* ================= CUMPLIMIENTO SLA ================= */
 
@@ -220,121 +300,25 @@ Exportar Excel
 </div>
 
 </form>
+<?php if ($rangoLimitado): ?><div class="alert alert-info py-2">El dashboard limita las consultas y la tendencia a un máximo de 366 días. El inicio del rango se ajustó para mantenerlo dentro de ese límite.</div><?php endif; ?>
 <div class="row g-4 mb-4">
-    
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-blue">📊</div>
-<div class="kpi-info">
-<span>Tickets del Mes pasado</span>
-<strong><?=$ticketsMesAnterior?></strong>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-blue">📊</div><div class="kpi-info"><span>Tickets periodo anterior (<?= $diasPeriodo ?> días)</span><strong><?= (int) $ticketsPeriodoAnterior ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-blue">📊</div><div class="kpi-info"><span>Tickets del periodo</span><strong><?= (int) $ticketsMes ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-orange">📈</div><div class="kpi-info"><span>Cambio vs. los <?= $diasPeriodo ?> días previos</span><strong class="<?= $crecimiento === null ? 'text-primary' : (($crecimiento >= 0) ? 'text-success':'text-danger') ?>"><?= $crecimiento === null ? 'Nuevo' : ((($crecimiento >= 0) ? '▲' : '▼') . ' ' . $crecimiento . '%') ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-green">✅</div><div class="kpi-info"><span>Finalizados de los creados</span><strong><?= $porcentajeCierre ?>%</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-yellow">⏳</div><div class="kpi-info"><span>Abiertos creados en el rango</span><strong><?= (int) $ticketsAbiertos ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-red">✖</div><div class="kpi-info"><span>Cancelados creados en el rango</span><strong><?= (int) $ticketsCancelados ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-green">✅</div><div class="kpi-info"><span>Resueltos en el periodo</span><strong><?= (int) $ticketsResueltosPeriodo ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-red">⚠️</div><div class="kpi-info"><span>Abiertos vencidos (SLA)</span><strong><?= (int) $ticketsVencidos ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-yellow">📂</div><div class="kpi-info"><span>Backlog actual</span><strong><?= (int) $backlogActual ?></strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-purple">⏱</div><div class="kpi-info"><span>Promedio de resolución</span><strong><?= $promedioHoras ?> hrs</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-purple">◉</div><div class="kpi-info"><span>Mediana de resolución</span><strong><?= $medianaHoras ?> hrs</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-orange kpi-percentile">P90</div><div class="kpi-info"><span>90% se resuelve en</span><strong><?= $percentil90Horas ?> hrs</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-green">⚡</div><div class="kpi-info"><span>SLA primera respuesta</span><strong><?= $slaRespuestaPorcentaje ?>%</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-orange">🛠</div><div class="kpi-info"><span>SLA de resolución</span><strong><?= $slaResolucionPorcentaje ?>%</strong></div></div></div>
+    <div class="col-12 col-md-6 col-xl-3"><div class="kpi"><div class="kpi-icon kpi-blue">📱</div><div class="kpi-info"><span>Líneas activas</span><strong><?= $porcentajeLineasActivas ?>%</strong></div></div></div>
 </div>
-</div>
-</div>
-
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-blue">📊</div>
-<div class="kpi-info">
-<span>Tickets del mes</span>
-<strong><?=$ticketsMes?></strong>
-</div>
-</div>
-</div>
-
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-green">✅</div>
-<div class="kpi-info">
-<span>% Finalizados</span>
-<strong><?=$porcentajeCierre?>%</strong>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-yellow">⏳</div>
-<div class="kpi-info">
-<span>Tickets Abiertos</span>
-<strong><?=$ticketsAbiertos?></strong>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-red">✖</div>
-<div class="kpi-info">
-<span>Tickets Cancelados</span>
-<strong><?=$ticketsCancelados?></strong>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-purple">⏱</div>
-<div class="kpi-info">
-<span>Promedio de resolución</span>
-<strong><?=$promedioHoras?> hrs</strong>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="kpi">
-
-<div class="kpi-icon kpi-orange">📈</div>
-
-<div class="kpi-info">
-<span>Crecimiento vs Mes Pasado</span>
-<strong class="<?= ($crecimiento > 0) ? 'text-success':'text-danger' ?>">
-    <?= ($crecimiento > 0) ? '▲' : '▼' ?> <?=$crecimiento?>%
-</strong>
-</div>
-
-</div>
-</div>
-
-
-<div class="col-md-3">
-<div class="kpi">
-
-<div class="kpi-icon kpi-green">⚡</div>
-
-<div class="kpi-info">
-<span>SLA primera respuesta</span>
-<strong><?=$slaRespuestaPorcentaje?>%</strong>
-</div>
-
-</div>
-</div>
-
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-orange">🛠</div>
-<div class="kpi-info">
-<span>SLA de resolución</span>
-<strong><?=$slaResolucionPorcentaje?>%</strong>
-</div>
-</div>
-</div>
-
-<div class="col-md-3">
-<div class="kpi">
-<div class="kpi-icon kpi-blue">📱</div>
-<div class="kpi-info">
-<span>% Líneas Activas</span>
-<strong><?=$porcentajeLineasActivas?>%</strong>
-</div>
-</div>
-</div>
-
-</div>
+<p class="small text-muted mb-4">Los SLA se calculan en tiempo corrido. Los tickets cerrados antes de registrar su fecha de resolución no se incluyen en el cumplimiento ni en los tiempos de resolución.</p>
 
 <div class="row g-4 mb-4">
 
@@ -358,7 +342,7 @@ Exportar Excel
 
 <div class="col-lg-4">
 <div class="card">
-<h6>Tickets por Día</h6>
+<h6>Tickets creados por fecha</h6>
 <div class="chart-wrap">
 <canvas id="gDias"></canvas>
 </div>
@@ -408,6 +392,29 @@ Exportar Excel
 
 </ul>
 
+</div>
+</div>
+
+<div class="col-lg-4">
+<div class="card">
+<h6>📚 Antigüedad de tickets abiertos</h6>
+<ul class="rank-list">
+<?php foreach ([['Hasta 1 día','hasta_un_dia'],['2 a 3 días','dos_a_tres_dias'],['4 a 7 días','cuatro_a_siete_dias'],['Más de 7 días','mas_de_siete_dias']] as [$etiqueta,$clave]): ?>
+<li><span><?= $etiqueta ?></span><strong><?= (int) ($antiguedadTickets[$clave] ?? 0) ?></strong></li>
+<?php endforeach; ?>
+</ul>
+</div>
+</div>
+
+<div class="col-lg-4">
+<div class="card">
+<h6>🧑‍💻 Carga actual por responsable</h6>
+<ul class="rank-list">
+<?php if (!$cargaResponsables || $cargaResponsables->num_rows === 0): ?><li><span>No hay tickets abiertos</span><strong>0</strong></li><?php endif; ?>
+<?php if ($cargaResponsables): while ($r = $cargaResponsables->fetch_assoc()): ?>
+<li><span><?= htmlspecialchars($r['responsable'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?><small class="d-block text-muted"><?= (int) $r['vencidos'] ?> vencidos</small></span><strong><?= (int) $r['abiertos'] ?></strong></li>
+<?php endwhile; endif; ?>
+</ul>
 </div>
 </div>
 
@@ -513,22 +520,12 @@ const chartTickets = new Chart(document.getElementById("gTickets"),{
 
     data:{
         labels:[
-            <?php
-            $ticketsEstado->data_seek(0);
-            while($r=$ticketsEstado->fetch_assoc()){
-                echo '"'.$r['estatus'].'",';
-            }
-            ?>
+            <?= json_encode(array_column($ticketsEstadoDatos, 'estatus'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
         ],
 
         datasets:[{
             data:[
-                <?php
-                $ticketsEstado->data_seek(0);
-                while($r=$ticketsEstado->fetch_assoc()){
-                    echo $r['total'].',';
-                }
-                ?>
+                <?= json_encode(array_map('intval', array_column($ticketsEstadoDatos, 'total'))) ?>
             ],
 
             backgroundColor:[
@@ -576,27 +573,13 @@ type:'bar',
 
 data:{
 
-labels:[
-<?php
-$ticketsTipo->data_seek(0);
-while($r=$ticketsTipo->fetch_assoc()){
-echo '"'.$r['tipo_ticket'].'",';
-}
-?>
-],
+labels: <?= json_encode(array_column($ticketsTipoDatos, 'tipo_ticket'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
 
 datasets:[{
 
 label:'Tickets',
 
-data:[
-<?php
-$ticketsTipo->data_seek(0);
-while($r=$ticketsTipo->fetch_assoc()){
-echo $r['total'].',';
-}
-?>
-],
+data: <?= json_encode(array_map('intval', array_column($ticketsTipoDatos, 'total'))) ?>,
 
 backgroundColor:'#3b82f6'
 
@@ -619,27 +602,13 @@ type:'line',
 
 data:{
 
-labels:[
-<?php
-$ticketsPorDia->data_seek(0);
-while($r=$ticketsPorDia->fetch_assoc()){
-echo $r['dia'].',';
-}
-?>
-],
+labels: <?= json_encode($labelsDias, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
 
 datasets:[{
 
 label:'Tickets',
 
-data:[
-<?php
-$ticketsPorDia->data_seek(0);
-while($r=$ticketsPorDia->fetch_assoc()){
-echo $r['total'].',';
-}
-?>
-],
+data: <?= json_encode($valoresDias) ?>,
 
 borderColor:'#8b5cf6',
 backgroundColor:'rgba(139,92,246,0.2)',
