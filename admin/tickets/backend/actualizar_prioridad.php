@@ -13,7 +13,7 @@ function responderPrioridad(int $status, string $mensaje): void
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') responderPrioridad(405, 'Método no permitido.');
-if (empty($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) responderPrioridad(403, 'No autorizado.');
+if (empty($_SESSION['logueado']) || !in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['admin', 'superadmin'], true) || !tieneModulo('tickets')) responderPrioridad(403, 'Solo admin y superadmin pueden cambiar la prioridad.');
 if (!validarTokenCsrf()) responderPrioridad(403, 'La sesión expiró. Recarga la página.');
 
 $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT) ?: 0;
@@ -30,24 +30,21 @@ $ticket = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 if (!$ticket) responderPrioridad(404, 'No se encontró el ticket.');
 
-$cerrado = in_array($ticket['estatus'], ['Finalizado', 'Cancelado'], true);
-if ($cerrado) {
-    // Conserva los objetivos SLA históricos para no alterar el resultado retrospectivo.
-    $stmt = $conexion->prepare('UPDATE tickets SET prioridad = ? WHERE id = ?');
-    $stmt->bind_param('si', $prioridad, $ticketId);
-} else {
-    $stmt = $conexion->prepare('SELECT respuesta_minutos, resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = ? LIMIT 1');
-    $stmt->bind_param('s', $prioridad);
-    $stmt->execute();
-    $objetivos = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    if (!$objetivos) responderPrioridad(500, 'No existe una política SLA para esa prioridad.');
-
-    $respuestaMinutos = (int) $objetivos['respuesta_minutos'];
-    $resolucionMinutos = (int) $objetivos['resolucion_minutos'];
-    $stmt = $conexion->prepare('UPDATE tickets SET prioridad = ?, objetivo_respuesta_minutos = ?, objetivo_resolucion_minutos = ? WHERE id = ?');
-    $stmt->bind_param('siii', $prioridad, $respuestaMinutos, $resolucionMinutos, $ticketId);
+if (in_array($ticket['estatus'], ['Finalizado', 'Cerrado', 'Cancelado'], true)) {
+    responderPrioridad(409, 'No se puede cambiar la prioridad de un ticket cerrado.');
 }
+
+$stmt = $conexion->prepare('SELECT respuesta_minutos, resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = ? LIMIT 1');
+$stmt->bind_param('s', $prioridad);
+$stmt->execute();
+$objetivos = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if (!$objetivos) responderPrioridad(500, 'No existe una política SLA para esa prioridad.');
+
+$respuestaMinutos = (int) $objetivos['respuesta_minutos'];
+$resolucionMinutos = (int) $objetivos['resolucion_minutos'];
+$stmt = $conexion->prepare('UPDATE tickets SET prioridad = ?, objetivo_respuesta_minutos = ?, objetivo_resolucion_minutos = ? WHERE id = ?');
+$stmt->bind_param('siii', $prioridad, $respuestaMinutos, $resolucionMinutos, $ticketId);
 
 if (!$stmt->execute()) responderPrioridad(500, 'No se pudo guardar la prioridad.');
 $stmt->close();

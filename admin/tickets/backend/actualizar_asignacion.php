@@ -13,7 +13,7 @@ function responderAsignacion(int $status, string $mensaje): void
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') responderAsignacion(405, 'Método no permitido.');
-if (empty($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) responderAsignacion(403, 'No autorizado.');
+if (empty($_SESSION['logueado']) || !in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['admin', 'superadmin'], true) || !tieneModulo('tickets')) responderAsignacion(403, 'Solo admin y superadmin pueden cambiar la prioridad.');
 if (!validarTokenCsrf()) responderAsignacion(403, 'La sesión expiró. Recarga la página.');
 
 $ticketId = filter_input(INPUT_POST, 'ticket_id', FILTER_VALIDATE_INT) ?: 0;
@@ -36,12 +36,16 @@ if ($asignado !== '') {
     if (!$puedeAtenderTickets) responderAsignacion(422, 'El responsable debe tener acceso al módulo de tickets.');
 }
 
-$stmtTicket = $conexion->prepare('SELECT asignado_a, prioridad FROM tickets WHERE id = ? LIMIT 1');
+$stmtTicket = $conexion->prepare('SELECT asignado_a, prioridad, estatus FROM tickets WHERE id = ? LIMIT 1');
 $stmtTicket->bind_param('i', $ticketId);
 $stmtTicket->execute();
 $ticketActual = $stmtTicket->get_result()->fetch_assoc();
 $stmtTicket->close();
 if (!$ticketActual) responderAsignacion(404, 'No se encontró el ticket.');
+if (in_array($ticketActual['estatus'], ['Finalizado', 'Cerrado', 'Cancelado'], true)
+    && (string) ($ticketActual['prioridad'] ?? 'Normal') !== $prioridad) {
+    responderAsignacion(409, 'No se puede cambiar la prioridad de un ticket cerrado.');
+}
 
 $stmt = $conexion->prepare('SELECT respuesta_minutos, resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = ?');
 $stmt->bind_param('s', $prioridad);

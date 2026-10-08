@@ -273,7 +273,7 @@ function claseTipoTicket($tipo) {
                                 $comSeguro = (string)($f['comentario_admin'] ?? '');
                                 $textoHTML = nl2br(htmlspecialchars(trim($descSegura)));
                                 $comentarioHTML = nl2br(htmlspecialchars(trim($comSeguro)));
-                                $esFinalizado = in_array($f['estatus'], ['Finalizado', 'Cancelado']);
+                                $esFinalizado = in_array($f['estatus'], ['Finalizado', 'Cerrado', 'Cancelado'], true);
                                 // Umbrales para decidir si mostramos "Ver más" (texto largo o con varias líneas/lista)
                                 $descLineas = substr_count(trim($descSegura), "\n") + 1;
                                 $descLarga = (mb_strlen(trim($descSegura)) > 120) || ($descLineas > 3);
@@ -330,11 +330,9 @@ function claseTipoTicket($tipo) {
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <span><?= htmlspecialchars($f['asignado_a'] ?? 'Sin asignar') ?></span><br>
-                                        <select class="form-select form-select-sm ticket-prioridad" data-prioridad-guardada="<?= htmlspecialchars($f['prioridad'] ?? 'Normal', ENT_QUOTES, 'UTF-8') ?>" aria-label="Prioridad del ticket">
-                                            <?php foreach (['Baja','Normal','Alta','Urgente'] as $prioridad): ?>
-                                                <option value="<?= $prioridad ?>" <?= ($f['prioridad'] ?? 'Normal') === $prioridad ? 'selected' : '' ?>><?= $prioridad ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <span class="badge bg-secondary" title="La prioridad no se puede cambiar cuando el ticket está cerrado">
+                                            <?= htmlspecialchars($f['prioridad'] ?? 'Normal') ?> · Cerrado
+                                        </span>
                                     <?php endif; ?>
                                 </td>
 
