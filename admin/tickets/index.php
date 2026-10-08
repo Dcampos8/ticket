@@ -195,12 +195,21 @@ function claseTipoTicket($tipo) {
         color: var(--ink);
     }
 
+    /* El listado usa todo el ancho útil de la ventana, sin el límite Bootstrap de .container. */
+    .container.px-4.mb-5 {
+        width: 100%;
+        max-width: none;
+        padding-left: clamp(12px, 1.5vw, 28px) !important;
+        padding-right: clamp(12px, 1.5vw, 28px) !important;
+    }
+
     .table-container-custom {
-        padding: 28px clamp(12px, 3vw, 32px);
+        width: 100%;
+        padding: 24px 0;
         min-height: calc(100vh - 85px);
         animation: fadeIn 0.5s ease-in-out;
-        max-width: 1600px;
-        margin: 0 auto;
+        max-width: none;
+        margin: 0;
     }
 
     /* Encabezado */
@@ -340,6 +349,9 @@ function claseTipoTicket($tipo) {
         background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(10px);
         box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06) !important;
+    }
+    .table-card > .table-responsive {
+        padding: 8px !important;
     }
 
     /* Estilos de Tabla */
