@@ -1,8 +1,9 @@
-/* Estilos extraídos de login.php */`r`n`r`n:root {
-      --primary-color: var(--tv-navy, #1e3a8a);
-      --primary-color-dark: var(--tv-navy-dark, #172554);
-      --accent-color: var(--tv-red, #e31e24);
-      --background-color: #f1f5f9;
+/* Estilos de la pantalla de acceso */
+:root {
+      --primary-color: #ed1c24;
+      --primary-color-dark: #c81019;
+      --accent-color: #ed1c24;
+      --background-color: #f4f4f5;
       --input-bg: #f8fafc;
       --text-color: #1e293b;
       --error-bg: #fdeceb;
@@ -17,7 +18,7 @@
     body {
       margin: 0;
       font-family: var(--tv-font, 'Inter', 'Segoe UI', sans-serif);
-      background: #172033;
+      background: #373739;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -126,13 +127,24 @@
       box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
     }
 
+    .login-container button[type="submit"] {
+      background-color: #ed1c24;
+      color: #fff;
+    }
+
     button:hover {
+      background-color: #c81019;
       transform: translateY(-1px);
       box-shadow: 0 6px 14px rgba(30, 58, 138, 0.25);
     }
 
     button:active {
       transform: translateY(0);
+    }
+
+    button:focus-visible {
+      outline: 3px solid rgba(237, 28, 36, .35);
+      outline-offset: 3px;
     }
 
     .error-msg {
