@@ -365,10 +365,25 @@ function claseTipoTicket($tipo) {
     }
     .table-card > .table-responsive {
         padding: 8px !important;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #aab3c2 #eef1f5;
     }
 
     /* Estilos de Tabla */
-    .table { margin-bottom: 0; }
+    .table { margin-bottom: 0; min-width: 1480px; table-layout: fixed; }
+    .table th:nth-child(1), .table td:nth-child(1) { width: 64px; }
+    .table th:nth-child(2), .table td:nth-child(2) { width: 140px; }
+    .table th:nth-child(3), .table td:nth-child(3) { width: 180px; }
+    .table th:nth-child(4), .table td:nth-child(4) { width: 260px; }
+    .table th:nth-child(5), .table td:nth-child(5) { width: 155px; }
+    .table th:nth-child(6), .table td:nth-child(6) { width: 210px; }
+    .table th:nth-child(7), .table td:nth-child(7),
+    .table th:nth-child(8), .table td:nth-child(8) { width: 82px; }
+    .table th:nth-child(9), .table td:nth-child(9) { width: 130px; }
+    .table th:nth-child(10), .table td:nth-child(10) { width: 130px; }
+    .table th:nth-child(11), .table td:nth-child(11) { width: 260px; }
+    .table th:nth-child(12), .table td:nth-child(12) { width: 180px; }
     .table thead th {
         background: var(--ink) !important;
         color: #ffffff;
@@ -386,6 +401,7 @@ function claseTipoTicket($tipo) {
         padding: 13px 14px;
         vertical-align: middle;
         border-bottom: 1px solid var(--line);
+        overflow-wrap: anywhere;
     }
     .table tbody tr { transition: background-color 0.2s ease; }
     .table tbody tr:last-child td { border-bottom: none; }
@@ -413,7 +429,7 @@ function claseTipoTicket($tipo) {
         text-transform: uppercase;
         letter-spacing: 0.3px;
     }
-    .nombre-usuario { font-weight: 600; color: var(--ink); }
+    .nombre-usuario { font-weight: 600; color: var(--ink); line-height: 1.35; }
 
     .tipo-badge {
         display: inline-block;
@@ -474,6 +490,7 @@ function claseTipoTicket($tipo) {
         white-space: pre-line;
         transition: max-height 0.25s ease;
     }
+    .desc-text, .comentario-text { min-width: 220px; min-height: 64px; resize: vertical; line-height: 1.4; }
     .texto-clamp.expandido { max-height: 1000px; }
     .btn-ver-mas {
         display: inline-block;
@@ -563,6 +580,8 @@ function claseTipoTicket($tipo) {
         .filtros-acciones { width: 100%; }
         .filtros-acciones .btn-filtrar,
         .filtros-acciones .btn-limpiar { flex: 1; text-align: center; }
+        .table-card > .table-responsive { padding: 4px !important; }
+        .table thead th, .table tbody td { padding: 10px 11px; }
     }
 </style>
 <div class="container px-4 mb-5" style="margin-top:0;">
@@ -643,6 +662,7 @@ function claseTipoTicket($tipo) {
 
         <div class="table-card">
             <div class="table-responsive p-3">
+                <div class="small text-muted px-2 pb-2 d-lg-none"><i class="fas fa-arrows-left-right me-1"></i>Desliza horizontalmente para ver todas las columnas.</div>
                 <table id="tablaTickets" class="table table-hover align-middle">
                     <thead>
                         <tr>
