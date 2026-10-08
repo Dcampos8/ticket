@@ -3,6 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../../shared/permisos.php';
 require_once __DIR__ . '/../../../shared/security.php';
+require_once __DIR__ . '/../../../shared/ticket_activity.php';
 
 function responderAsignacion(int $status, string $mensaje): void
 {
@@ -35,12 +36,12 @@ if ($asignado !== '') {
     if (!$puedeAtenderTickets) responderAsignacion(422, 'El responsable debe tener acceso al módulo de tickets.');
 }
 
-$stmtTicket = $conexion->prepare('SELECT 1 FROM tickets WHERE id = ? LIMIT 1');
+$stmtTicket = $conexion->prepare('SELECT asignado_a, prioridad FROM tickets WHERE id = ? LIMIT 1');
 $stmtTicket->bind_param('i', $ticketId);
 $stmtTicket->execute();
-$ticketExiste = (bool) $stmtTicket->get_result()->fetch_row();
+$ticketActual = $stmtTicket->get_result()->fetch_assoc();
 $stmtTicket->close();
-if (!$ticketExiste) responderAsignacion(404, 'No se encontró el ticket.');
+if (!$ticketActual) responderAsignacion(404, 'No se encontró el ticket.');
 
 $stmt = $conexion->prepare('SELECT respuesta_minutos, resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = ?');
 $stmt->bind_param('s', $prioridad);
@@ -55,5 +56,12 @@ $resolucionMinutos = (int) $objetivos['resolucion_minutos'];
 $stmt->bind_param('ssiii', $asignado, $prioridad, $respuestaMinutos, $resolucionMinutos, $ticketId);
 if (!$stmt->execute() || $stmt->affected_rows < 0) responderAsignacion(500, 'No se pudo guardar la asignación.');
 $stmt->close();
+$responsableAnterior = (string) ($ticketActual['asignado_a'] ?? '');
+$prioridadAnterior = (string) ($ticketActual['prioridad'] ?? 'Normal');
+if ($responsableAnterior !== $asignado || $prioridadAnterior !== $prioridad) {
+    $detalle = 'Responsable: ' . ($responsableAnterior !== '' ? $responsableAnterior : 'Sin asignar') . ' → ' . ($asignado !== '' ? $asignado : 'Sin asignar')
+        . '; prioridad: ' . $prioridadAnterior . ' → ' . $prioridad . '.';
+    registrarActividadTicket($conexion, $ticketId, 'asignacion', $detalle, false);
+}
 $conexion->close();
 responderAsignacion(200, 'Asignación y prioridad guardadas.');

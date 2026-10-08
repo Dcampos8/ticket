@@ -2,6 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 require_once '../../../shared/security.php';
+require_once '../../../shared/ticket_activity.php';
 
 if (!isset($_SESSION['logueado'])) {
     http_response_code(403);
@@ -52,6 +53,7 @@ if ($stmt->execute()) {
         $respuesta->bind_param('i', $ticket_id);
         $respuesta->execute();
         $respuesta->close();
+        registrarActividadTicket($conexion, $ticket_id, 'chat', 'Respondió en el chat del ticket.');
     }
     echo json_encode(['status' => 'ok']);
 } else {

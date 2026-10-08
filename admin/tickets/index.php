@@ -313,7 +313,7 @@ function claseTipoTicket($tipo) {
                                                 <option value="<?= htmlspecialchars($usuarioSoporte['usuario'], ENT_QUOTES, 'UTF-8') ?>" <?= ($f['asignado_a'] ?? '') === $usuarioSoporte['usuario'] ? 'selected' : '' ?>><?= htmlspecialchars($usuarioSoporte['nombre_completo'] ?: $usuarioSoporte['usuario']) ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <select class="form-select form-select-sm ticket-prioridad" aria-label="Prioridad del ticket">
+                                        <select class="form-select form-select-sm ticket-prioridad" data-prioridad-guardada="<?= htmlspecialchars($f['prioridad'] ?? 'Normal', ENT_QUOTES, 'UTF-8') ?>" aria-label="Prioridad del ticket">
                                             <?php foreach (['Baja','Normal','Alta','Urgente'] as $prioridad): ?>
                                                 <option value="<?= $prioridad ?>" <?= ($f['prioridad'] ?? 'Normal') === $prioridad ? 'selected' : '' ?>><?= $prioridad ?></option>
                                             <?php endforeach; ?>
@@ -330,7 +330,11 @@ function claseTipoTicket($tipo) {
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <span><?= htmlspecialchars($f['asignado_a'] ?? 'Sin asignar') ?></span><br>
-                                        <span class="badge bg-light text-dark"><?= htmlspecialchars($f['prioridad'] ?? 'Normal') ?></span>
+                                        <select class="form-select form-select-sm ticket-prioridad" data-prioridad-guardada="<?= htmlspecialchars($f['prioridad'] ?? 'Normal', ENT_QUOTES, 'UTF-8') ?>" aria-label="Prioridad del ticket">
+                                            <?php foreach (['Baja','Normal','Alta','Urgente'] as $prioridad): ?>
+                                                <option value="<?= $prioridad ?>" <?= ($f['prioridad'] ?? 'Normal') === $prioridad ? 'selected' : '' ?>><?= $prioridad ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     <?php endif; ?>
                                 </td>
 
@@ -411,6 +415,9 @@ function claseTipoTicket($tipo) {
 
                                 <!-- Acciones -->
                                 <td>
+                                    <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0 me-2" title="Ver quién atendió y qué cambios hizo">
+                                        <i class="fas fa-user-clock"></i>
+                                    </button>
                                     <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -476,6 +483,19 @@ function claseTipoTicket($tipo) {
         </div>
     </div>
     </div>
+    <div class="modal fade" id="actividadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title"><i class="fas fa-user-clock me-2"></i>Actividad y responsables</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="actividadBody">
+            <p class="text-muted text-center mb-0">Cargando...</p>
+        </div>
+        </div>
+    </div>
+    </div>
 </div>
 <!-- Scripts (Única inclusión limpia) -->
 <script>
@@ -535,6 +555,41 @@ function verHistorial(id) {
         }
     });
 }
+function verActividad(id) {
+    const modal = new bootstrap.Modal(document.getElementById('actividadModal'));
+    const etiquetasAccion = {
+        creacion: 'Creación', chat: 'Chat', comentario: 'Comentario', estatus: 'Cambio de estatus',
+        descripcion: 'Edición de descripción', asignacion: 'Asignación', prioridad: 'Cambio de prioridad', adjunto: 'Adjunto'
+    };
+    $('#actividadBody').html('<p class="text-muted text-center mb-0">Cargando actividad...</p>');
+    modal.show();
+    $.ajax({
+        url: 'backend/obtener_actividad.php',
+        data: { ticket_id: id },
+        dataType: 'json',
+        success: function(r) {
+            if (r.status === 'ok' && r.actividad.length > 0) {
+                let html = '';
+                r.actividad.forEach(function(item) {
+                    html += '<div class="historial-item">'
+                        + '<div class="d-flex justify-content-between gap-2">'
+                        + '<span class="historial-admin">' + escapeHtml(item.actor_nombre) + '</span>'
+                        + '<span class="historial-fecha">' + escapeHtml(item.fecha_fmt) + '</span>'
+                        + '</div>'
+                        + '<div class="small text-muted">@' + escapeHtml(item.actor_usuario) + ' · ' + escapeHtml(etiquetasAccion[item.accion] || item.accion) + '</div>'
+                        + '<div class="historial-texto">' + escapeHtml(item.detalle || 'Interacción registrada.') + '</div>'
+                        + '</div>';
+                });
+                $('#actividadBody').html(html);
+            } else {
+                $('#actividadBody').html('<p class="text-muted text-center mb-0">Aún no hay actividad registrada.</p>');
+            }
+        },
+        error: function() {
+            $('#actividadBody').html('<p class="text-danger text-center mb-0">No se pudo cargar la actividad.</p>');
+        }
+    });
+}
 $(document).ready(function() {
     function guardarAsignacion(select) {
         const fila = select.closest('tr');
@@ -546,7 +601,26 @@ $(document).ready(function() {
             error: function(xhr) { alert(xhr.responseJSON?.message || 'No se pudo guardar responsable y prioridad.'); }
         });
     }
-    $(document).on('change', '.ticket-responsable, .ticket-prioridad', function() { guardarAsignacion($(this)); });
+    function guardarPrioridad(select) {
+        const fila = select.closest('tr');
+        const prioridadAnterior = select.data('prioridad-guardada') || select.val();
+        fila.addClass('saving-row');
+        $.ajax({
+            url: 'backend/actualizar_prioridad.php', type: 'POST', dataType: 'json',
+            data: { ticket_id: fila.data('id'), prioridad: select.val(), csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            success: function() {
+                select.data('prioridad-guardada', select.val()).addClass('is-valid');
+                setTimeout(() => select.removeClass('is-valid'), 1200);
+            },
+            error: function(xhr) {
+                select.val(prioridadAnterior);
+                alert(xhr.responseJSON?.message || 'No se pudo guardar la prioridad.');
+            },
+            complete: function() { fila.removeClass('saving-row'); }
+        });
+    }
+    $(document).on('change', '.ticket-responsable', function() { guardarAsignacion($(this)); });
+    $(document).on('change', '.ticket-prioridad', function() { guardarPrioridad($(this)); });
     // 1. ACTUALIZAR ESTATUS
     $(document).on('change', '.estatus', function() {
         let select = $(this);

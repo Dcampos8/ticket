@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 header('Content-Type: application/json');
 require_once __DIR__ . '/../../../shared/permisos.php';
 require_once __DIR__ . '/../../../shared/security.php';
+require_once __DIR__ . '/../../../shared/ticket_activity.php';
 
 // Verificar sesión y rol
 if (empty($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) {
@@ -66,6 +67,8 @@ $stmt->close();
 
 $nueva_descripcion = $descripcion !== null ? $descripcion : $ticket['descripcion'];
 $nuevo_estatus = $estatus !== null ? $estatus : $ticket['estatus'];
+$cambioEstatus = $nuevo_estatus !== $ticket['estatus'];
+$cambioDescripcion = $nueva_descripcion !== $ticket['descripcion'];
 $fecha_actualizacion = date('Y-m-d H:i:s');
 
 $updateQuery = "UPDATE tickets
@@ -85,6 +88,12 @@ $stmt->bind_param("ssssssssi", $nueva_descripcion, $nuevo_estatus, $fecha_actual
     $nuevo_estatus, $fecha_actualizacion, $nuevo_estatus, $fecha_actualizacion, $nuevo_estatus, $id);
 
 if ($stmt->execute()) {
+    if ($cambioEstatus) {
+        registrarActividadTicket($conexion, $id, 'estatus', 'Cambió el estatus de ' . $ticket['estatus'] . ' a ' . $nuevo_estatus . '.');
+    }
+    if ($cambioDescripcion) {
+        registrarActividadTicket($conexion, $id, 'descripcion', 'Editó la descripción del ticket.');
+    }
     // Si el estatus cambia a Finalizado o Cerrado
     if ($nuevo_estatus === 'Finalizado' || $nuevo_estatus === 'Cerrado') {
         $stmt_t = $conexion->prepare("SELECT nombre FROM tickets WHERE id = ? LIMIT 1");

@@ -4,6 +4,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once '../../../backend/conexion.php';
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
+require_once '../../../shared/ticket_activity.php';
 $conexion->set_charset('utf8mb4');
 date_default_timezone_set('America/Mexico_City');
 
@@ -153,5 +154,6 @@ if (!$stmt->execute()) {
 
 $ticketId = $stmt->insert_id;
 $stmt->close();
+registrarActividadTicket($conexion, $ticketId, 'creacion', 'Ticket creado desde el panel de administración.', false);
 $conexion->close();
 echo json_encode(['status' => 'ok', 'ticketId' => $ticketId], JSON_UNESCAPED_UNICODE);

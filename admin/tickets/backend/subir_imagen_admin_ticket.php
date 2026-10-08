@@ -3,6 +3,7 @@ session_start();
 include '../../../backend/conexion.php';
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
+require_once '../../../shared/ticket_activity.php';
 
 // Verificar que sea admin o superadmin
 if (!isset($_SESSION['logueado']) || !esAdminOSuperior() || !tieneModulo('tickets')) {
@@ -51,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['imagen_admin']) && i
                 http_response_code(404);
                 exit('Ticket no encontrado.');
             }
+            registrarActividadTicket($conexion, $ticket_id, 'adjunto', 'Adjuntó una imagen de soporte.');
             header("Location: ../index.php?success=1");
             exit();
         } else {

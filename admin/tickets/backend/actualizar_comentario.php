@@ -3,6 +3,7 @@ session_start();
 include '../../../backend/conexion.php';
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
+require_once '../../../shared/ticket_activity.php';
 
 header('Content-Type: application/json');
 
@@ -71,6 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtHist->bind_param("iss", $ticket_id, $admin, $comentario);
             $stmtHist->execute();
             $stmtHist->close();
+        }
+        if ($comentario !== $comentarioAnterior) {
+            registrarActividadTicket($conexion, $ticket_id, 'comentario', 'Actualizó la respuesta del ticket.');
         }
 
         echo json_encode(['status' => 'ok']);
