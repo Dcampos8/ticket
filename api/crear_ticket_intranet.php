@@ -26,7 +26,8 @@ if ($contentLength < 1 || $contentLength > 20000) {
 }
 
 require_once __DIR__ . '/../config/env.php';
-$secret = trim((string) env('INTRANET_TICKET_API_SECRET', ''));
+require_once __DIR__ . '/../shared/integration_settings.php';
+$secret = trim((string) obtenerConfiguracionIntegracion('INTRANET_TICKET_API_SECRET', ''));
 if (strlen($secret) < 32) {
     error_log('API intranet tickets: falta configurar INTRANET_TICKET_API_SECRET (mínimo 32 caracteres).');
     responderApi(503, ['status' => 'error', 'error' => 'La integración con la intranet no está configurada en el servidor.']);

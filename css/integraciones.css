@@ -1,0 +1,7 @@
+.integrations-page { max-width: 1440px; margin: 0 auto; padding-top: 6rem !important; color: #263244; }
+.integration-card { border: 1px solid #e2e5e9; border-radius: 14px; box-shadow: 0 5px 20px rgba(31, 41, 55, .06); }
+.integration-card .card-body { padding: 1.5rem; }
+.integration-card h2 { color: #303236; font-weight: 700; }
+.integration-form .form-control { min-height: 44px; border-color: #d6d9df; }
+.integration-form .form-control:focus { border-color: #ed1c24; box-shadow: 0 0 0 .2rem rgba(237, 28, 36, .15); }
+@media (max-width: 768px) { .integrations-page { padding: 5.5rem 1rem 1rem !important; } .integration-card .card-body { padding: 1rem; } }

@@ -11,8 +11,8 @@ if (!defined('ROOT_PATH')) {
 
 // 2. URL Base
 if (!defined('BASE_URL')) {
-    require_once __DIR__ . '/config/env.php';
-    $baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
+    require_once __DIR__ . '/shared/integration_settings.php';
+    $baseUrl = rtrim((string) obtenerConfiguracionIntegracion('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
     define('BASE_URL', $baseUrl);
 }
 

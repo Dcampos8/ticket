@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../shared/integration_settings.php';
 require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirAdmin();
@@ -13,9 +14,9 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/config/env.php');
 set_time_limit(300);
 ini_set('memory_limit', '512M');
 
-$hostname = '{imap.hostinger.com:993/imap/ssl}INBOX';
-$username = env('MAIL_SISTEMAS_USER');
-$password = env('MAIL_SISTEMAS_PASS');
+$hostname = obtenerConfiguracionIntegracion('MAIL_SISTEMAS_HOST', '{imap.hostinger.com:993/imap/ssl}INBOX');
+$username = obtenerConfiguracionIntegracion('MAIL_SISTEMAS_USER');
+$password = obtenerConfiguracionIntegracion('MAIL_SISTEMAS_PASS');
 
 $uploadDir = __DIR__ . '/correos_adjuntos/';
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../shared/integration_settings.php';
 // 1. CONFIGURACIÓN DE ERRORES Y LIBRERÍAS
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -108,8 +109,8 @@ try {
     $mail->Host       = 'smtp.hostinger.com'; 
     $mail->SMTPAuth   = true;
     require_once(__DIR__ . '/../../../config/env.php');
-    $mail->Username   = env('MAIL_MENSAJERIA_USER');
-    $mail->Password   = env('MAIL_MENSAJERIA_PASS');           
+    $mail->Username   = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_USER');
+    $mail->Password   = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_PASS');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
     $mail->Port       = 465;
     $mail->CharSet    = 'UTF-8';

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require('../../../backend/conexion.php');
+require_once __DIR__ . '/../../../shared/integration_settings.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -77,16 +78,15 @@ if (mysqli_stmt_execute($stmt)) {
         require_once(__DIR__ . '../../../backend/PHPMailer/src/Exception.php');
         require_once(__DIR__ . '../../../backend/PHPMailer/src/PHPMailer.php');
         require_once(__DIR__ . '../../../backend/PHPMailer/src/SMTP.php');
-        require_once(__DIR__ . '../../../config/env.php');
 
         try {
             $mail = new PHPMailer\PHPMailer\PHPMailer(true);
             $mail->isSMTP();
             $mail->CharSet = 'UTF-8';
-            $mail->Host = env('MAIL_MENSAJERIA_HOST');
+            $mail->Host = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_HOST');
             $mail->SMTPAuth = true;
-            $mail->Username = env('MAIL_MENSAJERIA_USER');
-            $mail->Password = env('MAIL_MENSAJERIA_PASS');
+            $mail->Username = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_USER');
+            $mail->Password = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_PASS');
             $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port = 465;
 
@@ -104,7 +104,7 @@ if (mysqli_stmt_execute($stmt)) {
                 <p><b>Calificación:</b> $calificacion / 5</p>
                 <p><b>¿Resuelto?:</b> $resuelto</p>
                 <p><b>Comentarios:</b> " . nl2br(htmlspecialchars($comentarios ?: 'Sin comentarios')) . "</p>
-                <p><a href='" . env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/') . "admin/calificaciones/calificaciones.php'>Ver todas las calificaciones</a></p>
+                <p><a href='" . obtenerConfiguracionIntegracion('APP_BASE_URL', 'https://ticket.transportesvaladez.com/') . "admin/calificaciones/calificaciones.php'>Ver todas las calificaciones</a></p>
             ";
             $mail->send();
         } catch (Exception $e) {

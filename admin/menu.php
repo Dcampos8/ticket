@@ -176,6 +176,9 @@ function checkActive($target, $currentUri, $dropdowns = []) {
             <?php if (tieneModulo('avisos')): ?>
             <li><a class="dropdown-item" href="<?= BASE_URL ?>admin/avisos/gestionar_aviso.php"><i class="fas fa-bullhorn"></i> Gestionar Avisos</a></li>
             <?php endif; ?>
+            <?php if (esSuperAdmin()): ?>
+            <li><a class="dropdown-item" href="<?= BASE_URL ?>admin/integraciones/"><i class="fas fa-plug"></i> Conexiones e integraciones</a></li>
+            <?php endif; ?>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger fw-bold" href="<?= BASE_URL ?>core/logout.php"><i class="fas fa-power-off"></i> Salir</a></li>
           </ul>

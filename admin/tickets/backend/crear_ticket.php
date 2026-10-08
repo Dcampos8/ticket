@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../../shared/security.php';
+require_once __DIR__ . '/../../../shared/integration_settings.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -112,7 +113,7 @@ function clasificarSolicitud(string $descripcion): ?array
     $prioridades = ['Baja', 'Normal', 'Alta', 'Urgente'];
 
     require_once __DIR__ . '/../../../config/env.php';
-    $apiKey = trim((string) env('GEMINI_API_KEY', ''));
+    $apiKey = trim((string) obtenerConfiguracionIntegracion('GEMINI_API_KEY', ''));
     if ($apiKey === '') {
         error_log('Clasificación IA: GEMINI_API_KEY no está configurada en el entorno del servidor.');
         $GLOBALS['gemini_classification_issue'] = 'Falta configurar GEMINI_API_KEY en el .env del servidor.';
@@ -124,7 +125,7 @@ function clasificarSolicitud(string $descripcion): ?array
         return null;
     }
 
-    $model = trim((string) env('GEMINI_MODEL', '')) ?: 'gemini-3.5-flash-lite';
+    $model = trim((string) obtenerConfiguracionIntegracion('GEMINI_MODEL', '')) ?: 'gemini-3.5-flash-lite';
     $payload = [
             'systemInstruction' => [
                 'parts' => [[
@@ -281,7 +282,7 @@ if (!$guardado) {
 }
 $ticketId = $stmt->insert_id;
 $escapeHtml = static fn(string $valor): string => htmlspecialchars($valor, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$baseUrl = rtrim((string) env('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
+$baseUrl = rtrim((string) obtenerConfiguracionIntegracion('APP_BASE_URL', 'https://ticket.transportesvaladez.com/'), '/') . '/';
 $urlImagen = $nombre_imagen !== null ? $baseUrl . 'uploads/' . rawurlencode($nombre_imagen) : '';
 
 // ===============================
@@ -292,10 +293,10 @@ try {
     $mail->isSMTP();
     $mail->CharSet = 'UTF-8';
     require_once(__DIR__ . '/../../../config/env.php');
-    $mail->Host = env('MAIL_MENSAJERIA_HOST');
+    $mail->Host = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_HOST');
     $mail->SMTPAuth = true;
-    $mail->Username = env('MAIL_MENSAJERIA_USER');
-    $mail->Password = env('MAIL_MENSAJERIA_PASS');
+    $mail->Username = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_USER');
+    $mail->Password = obtenerConfiguracionIntegracion('MAIL_MENSAJERIA_PASS');
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
     $mail->Port = 465;
 
@@ -327,8 +328,8 @@ try {
 // ✈️ ENVÍO A TELEGRAM
 // ===============================
 require_once(__DIR__ . '/../../../config/env.php');
-$botToken = env('TELEGRAM_BOT_TOKEN');
-$chatId   = env('TELEGRAM_CHAT_ID');
+$botToken = obtenerConfiguracionIntegracion('TELEGRAM_BOT_TOKEN');
+$chatId   = obtenerConfiguracionIntegracion('TELEGRAM_CHAT_ID');
 
 // Construir el mensaje con formato HTML
 $mensajeTelegram = "📝 <b>NUEVO TICKET REPORTE #{$ticketId}</b>\n\n"
