@@ -208,6 +208,14 @@ for ($dia = $fechaInicioObj; $dia <= $fechaFinObj; $dia = $dia->modify('+1 day')
 
 $ticketsEstadoDatos = $ticketsEstado ? $ticketsEstado->fetch_all(MYSQLI_ASSOC) : [];
 $ticketsTipoDatos = $ticketsTipo ? $ticketsTipo->fetch_all(MYSQLI_ASSOC) : [];
+$coloresEstatus = array_map(static function ($estatus) {
+    return [
+        'Pendiente' => '#f59e0b',
+        'En proceso' => '#3b82f6',
+        'Finalizado' => '#22c55e',
+        'Cancelado' => '#ef4444',
+    ][$estatus] ?? '#64748b';
+}, array_column($ticketsEstadoDatos, 'estatus'));
 
 /* ============ PERIODO ANTERIOR DE LA MISMA DURACION ============ */
 
@@ -523,22 +531,12 @@ const chartTickets = new Chart(document.getElementById("gTickets"),{
     type:'doughnut',
 
     data:{
-        labels:[
-            <?= json_encode(array_column($ticketsEstadoDatos, 'estatus'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>
-        ],
+        labels: <?= json_encode(array_column($ticketsEstadoDatos, 'estatus'), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
 
         datasets:[{
-            data:[
-                <?= json_encode(array_map('intval', array_column($ticketsEstadoDatos, 'total'))) ?>
-            ],
+            data: <?= json_encode(array_map('intval', array_column($ticketsEstadoDatos, 'total'))) ?>,
 
-            backgroundColor:[
-                '#22c55e',
-                '#f59e0b',
-                '#ef4444',
-                '#3b82f6',
-                '#8b5cf6'
-            ],
+            backgroundColor: <?= json_encode($coloresEstatus) ?>,
 
             hoverOffset:15
         }]
