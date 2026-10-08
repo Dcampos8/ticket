@@ -323,7 +323,7 @@ Exportar Excel
 <div class="row g-4 mb-4">
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 <h6>Tickets por Estatus</h6>
 <div class="chart-wrap">
 <canvas id="gTickets"></canvas>
@@ -332,7 +332,7 @@ Exportar Excel
 </div>
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 <h6>Tickets por Tipo</h6>
 <div class="chart-wrap">
 <canvas id="gTipos"></canvas>
@@ -341,7 +341,7 @@ Exportar Excel
 </div>
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 <h6>Tickets creados por fecha</h6>
 <div class="chart-wrap">
 <canvas id="gDias"></canvas>
@@ -354,7 +354,7 @@ Exportar Excel
 <div class="row g-4">
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 
 <h6>🏆 Top Usuarios</h6>
 
@@ -375,7 +375,7 @@ Exportar Excel
 </div>
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 
 <h6>🏢 Top Áreas</h6>
 
@@ -396,7 +396,7 @@ Exportar Excel
 </div>
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 <h6>📚 Antigüedad de tickets abiertos</h6>
 <ul class="rank-list">
 <?php foreach ([['Hasta 1 día','hasta_un_dia'],['2 a 3 días','dos_a_tres_dias'],['4 a 7 días','cuatro_a_siete_dias'],['Más de 7 días','mas_de_siete_dias']] as [$etiqueta,$clave]): ?>
@@ -407,7 +407,7 @@ Exportar Excel
 </div>
 
 <div class="col-lg-4">
-<div class="card">
+<div class="card dashboard-panel">
 <h6>🧑‍💻 Carga actual por responsable</h6>
 <ul class="rank-list">
 <?php if (!$cargaResponsables || $cargaResponsables->num_rows === 0): ?><li><span>No hay tickets abiertos</span><strong>0</strong></li><?php endif; ?>
