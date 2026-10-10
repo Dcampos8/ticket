@@ -1,6 +1,10 @@
 <?php
 // /backend/conexion.php
 // Usamos una variable global para reutilizar la conexión existente
+// Este archivo también puede cargarse desde funciones; declarar el alias global
+// evita que require_once deje $conexion limitado al ámbito local de esa función.
+global $conexion;
+
 if (!isset($GLOBALS['db_conexion'])) {
     require_once dirname(__DIR__) . '/config/env.php';
 
