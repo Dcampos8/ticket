@@ -9,6 +9,9 @@ error_reporting(E_ALL);
 require_once(__DIR__ . '/../../config.php');
 date_default_timezone_set('America/Mexico_City');
 $hoyLocal = date('Y-m-d');
+$ahoraLocal = date('Y-m-d H:i:s');
+$checkHistorial = $conexion->query("SHOW TABLES LIKE 'ticket_actividad_historial'");
+$historialTicketsDisponible = $checkHistorial && $checkHistorial->num_rows > 0;
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -33,6 +36,8 @@ $filtros = [
     'estatus'     => trim($_GET['estatus'] ?? ''),
     'fecha_desde' => trim($_GET['fecha_desde'] ?? ''),
     'fecha_hasta' => trim($_GET['fecha_hasta'] ?? ''),
+    'resuelto_desde' => trim($_GET['resuelto_desde'] ?? ''),
+    'resuelto_hasta' => trim($_GET['resuelto_hasta'] ?? ''),
     'vista'       => trim($_GET['vista'] ?? ''),
 ];
 $hayFiltrosActivos = count(array_filter($filtros, fn($v) => $v !== '')) > 0;
@@ -93,14 +98,30 @@ if ($filtros['fecha_hasta'] !== '') {
     $parametros[] = $filtros['fecha_hasta'] . ' 23:59:59';
     $tiposParam .= 's';
 }
+foreach (['resuelto_desde' => '>=', 'resuelto_hasta' => '<='] as $filtroFecha => $operadorFecha) {
+    if ($filtros[$filtroFecha] !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $filtros[$filtroFecha])) {
+        $fechaFiltro = DateTimeImmutable::createFromFormat('!Y-m-d', $filtros[$filtroFecha]);
+        if ($fechaFiltro && $fechaFiltro->format('Y-m-d') === $filtros[$filtroFecha]) {
+            $condiciones[] = "t.estatus IN ('Finalizado','Cerrado') AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) $operadorFecha ?";
+            $parametros[] = $filtros[$filtroFecha];
+            $tiposParam .= 's';
+        }
+    }
+}
 if ($filtros['vista'] === 'abiertos') {
     $condiciones[] = "t.estatus IN ('Pendiente','En proceso')";
 } elseif ($filtros['vista'] === 'sin_asignar') {
     $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND (t.asignado_a IS NULL OR t.asignado_a = '')";
 } elseif ($filtros['vista'] === 'sla_vencido') {
-    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, NOW()) > t.objetivo_respuesta_minutos";
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, '$ahoraLocal') > t.objetivo_respuesta_minutos";
+} elseif ($filtros['vista'] === 'resolucion_vencida') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)";
+} elseif ($filtros['vista'] === 'resolucion_proxima') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)) <= 240";
 } elseif ($filtros['vista'] === 'resueltos_hoy') {
     $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = '$hoyLocal'";
+} elseif ($filtros['vista'] === 'reabiertos') {
+    $condiciones[] = $historialTicketsDisponible ? "t.estatus IN ('Pendiente','En proceso') AND EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%'))" : '1 = 0';
 }
 
 $whereSql = $condiciones ? ('WHERE ' . implode(' AND ', $condiciones)) : '';
@@ -121,24 +142,39 @@ $total_paginas = (int)ceil($total_registros / $registros_por_pagina);
 $stmtTotal->close();
 
 // Indicadores operativos del Service Desk (independientes de los filtros de la tabla).
-$resumenTickets = ['abiertos' => 0, 'pendientes' => 0, 'en_proceso' => 0, 'sin_asignar' => 0, 'sla_vencido' => 0, 'resueltos_hoy' => 0];
+$resumenTickets = ['abiertos' => 0, 'pendientes' => 0, 'en_proceso' => 0, 'sin_asignar' => 0, 'sla_vencido' => 0, 'resueltos_hoy' => 0, 'reabiertos' => 0, 'resolucion_vencida' => 0, 'resolucion_proxima' => 0];
 $resumenResult = $conexion->query("SELECT
     SUM(estatus IN ('Pendiente','En proceso')) AS abiertos,
     SUM(estatus = 'Pendiente') AS pendientes,
     SUM(estatus = 'En proceso') AS en_proceso,
     SUM(estatus IN ('Pendiente','En proceso') AND (asignado_a IS NULL OR asignado_a = '')) AS sin_asignar,
-    SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, NOW()) > objetivo_respuesta_minutos) AS sla_vencido,
-    SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = '$hoyLocal') AS resueltos_hoy
+    SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, '$ahoraLocal') > objetivo_respuesta_minutos) AS sla_vencido,
+    SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = '$hoyLocal') AS resueltos_hoy,
+    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) AS resolucion_vencida,
+    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) <= 240) AS resolucion_proxima
     FROM tickets");
 if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
     foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
 }
+if ($historialTicketsDisponible) {
+    $resultadoReabiertos = $conexion->query("SELECT COUNT(DISTINCT t.id) AS total FROM tickets t INNER JOIN ticket_actividad_historial tah ON tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%') WHERE t.estatus IN ('Pendiente','En proceso')");
+    if ($resultadoReabiertos) $resumenTickets['reabiertos'] = (int) ($resultadoReabiertos->fetch_assoc()['total'] ?? 0);
+}
+
+$resumenResponsables = [];
+$qResponsables = $conexion->query("SELECT COALESCE(NULLIF(u.nombre_completo,''), NULLIF(t.asignado_a,''), 'Sin asignar') AS etiqueta, COUNT(*) AS total FROM tickets t LEFT JOIN usuarios u ON u.usuario = t.asignado_a WHERE t.estatus IN ('Pendiente','En proceso') GROUP BY etiqueta ORDER BY total DESC, etiqueta LIMIT 5");
+if ($qResponsables) while ($r = $qResponsables->fetch_assoc()) $resumenResponsables[] = $r;
+$resumenAreas = [];
+$qAreasTickets = $conexion->query("SELECT COALESCE(NULLIF(u.area,''), NULLIF(t.area,''), 'Sin área') AS etiqueta, COUNT(*) AS total FROM tickets t LEFT JOIN usuarios u ON u.usuario = t.nombre WHERE t.estatus IN ('Pendiente','En proceso') GROUP BY etiqueta ORDER BY total DESC, etiqueta LIMIT 5");
+if ($qAreasTickets) while ($r = $qAreasTickets->fetch_assoc()) $resumenAreas[] = $r;
 
 // 3. Cargar el menú
 include(ROOT_PATH . 'admin/menu.php');
 
 // 4. Consulta de Datos (respetando filtros + paginación)
-$sql = "SELECT t.*, u.nombre_completo AS usuario_nombre_completo, u.area AS usuario_area
+$campoReabiertoSql = $historialTicketsDisponible ? "EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%'))" : '0';
+$sql = "SELECT t.*, u.nombre_completo AS usuario_nombre_completo, u.area AS usuario_area,
+               $campoReabiertoSql AS reabierto
         FROM tickets t
         LEFT JOIN usuarios u ON t.nombre = u.usuario
         $whereSql
@@ -220,12 +256,29 @@ function claseTipoTicket($tipo) {
             <a class="sd-metric metric-unassigned" href="?vista=sin_asignar"><span class="sd-metric-icon"><i class="fas fa-user-slash"></i></span><span><small>Sin asignar</small><strong><?= $resumenTickets['sin_asignar'] ?></strong></span></a>
             <a class="sd-metric metric-overdue" href="?vista=sla_vencido"><span class="sd-metric-icon"><i class="fas fa-clock"></i></span><span><small>SLA de respuesta vencido</small><strong><?= $resumenTickets['sla_vencido'] ?></strong></span></a>
             <a class="sd-metric metric-resolved" href="?vista=resueltos_hoy"><span class="sd-metric-icon"><i class="fas fa-check"></i></span><span><small>Resueltos hoy</small><strong><?= $resumenTickets['resueltos_hoy'] ?></strong></span></a>
+            <a class="sd-metric metric-overdue" href="?vista=resolucion_vencida"><span class="sd-metric-icon"><i class="fas fa-triangle-exclamation"></i></span><span><small>SLA resolución vencido</small><strong><?= $resumenTickets['resolucion_vencida'] ?></strong></span></a>
+            <a class="sd-metric metric-pending" href="?vista=resolucion_proxima"><span class="sd-metric-icon"><i class="fas fa-hourglass"></i></span><span><small>Vencen en ≤ 4 h</small><strong><?= $resumenTickets['resolucion_proxima'] ?></strong></span></a>
+            <a class="sd-metric metric-reopened" href="?vista=reabiertos"><span class="sd-metric-icon"><i class="fas fa-rotate-left"></i></span><span><small>Reabiertos activos</small><strong><?= $resumenTickets['reabiertos'] ?></strong></span></a>
+        </section>
+
+        <section class="sd-breakdown" aria-label="Carga de tickets abiertos">
+            <div class="sd-breakdown-card"><h2><i class="fas fa-user-gear"></i> Carga por responsable</h2>
+                <?php if ($resumenResponsables): foreach ($resumenResponsables as $item): ?>
+                    <div class="sd-breakdown-row"><span><?= htmlspecialchars($item['etiqueta']) ?></span><strong><?= (int)$item['total'] ?></strong></div>
+                <?php endforeach; else: ?><p class="sd-empty">No hay tickets abiertos.</p><?php endif; ?>
+            </div>
+            <div class="sd-breakdown-card"><h2><i class="fas fa-building"></i> Carga por área</h2>
+                <?php if ($resumenAreas): foreach ($resumenAreas as $item): ?>
+                    <div class="sd-breakdown-row"><span><?= htmlspecialchars($item['etiqueta']) ?></span><strong><?= (int)$item['total'] ?></strong></div>
+                <?php endforeach; else: ?><p class="sd-empty">No hay tickets abiertos.</p><?php endif; ?>
+            </div>
         </section>
 
         <!-- Barra de filtros -->
         <div class="filtros-card">
             <div class="filtros-titulo"><i class="fas fa-sliders-h"></i> Filtrar tickets</div>
             <form method="GET" action="" id="formFiltros">
+                <input type="hidden" name="vista" value="<?= htmlspecialchars($filtros['vista'], ENT_QUOTES, 'UTF-8') ?>">
                 <div class="filtros-grid">
                     <div class="campo-busqueda">
                         <label for="f_busqueda">Búsqueda</label>
@@ -268,12 +321,25 @@ function claseTipoTicket($tipo) {
                         <label for="f_hasta">Hasta</label>
                         <input type="date" id="f_hasta" name="fecha_hasta" class="form-control form-control-sm auto-submit" value="<?= htmlspecialchars($filtros['fecha_hasta']) ?>">
                     </div>
+                    <div>
+                        <label for="f_resuelto_desde">Resuelto desde</label>
+                        <input type="date" id="f_resuelto_desde" name="resuelto_desde" class="form-control form-control-sm" value="<?= htmlspecialchars($filtros['resuelto_desde']) ?>">
+                    </div>
+                    <div>
+                        <label for="f_resuelto_hasta">Resuelto hasta</label>
+                        <input type="date" id="f_resuelto_hasta" name="resuelto_hasta" class="form-control form-control-sm" value="<?= htmlspecialchars($filtros['resuelto_hasta']) ?>">
+                    </div>
                     <div class="filtros-acciones">
                         <button type="submit" class="btn-filtrar"><i class="fas fa-search me-1"></i>Buscar</button>
                         <?php if ($hayFiltrosActivos): ?>
                             <a href="?" class="btn-limpiar"><i class="fas fa-times"></i>Limpiar</a>
                         <?php endif; ?>
                     </div>
+                </div>
+                <div class="saved-filter-tools">
+                    <label for="savedFilterSelect">Mis filtros</label>
+                    <select id="savedFilterSelect" class="form-select form-select-sm"><option value="">Cargar filtro guardado…</option></select>
+                    <button type="button" class="btn-limpiar" id="saveCurrentFilter"><i class="fas fa-bookmark"></i> Guardar filtros actuales</button>
                 </div>
             </form>
             <?php if ($hayFiltrosActivos): ?>
@@ -364,6 +430,14 @@ function claseTipoTicket($tipo) {
                                                 <?= time() > $limiteRespuesta ? 'Respuesta vencida' : 'Responder antes de ' . date('d/m H:i', $limiteRespuesta) ?>
                                             </small>
                                         <?php endif; ?>
+                                        <?php if (in_array($f['estatus'], ['Pendiente','En proceso'], true)):
+                                            $limiteResolucion = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_resolucion_minutos'] ?? 2880) * 60);
+                                            $minutosResolucion = (int) floor(($limiteResolucion - time()) / 60);
+                                        ?>
+                                            <small class="sla-resolution <?= $minutosResolucion < 0 ? 'is-late' : ($minutosResolucion <= 240 ? 'is-soon' : '') ?>">
+                                                <?= $minutosResolucion < 0 ? 'Resolución vencida' : ($minutosResolucion <= 240 ? 'Vence en ' . max(0, $minutosResolucion) . ' min' : 'Resolver antes de ' . date('d/m H:i', $limiteResolucion)) ?>
+                                            </small>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span><?= htmlspecialchars($f['asignado_a'] ?? 'Sin asignar') ?></span><br>
                                         <span class="badge bg-secondary" title="La prioridad no se puede cambiar cuando el ticket está cerrado">
@@ -404,6 +478,7 @@ function claseTipoTicket($tipo) {
 
                                 <!-- Estatus -->
                                 <td>
+                                    <?php if (!empty($f['reabierto']) && in_array($f['estatus'], ['Pendiente','En proceso'], true)): ?><span class="reopened-tag">Reabierto</span><br><?php endif; ?>
                                     <?php if ($esFinalizado): ?>
                                         <span class="status-badge <?= $f['estatus'] == 'Finalizado' ? 'status-finalizado' : 'status-cancelado' ?>"><?= $f['estatus'] ?></span>
                                     <?php else: ?>
@@ -417,6 +492,9 @@ function claseTipoTicket($tipo) {
                                 </td>
                                 <td class="smaller">
                                     <?= date("d/m/y H:i", strtotime($f['fecha_creacion'])) ?>
+                                    <?php if (!empty($f['fecha_resolucion']) || in_array($f['estatus'], ['Finalizado','Cerrado'], true)): ?>
+                                        <div class="fecha-resolucion"><i class="fas fa-check-circle"></i> <?= !empty($f['fecha_resolucion']) ? date('d/m/y H:i', strtotime($f['fecha_resolucion'])) : date('d/m/y H:i', strtotime($f['fecha_modificacion'])) ?></div>
+                                    <?php endif; ?>
                                     <?php if ($tieneModificacion): ?>
                                         <div class="fecha-mod" title="Última actualización">
                                             <i class="fas fa-clock"></i> <?= date("d/m/y H:i", strtotime($f['fecha_modificacion'])) ?>
@@ -544,6 +622,39 @@ document.querySelectorAll('#formFiltros .auto-submit').forEach(function (el) {
         document.getElementById('formFiltros').submit();
     });
 });
+
+// Filtros guardados en este navegador, separados por usuario.
+(function () {
+    const key = 'serviceDeskSavedFilters:' + <?= json_encode((string)($_SESSION['usuario'] ?? 'soporte')) ?>;
+    const select = document.getElementById('savedFilterSelect');
+    const button = document.getElementById('saveCurrentFilter');
+    const form = document.getElementById('formFiltros');
+    if (!select || !button || !form) return;
+    const readSaved = () => { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { return []; } };
+    const saved = readSaved();
+    const refresh = () => {
+        select.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
+        saved.forEach((item, index) => {
+            const option = document.createElement('option'); option.value = String(index); option.textContent = item.name; select.appendChild(option);
+        });
+    };
+    refresh();
+    select.addEventListener('change', () => {
+        const item = saved[Number(select.value)]; if (!item) return;
+        for (const field of form.elements) if (field.name in item.params) field.value = item.params[field.name];
+        form.submit();
+    });
+    button.addEventListener('click', () => {
+        const name = window.prompt('¿Cómo quieres llamar a este filtro?'); if (!name || !name.trim()) return;
+        const params = {};
+        for (const field of form.elements) if (field.name && field.value) params[field.name] = field.value;
+        saved.push({ name: name.trim().slice(0, 40), params });
+        if (saved.length > 12) saved.shift();
+        try { localStorage.setItem(key, JSON.stringify(saved)); }
+        catch (_) { window.alert('No se pudo guardar el filtro en este navegador.'); return; }
+        refresh(); select.value = String(saved.length - 1);
+    });
+})();
 
 // Modal Imagen
 function verImagen(url) {
