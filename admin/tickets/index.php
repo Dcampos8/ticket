@@ -31,6 +31,7 @@ $filtros = [
     'estatus'     => trim($_GET['estatus'] ?? ''),
     'fecha_desde' => trim($_GET['fecha_desde'] ?? ''),
     'fecha_hasta' => trim($_GET['fecha_hasta'] ?? ''),
+    'vista'       => trim($_GET['vista'] ?? ''),
 ];
 $hayFiltrosActivos = count(array_filter($filtros, fn($v) => $v !== '')) > 0;
 
@@ -61,9 +62,9 @@ $tiposParam  = '';
 
 if ($filtros['busqueda'] !== '') {
     $like = '%' . $filtros['busqueda'] . '%';
-    $condiciones[] = "(COALESCE(u.nombre_completo, t.nombre_completo) LIKE ? OR COALESCE(u.area, t.area) LIKE ? OR t.descripcion LIKE ? OR t.comentario_admin LIKE ?)";
-    array_push($parametros, $like, $like, $like, $like);
-    $tiposParam .= 'ssss';
+    $condiciones[] = "(CAST(t.id AS CHAR) LIKE ? OR COALESCE(u.nombre_completo, t.nombre_completo) LIKE ? OR COALESCE(u.area, t.area) LIKE ? OR t.descripcion LIKE ? OR t.comentario_admin LIKE ?)";
+    array_push($parametros, $like, $like, $like, $like, $like);
+    $tiposParam .= 'sssss';
 }
 if ($filtros['area'] !== '') {
     $condiciones[] = "COALESCE(u.area, t.area) = ?";
@@ -90,6 +91,15 @@ if ($filtros['fecha_hasta'] !== '') {
     $parametros[] = $filtros['fecha_hasta'] . ' 23:59:59';
     $tiposParam .= 's';
 }
+if ($filtros['vista'] === 'abiertos') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso')";
+} elseif ($filtros['vista'] === 'sin_asignar') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND (t.asignado_a IS NULL OR t.asignado_a = '')";
+} elseif ($filtros['vista'] === 'sla_vencido') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, NOW()) > t.objetivo_respuesta_minutos";
+} elseif ($filtros['vista'] === 'resueltos_hoy') {
+    $condiciones[] = "t.estatus = 'Finalizado' AND DATE(t.fecha_resolucion) = CURDATE()";
+}
 
 $whereSql = $condiciones ? ('WHERE ' . implode(' AND ', $condiciones)) : '';
 
@@ -107,6 +117,20 @@ $total_row = $stmtTotal->get_result()->fetch_assoc();
 $total_registros = (int)$total_row['total'];
 $total_paginas = (int)ceil($total_registros / $registros_por_pagina);
 $stmtTotal->close();
+
+// Indicadores operativos del Service Desk (independientes de los filtros de la tabla).
+$resumenTickets = ['abiertos' => 0, 'pendientes' => 0, 'en_proceso' => 0, 'sin_asignar' => 0, 'sla_vencido' => 0, 'resueltos_hoy' => 0];
+$resumenResult = $conexion->query("SELECT
+    SUM(estatus IN ('Pendiente','En proceso')) AS abiertos,
+    SUM(estatus = 'Pendiente') AS pendientes,
+    SUM(estatus = 'En proceso') AS en_proceso,
+    SUM(estatus IN ('Pendiente','En proceso') AND (asignado_a IS NULL OR asignado_a = '')) AS sin_asignar,
+    SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, NOW()) > objetivo_respuesta_minutos) AS sla_vencido,
+    SUM(estatus = 'Finalizado' AND DATE(fecha_resolucion) = CURDATE()) AS resueltos_hoy
+    FROM tickets");
+if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
+    foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
+}
 
 // 3. Cargar el menú
 include(ROOT_PATH . 'admin/menu.php');
@@ -174,7 +198,7 @@ function claseTipoTicket($tipo) {
         <div class="tickets-header">
             <div>
                 <h1 class="page-title">
-                    <i class="fas fa-ticket-alt"></i> Listado de Tickets
+                    <i class="fas fa-headset"></i> Service Desk
                 </h1>
                 <span class="subtitle-count">
                     <?php if ($hayFiltrosActivos): ?>
@@ -184,7 +208,17 @@ function claseTipoTicket($tipo) {
                     <?php endif; ?>
                 </span>
             </div>
+            <a class="service-desk-new" href="crear_ticket_admin.php"><i class="fas fa-plus"></i> Crear ticket</a>
         </div>
+
+        <section class="sd-summary" aria-label="Resumen de operación">
+            <a class="sd-metric metric-open" href="?vista=abiertos"><span class="sd-metric-icon"><i class="fas fa-inbox"></i></span><span><small>Tickets abiertos</small><strong><?= $resumenTickets['abiertos'] ?></strong></span></a>
+            <a class="sd-metric metric-pending" href="?estatus=Pendiente"><span class="sd-metric-icon"><i class="fas fa-hourglass-half"></i></span><span><small>Pendientes</small><strong><?= $resumenTickets['pendientes'] ?></strong></span></a>
+            <a class="sd-metric metric-progress" href="?estatus=En+proceso"><span class="sd-metric-icon"><i class="fas fa-spinner"></i></span><span><small>En proceso</small><strong><?= $resumenTickets['en_proceso'] ?></strong></span></a>
+            <a class="sd-metric metric-unassigned" href="?vista=sin_asignar"><span class="sd-metric-icon"><i class="fas fa-user-slash"></i></span><span><small>Sin asignar</small><strong><?= $resumenTickets['sin_asignar'] ?></strong></span></a>
+            <a class="sd-metric metric-overdue" href="?vista=sla_vencido"><span class="sd-metric-icon"><i class="fas fa-clock"></i></span><span><small>SLA de respuesta vencido</small><strong><?= $resumenTickets['sla_vencido'] ?></strong></span></a>
+            <a class="sd-metric metric-resolved" href="?vista=resueltos_hoy"><span class="sd-metric-icon"><i class="fas fa-check"></i></span><span><small>Resueltos hoy</small><strong><?= $resumenTickets['resueltos_hoy'] ?></strong></span></a>
+        </section>
 
         <!-- Barra de filtros -->
         <div class="filtros-card">
@@ -261,7 +295,7 @@ function claseTipoTicket($tipo) {
                             <th>Admin Adj.</th>
                             <th>Estatus</th>
                             <th>Fecha</th>
-                            <th>Respuesta Admin</th>
+                            <th>Atención / respuesta</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -413,6 +447,9 @@ function claseTipoTicket($tipo) {
 
                                 <!-- Acciones -->
                                 <td>
+                                    <a href="chat_ticket.php?ticket_id=<?= (int) $f['id'] ?>" class="sd-action-chat" title="Abrir conversación del ticket #<?= (int) $f['id'] ?>" aria-label="Abrir conversación del ticket #<?= (int) $f['id'] ?>">
+                                        <i class="fas fa-comments"></i><span>Atender</span>
+                                    </a>
                                     <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0 me-2" title="Ver quién atendió y qué cambios hizo">
                                         <i class="fas fa-user-clock"></i>
                                     </button>
