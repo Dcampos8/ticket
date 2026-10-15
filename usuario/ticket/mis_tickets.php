@@ -49,7 +49,13 @@ window.ticketChatFirma = '';
 window.intervaloChatUsuario = null;
 window.ticketChatVigilados = [];
 window.ticketAudioContext = null;
+window.ticketChatSonidoActivo = leerPreferenciaSonidoChat();
+window.ticketChatSonidoPendiente = false;
 window.ticketChatMemoria = window.ticketChatMemoria || {};
+
+function leerPreferenciaSonidoChat() {
+    try { return window.localStorage.getItem('ticket_chat_sonido') !== '0'; } catch (_) { return true; }
+}
 
 function firmaUltimoMensajeSoporte(mensajes) {
     const entrante = [...mensajes].reverse().find(m => String(m.usuario || '').trim().toLowerCase() !== String(window.usuarioActual).trim().toLowerCase());
@@ -83,18 +89,47 @@ function mostrarIndicadorChat(id, nuevo) {
     boton.title = nuevo ? 'Tienes un mensaje nuevo de soporte' : 'Abrir conversación con soporte';
 }
 
-function activarSonidoChat() {
+function actualizarControlSonidoChat() {
+    const boton = document.getElementById('chatSonidoControl');
+    if (!boton) return;
+    boton.innerHTML = window.ticketChatSonidoActivo
+        ? '<i class="fas fa-volume-up" aria-hidden="true"></i><span>Probar sonido</span>'
+        : '<i class="fas fa-volume-mute" aria-hidden="true"></i><span>Activar sonido</span>';
+    boton.setAttribute('aria-pressed', window.ticketChatSonidoActivo ? 'true' : 'false');
+    boton.title = window.ticketChatSonidoActivo ? 'Probar notificación sonora' : 'Activar notificaciones sonoras';
+}
+
+function activarSonidoChat(probar = false) {
     try {
         const ContextoAudio = window.AudioContext || window.webkitAudioContext;
-        if (!ContextoAudio) return;
+        if (!ContextoAudio) { window.ticketChatSonidoActivo = false; actualizarControlSonidoChat(); return; }
         if (!window.ticketAudioContext) window.ticketAudioContext = new ContextoAudio();
-        if (window.ticketAudioContext.state === 'suspended') window.ticketAudioContext.resume().catch(() => {});
+        const audio = window.ticketAudioContext;
+        const habilitar = audio.state === 'suspended' ? audio.resume() : Promise.resolve();
+        habilitar.then(() => {
+            window.ticketChatSonidoActivo = true;
+            try { window.localStorage.setItem('ticket_chat_sonido', '1'); } catch (_) {}
+            actualizarControlSonidoChat();
+            if (probar || window.ticketChatSonidoPendiente) {
+                window.ticketChatSonidoPendiente = false;
+                sonarMensajeNuevo();
+            }
+        }).catch(() => { window.ticketChatSonidoActivo = false; actualizarControlSonidoChat(); });
     } catch (_) {}
+}
+
+function alternarSonidoChat() {
+    if (window.ticketChatSonidoActivo) {
+        activarSonidoChat(true);
+        return;
+    }
+    activarSonidoChat(true);
 }
 
 function sonarMensajeNuevo() {
     const audio = window.ticketAudioContext;
-    if (!audio || audio.state !== 'running') return;
+    if (!window.ticketChatSonidoActivo) return;
+    if (!audio || audio.state !== 'running') { window.ticketChatSonidoPendiente = true; return; }
     const inicio = audio.currentTime;
     const oscilador = audio.createOscillator();
     const volumen = audio.createGain();
@@ -144,14 +179,12 @@ function abrirChat(id) {
     document.getElementById('chatFlotante').hidden = false;
     document.getElementById('chatMensaje').focus();
     cargarChat();
-    window.clearInterval(window.intervaloChatUsuario);
-    window.intervaloChatUsuario = window.setInterval(cargarChat, 5000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
 }
 
 function cerrarChat() {
     document.getElementById('chatFlotante').hidden = true;
     window.ticketActual = null;
-    window.clearInterval(window.intervaloChatUsuario);
 }
 
 function alternarTextoChat(texto, boton) {
@@ -206,14 +239,14 @@ async function cargarChat() {
 function conectarFormularioChat() {
     const formulario = document.getElementById('chatForm');
     if (!formulario) return;
-    window.clearInterval(window.intervaloChatUsuario);
     const botonesTicket = Array.from(document.querySelectorAll('.btn-chat-ticket[data-ticket-id]'));
     const idsAbiertos = botonesTicket.filter(boton => ['Pendiente', 'En proceso'].includes(boton.dataset.chatStatus)).map(boton => String(boton.dataset.ticketId));
     const idsRecientes = botonesTicket.slice(0, 10).map(boton => String(boton.dataset.ticketId));
     window.ticketChatVigilados = Array.from(new Set(idsAbiertos.concat(idsRecientes)));
     botonesTicket.forEach(boton => mostrarIndicadorChat(boton.dataset.ticketId, leerDatoChat(boton.dataset.ticketId, 'no_leido') === '1'));
     revisarChatsVigilados();
-    window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
+    actualizarControlSonidoChat();
     formulario.onsubmit = async event => {
         event.preventDefault();
         const input = document.getElementById('chatMensaje');
@@ -384,7 +417,7 @@ $descripcionUsuarioLarga = mb_strlen($descripcionUsuario, 'UTF-8') > 140 || coun
 <section id="chatFlotante" class="ticket-chat-panel" role="dialog" aria-labelledby="chatTitulo" hidden>
     <header class="ticket-chat-header">
         <div><span class="chat-eyebrow">SOPORTE</span><h2 id="chatTitulo">Conversación</h2></div>
-        <button type="button" class="chat-close" onclick="cerrarChat()" aria-label="Cerrar chat"><i class="fas fa-times"></i></button>
+        <div class="chat-header-actions"><button type="button" id="chatSonidoControl" class="chat-sound-toggle" onclick="alternarSonidoChat()" aria-label="Activar o probar sonido"></button><button type="button" class="chat-close" onclick="cerrarChat()" aria-label="Cerrar chat"><i class="fas fa-times"></i></button></div>
     </header>
     <div id="chatMensajes" class="ticket-chat-messages" aria-live="polite"><p class="chat-vacio">Cargando conversación…</p></div>
     <div id="chatError" class="ticket-chat-error" role="alert"></div>

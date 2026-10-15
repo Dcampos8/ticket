@@ -14,13 +14,13 @@
         --sub: #707074;
         --line: #dedee0;
         --surface: #ffffff;
-        --bg-1: #eef2ff;
-        --bg-2: #ecfeff;
-        --primary: #1e3a8a;
-        --primary-dark: #172554;
-        --primary-soft: #e8edf8;
-        --accent: #c9252d;
-        --accent-soft: #fbe9ea;
+        --bg-1: #f4f4f5;
+        --bg-2: #f4f4f5;
+        --primary: #ed1c24;
+        --primary-dark: #373739;
+        --primary-soft: #fde9ea;
+        --accent: #ed1c24;
+        --accent-soft: #fde9ea;
         --danger: #dc2626;
         --danger-soft: #fee2e2;
         --success: #059669;
@@ -35,7 +35,7 @@
 
     /* Apariencia general */
     body {
-        background: #f3f5f8;
+        background: #f4f4f5;
         font-family: 'Segoe UI', Roboto, sans-serif;
         color: var(--ink);
     }
@@ -165,7 +165,7 @@
     .filtros-grid .form-control:focus,
     .filtros-grid .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.14);
+        box-shadow: 0 0 0 3px rgba(237, 28, 36, 0.14);
     }
     .filtros-acciones {
         display: flex;
@@ -326,7 +326,7 @@
     .form-control-sm:focus, .form-select-sm:focus {
         background: #fff !important;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.12);
+        box-shadow: 0 0 0 3px rgba(237, 28, 36, 0.12);
     }
 
     /* Estatus */

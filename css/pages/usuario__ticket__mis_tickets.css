@@ -1,17 +1,18 @@
-/* Estilos extraídos de usuario\ticket\mis_tickets.php */
+/* Sistema visual compartido con la bandeja Service Desk. */
+:root{--sd-ink:#373739;--sd-red:#ed1c24;--sd-red-dark:#c81019;--sd-muted:#707074;--sd-line:#dedee0;--sd-page:#f4f4f5;--sd-soft:#fde9ea;--sd-radius:10px;--sd-shadow:0 2px 9px rgba(24,24,27,.05)}
 
 .tickets-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:25px;
+    margin-bottom:16px;
 }
 
 .tickets-header h3{
     margin:0;
     font-size:28px;
     font-weight:700;
-    color:var(--tv-ink,#0f172a);
+    color:var(--sd-ink);
 }
 
 .ticket-grid{
@@ -25,20 +26,16 @@
     display:flex;
     flex-direction:column;
     background:#fff;
-    border-radius:18px;
-    padding:20px;
-    border:1px solid #edf2f7;
-    box-shadow:
-        0 5px 20px rgba(0,0,0,.05),
-        0 1px 4px rgba(0,0,0,.03);
-    transition:.25s;
+    border-radius:var(--sd-radius);
+    padding:18px;
+    border:1px solid var(--sd-line);
+    box-shadow:var(--sd-shadow);
+    transition:border-color .15s,box-shadow .15s;
 }
 
 .ticket-card:hover{
-    transform:translateY(-3px);
-    box-shadow:
-        0 10px 28px rgba(0,0,0,.08),
-        0 2px 6px rgba(0,0,0,.04);
+    border-color:#c9c9cc;
+    box-shadow:0 5px 14px rgba(24,24,27,.08);
 }
 
 .ticket-top{
@@ -51,12 +48,12 @@
 .ticket-id{
     font-size:18px;
     font-weight:700;
-    color:var(--tv-ink,#0f172a);
+    color:var(--sd-ink);
 }
 
 .ticket-desc{
-    color:#555;
-    line-height:1.6;
+    color:#515156;
+    line-height:1.5;
     margin-bottom:18px;
     overflow-wrap:anywhere;
 }
@@ -76,7 +73,7 @@
     padding:0;
     border:0;
     background:transparent;
-    color:#c81019;
+    color:var(--sd-red-dark);
     font:inherit;
     font-size:13px;
     font-weight:700;
@@ -93,15 +90,16 @@
 }
 
 .meta-box{
-    background:#f8fafc;
-    border-radius:12px;
+    background:#f7f7f8;
+    border:1px solid #ededee;
+    border-radius:8px;
     padding:12px;
 }
 
 .meta-title{
     font-size:12px;
     text-transform:uppercase;
-    color:#95a5a6;
+    color:var(--sd-muted);
     margin-bottom:5px;
     font-weight:600;
 }
@@ -112,9 +110,9 @@
 }
 
 .badge-ticket{
-    padding:8px 14px;
-    border-radius:30px;
-    font-size:13px;
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
     font-weight:700;
 }
 
@@ -150,9 +148,10 @@
     gap:8px;
     text-decoration:none;
     padding:10px 14px;
-    border-radius:10px;
-    background:#f5f7fa;
-    color:#34495e;
+    border-radius:8px;
+    background:#f4f4f5;
+    color:var(--sd-ink);
+    border:1px solid var(--sd-line);
     transition:.2s;
 }
 
@@ -178,9 +177,9 @@
     gap:7px;
     padding:9px 14px;
     border:1px solid #f4b5b8;
-    border-radius:10px;
-    background:#fde9ea;
-    color:#c81019;
+    border-radius:8px;
+    background:var(--sd-soft);
+    color:var(--sd-red-dark);
     font-weight:700;
     cursor:pointer;
 }
@@ -193,23 +192,24 @@
 
 .btn-cancelar{
     border:none;
-    background:var(--tv-red,#e31e24);
+    background:var(--sd-red);
     color:white;
-    padding:10px 18px;
-    border-radius:10px;
+    padding:9px 14px;
+    border-radius:8px;
     font-weight:600;
 }
 
 .btn-cancelar:hover{
-    background:var(--tv-red-dark,#b91c1c);
+    background:var(--sd-red-dark);
 }
 
 .sin-tickets{
     text-align:center;
     background:white;
     padding:60px;
-    border-radius:18px;
-    color:#95a5a6;
+    border:1px solid var(--sd-line);
+    border-radius:var(--sd-radius);
+    color:var(--sd-muted);
 }
 
 /* Chat de atención del usuario */
@@ -244,6 +244,9 @@
 
 .chat-eyebrow{display:block;color:#d2d2d4;font-size:10px;font-weight:800;letter-spacing:1px;}
 .ticket-chat-header h2{margin:3px 0 0;color:#fff!important;font-size:16px;font-weight:700;}
+.chat-header-actions{display:flex;align-items:center;gap:7px;}
+.chat-sound-toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 9px;border:1px solid #ffffff30;border-radius:8px;background:#ffffff12;color:#fff;font:inherit;font-size:11px;font-weight:700;cursor:pointer;}
+.chat-sound-toggle:hover{background:#ffffff24;}
 .chat-close{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:#ffffff1a;color:#fff;cursor:pointer;}
 .chat-close:hover{background:#ffffff30;}
 
@@ -269,7 +272,9 @@
 
 @media(max-width:600px){
     .ticket-grid{grid-template-columns:minmax(0,1fr);gap:14px;}
-    .ticket-card{padding:16px;border-radius:14px;}
+    .ticket-card{padding:15px;border-radius:var(--sd-radius);}
     .ticket-chat-panel{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(78vh,640px);}
     .ticket-actions{padding-top:12px;}
 }
+
+@media(max-width:400px){.chat-sound-toggle{width:36px;padding:0;font-size:0}.chat-sound-toggle i{font-size:14px}}
