@@ -446,7 +446,7 @@ function claseTipoTicket($tipo) {
                                 </td>
 
                                 <!-- Acciones -->
-                                <td>
+                                <td class="ticket-actions">
                                     <a href="chat_ticket.php?ticket_id=<?= (int) $f['id'] ?>" class="sd-action-chat" title="Abrir conversación del ticket #<?= (int) $f['id'] ?>" aria-label="Abrir conversación del ticket #<?= (int) $f['id'] ?>">
                                         <i class="fas fa-comments"></i><span>Atender</span>
                                     </a>
