@@ -463,8 +463,14 @@ body { background:#f6f7f9; color:var(--ink); }
 .page-title { color:var(--ink); font-size:1.35rem; }
 .page-title i { width:38px; height:38px; border-radius:10px; background:#fff0f1; color:var(--primary)!important; }
 .subtitle-count { color:var(--sub); font-weight:500; }
-.service-desk-new { background:var(--primary); color:#fff; border-radius:8px; padding:10px 14px; }
-.service-desk-new:hover { background:#c91820; color:#fff; }
+.tickets-header a.service-desk-new,
+.tickets-header a.service-desk-new:visited,
+.tickets-header a.service-desk-new:hover,
+.tickets-header a.service-desk-new:focus { background-color:#ed1c24!important; color:#fff!important; border-color:#ed1c24!important; }
+.tickets-header a.service-desk-new:hover,
+.tickets-header a.service-desk-new:focus { background-color:#c81019!important; border-color:#c81019!important; }
+.tickets-header a.service-desk-new i { color:#fff!important; }
+.service-desk-new:focus-visible,.btn-filtrar:focus-visible { outline:3px solid #292b31; outline-offset:2px; }
 .sd-summary { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
 .sd-metric { min-height:76px; border-radius:10px; box-shadow:none; padding:12px; }
 .sd-metric-icon { width:36px; height:36px; flex-basis:36px; border-radius:10px; }
@@ -477,7 +483,12 @@ body { background:#f6f7f9; color:var(--ink); }
 .filtros-grid label,.saved-filter-tools label { color:#646b76; }
 .filtros-grid .form-control,.filtros-grid .form-select { min-height:38px; border-color:#dfe2e7; }
 .btn-filtrar { background:var(--primary); border-radius:8px; }
-.btn-filtrar:hover { background:#c91820; }
+.btn-filtrar,.btn-filtrar:hover,.btn-filtrar:focus { color:#fff!important; }
+.btn-filtrar:hover,.btn-filtrar:focus { background:#c91820; }
+.btn-limpiar,.btn-limpiar:visited { background:#f1f2f4; color:#34363b; border-color:#d5d8de; }
+.btn-limpiar:hover,.btn-limpiar:focus { background:#e2e4e8; color:#24262b; border-color:#c7cbd2; }
+.sd-action-chat,.sd-action-chat:visited { background:#fff0f1; color:#a70d14!important; border-color:#f4b5b8; }
+.sd-action-chat:hover,.sd-action-chat:focus { background:#fbd6d8; color:#8e0b12!important; }
 .table-card { border-color:var(--line); }
 #tablaTickets { min-width:1560px; }
 #tablaTickets thead th { background:#34363b!important; }

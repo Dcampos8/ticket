@@ -129,8 +129,9 @@
   margin: 0;
   font-size: .6rem;
 }
-.custom-navbar .user-profile-pill { width: 42px; min-width: 42px; padding: 6px !important; justify-content: center; }
+.custom-navbar .navbar-nav.ms-auto .user-profile-pill { width: 56px; min-width: 56px; height: 42px; padding: 5px 7px !important; gap: 4px; justify-content: center; }
 .custom-navbar .user-profile-pill > span { display: none !important; }
+.custom-navbar .user-profile-pill.dropdown-toggle::after { flex: 0 0 auto; margin: 0; color: #fff; }
 .custom-navbar .dropdown-menu {
   position: absolute !important;
   inset: auto !important;
@@ -157,8 +158,10 @@
 .custom-navbar .dropdown-item:hover,
 .custom-navbar .dropdown-item:focus { color: #fff !important; background: #34435d !important; }
 .custom-navbar .dropdown-divider { border-color: #43506a; }
-.user-profile-pill { flex-direction: row !important; background: #202b3e; }
-.user-avatar-small { display: inline-flex; width: 30px; height: 30px; flex: 0 0 30px; align-items: center; justify-content: center; border-radius: 50%; color: white; background: var(--accent); }
+.user-profile-pill { flex-direction: row !important; background: #505054; }
+.user-avatar-small { display: inline-flex; width: 28px; height: 28px; flex: 0 0 28px; align-items: center; justify-content: center; border-radius: 50%; color: #fff; background: var(--accent); }
+.custom-navbar .user-profile-pill .user-avatar-small { margin-right: 0 !important; }
+.custom-navbar .user-profile-pill .user-avatar-small i { width: auto; flex: 0 0 auto; color: #fff; font-size: .9rem; }
 .logo-animate { transition: opacity .15s ease; }
 .logo-animate:hover { opacity: .88; }
 
@@ -200,7 +203,7 @@
     pointer-events: auto;
   }
   .custom-navbar .navbar-nav.me-auto .nav-link > .badge { position: static; width: auto; min-width: 0; height: auto; padding: .35em .65em; font-size: .75em; }
-  .custom-navbar .user-profile-pill { width: 100%; min-width: 0; justify-content: flex-start; }
+  .custom-navbar .navbar-nav.ms-auto .user-profile-pill { width: 100%; min-width: 0; justify-content: flex-start; }
   .custom-navbar .user-profile-pill > span { display: inline !important; }
   .custom-navbar .dropdown-menu { position: static !important; width: 100%; max-width: 100%; max-height: none; margin: 2px 0 6px 18px !important; }
 }
