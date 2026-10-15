@@ -7,6 +7,8 @@ error_reporting(E_ALL);
 */
 // 1. Cargar la configuración global
 require_once(__DIR__ . '/../../config.php');
+date_default_timezone_set('America/Mexico_City');
+$hoyLocal = date('Y-m-d');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -98,7 +100,7 @@ if ($filtros['vista'] === 'abiertos') {
 } elseif ($filtros['vista'] === 'sla_vencido') {
     $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, NOW()) > t.objetivo_respuesta_minutos";
 } elseif ($filtros['vista'] === 'resueltos_hoy') {
-    $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = CURDATE()";
+    $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = '$hoyLocal'";
 }
 
 $whereSql = $condiciones ? ('WHERE ' . implode(' AND ', $condiciones)) : '';
@@ -126,7 +128,7 @@ $resumenResult = $conexion->query("SELECT
     SUM(estatus = 'En proceso') AS en_proceso,
     SUM(estatus IN ('Pendiente','En proceso') AND (asignado_a IS NULL OR asignado_a = '')) AS sin_asignar,
     SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, NOW()) > objetivo_respuesta_minutos) AS sla_vencido,
-    SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = CURDATE()) AS resueltos_hoy
+    SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = '$hoyLocal') AS resueltos_hoy
     FROM tickets");
 if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
     foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
