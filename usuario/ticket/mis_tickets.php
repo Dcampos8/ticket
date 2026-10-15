@@ -47,9 +47,98 @@ window.usuarioActual = <?= json_encode((string) ($_SESSION['usuario'] ?? ''), JS
 window.ticketCsrfToken = <?= json_encode(asegurarTokenCsrf(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 window.ticketChatFirma = '';
 window.intervaloChatUsuario = null;
+window.ticketChatVigilados = [];
+window.ticketAudioContext = null;
+window.ticketChatMemoria = window.ticketChatMemoria || {};
+
+function firmaUltimoMensajeSoporte(mensajes) {
+    const entrante = [...mensajes].reverse().find(m => String(m.usuario || '').trim().toLowerCase() !== String(window.usuarioActual).trim().toLowerCase());
+    return entrante ? JSON.stringify([entrante.usuario, entrante.fecha, entrante.mensaje]) : '';
+}
+
+function claveChatLocal(id, dato) { return 'ticket_chat_' + dato + '_' + String(id); }
+
+function leerDatoChat(id, dato) {
+    const clave = claveChatLocal(id, dato);
+    try {
+        const valor = window.localStorage.getItem(clave);
+        if (valor !== null) return valor;
+    } catch (_) {}
+    return window.ticketChatMemoria[clave] || null;
+}
+
+function guardarDatoChat(id, dato, valor) {
+    const clave = claveChatLocal(id, dato);
+    window.ticketChatMemoria[clave] = String(valor);
+    try { window.localStorage.setItem(clave, String(valor)); } catch (_) {}
+}
+
+function mostrarIndicadorChat(id, nuevo) {
+    const boton = document.querySelector('.btn-chat-ticket[data-ticket-id="' + String(id) + '"]');
+    if (!boton) return;
+    const punto = boton.querySelector('.chat-unread-dot');
+    if (punto) punto.hidden = !nuevo;
+    boton.classList.toggle('has-new-message', nuevo);
+    boton.setAttribute('aria-label', nuevo ? 'Abrir chat del ticket ' + id + '. Hay un mensaje nuevo de soporte.' : 'Abrir chat del ticket ' + id);
+    boton.title = nuevo ? 'Tienes un mensaje nuevo de soporte' : 'Abrir conversación con soporte';
+}
+
+function activarSonidoChat() {
+    try {
+        const ContextoAudio = window.AudioContext || window.webkitAudioContext;
+        if (!ContextoAudio) return;
+        if (!window.ticketAudioContext) window.ticketAudioContext = new ContextoAudio();
+        if (window.ticketAudioContext.state === 'suspended') window.ticketAudioContext.resume().catch(() => {});
+    } catch (_) {}
+}
+
+function sonarMensajeNuevo() {
+    const audio = window.ticketAudioContext;
+    if (!audio || audio.state !== 'running') return;
+    const inicio = audio.currentTime;
+    const oscilador = audio.createOscillator();
+    const volumen = audio.createGain();
+    oscilador.type = 'sine';
+    oscilador.frequency.setValueAtTime(740, inicio);
+    oscilador.frequency.setValueAtTime(880, inicio + 0.09);
+    volumen.gain.setValueAtTime(0.0001, inicio);
+    volumen.gain.exponentialRampToValueAtTime(0.12, inicio + 0.015);
+    volumen.gain.exponentialRampToValueAtTime(0.0001, inicio + 0.28);
+    oscilador.connect(volumen); volumen.connect(audio.destination);
+    oscilador.start(inicio); oscilador.stop(inicio + 0.3);
+}
+
+async function revisarMensajesNuevos(id) {
+    if (String(window.ticketActual) === String(id)) { await cargarChat(); return; }
+    try {
+        const response = await fetch('../../admin/tickets/backend/obtener_chat.php?ticket_id=' + id, {cache: 'no-store', credentials: 'same-origin'});
+        if (!response.ok) return;
+        const mensajes = await response.json();
+        if (!Array.isArray(mensajes)) return;
+        const firmaEntrante = firmaUltimoMensajeSoporte(mensajes);
+        if (!firmaEntrante) return;
+        const firmaVista = leerDatoChat(id, 'ultimo_soporte_visto');
+        if (!firmaVista) {
+            guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
+        } else if (firmaVista !== firmaEntrante) {
+            guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
+            guardarDatoChat(id, 'no_leido', '1');
+            mostrarIndicadorChat(id, true);
+            sonarMensajeNuevo();
+        } else {
+            mostrarIndicadorChat(id, leerDatoChat(id, 'no_leido') === '1');
+        }
+    } catch (_) {}
+}
+
+function revisarChatsVigilados() {
+    window.ticketChatVigilados.forEach(id => revisarMensajesNuevos(id));
+}
 
 function abrirChat(id) {
     window.ticketActual = id;
+    if (!window.ticketChatVigilados.includes(String(id))) window.ticketChatVigilados.push(String(id));
+    activarSonidoChat();
     window.ticketChatFirma = '';
     document.getElementById('chatTitulo').textContent = 'Conversación · Ticket #' + id;
     document.getElementById('chatFlotante').hidden = false;
@@ -107,6 +196,9 @@ async function cargarChat() {
             cont.append(item);
         });
         if (cercaDelFinal) cont.scrollTop = cont.scrollHeight;
+        guardarDatoChat(window.ticketActual, 'ultimo_soporte_visto', firmaUltimoMensajeSoporte(data));
+        guardarDatoChat(window.ticketActual, 'no_leido', '0');
+        mostrarIndicadorChat(window.ticketActual, false);
         document.getElementById('chatError').textContent = '';
     } catch (error) { document.getElementById('chatError').textContent = error.message || 'Error de conexión.'; }
 }
@@ -114,6 +206,14 @@ async function cargarChat() {
 function conectarFormularioChat() {
     const formulario = document.getElementById('chatForm');
     if (!formulario) return;
+    window.clearInterval(window.intervaloChatUsuario);
+    const botonesTicket = Array.from(document.querySelectorAll('.btn-chat-ticket[data-ticket-id]'));
+    const idsAbiertos = botonesTicket.filter(boton => ['Pendiente', 'En proceso'].includes(boton.dataset.chatStatus)).map(boton => String(boton.dataset.ticketId));
+    const idsRecientes = botonesTicket.slice(0, 10).map(boton => String(boton.dataset.ticketId));
+    window.ticketChatVigilados = Array.from(new Set(idsAbiertos.concat(idsRecientes)));
+    botonesTicket.forEach(boton => mostrarIndicadorChat(boton.dataset.ticketId, leerDatoChat(boton.dataset.ticketId, 'no_leido') === '1'));
+    revisarChatsVigilados();
+    window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
     formulario.onsubmit = async event => {
         event.preventDefault();
         const input = document.getElementById('chatMensaje');
@@ -240,8 +340,8 @@ $descripcionUsuarioLarga = mb_strlen($descripcionUsuario, 'UTF-8') > 140 || coun
 
     <div class="ticket-actions">
 
-        <button type="button" class="btn-chat-ticket" onclick="abrirChat(<?= (int) $row['id'] ?>)">
-            <i class="fas fa-comments"></i> Abrir chat
+        <button type="button" class="btn-chat-ticket" data-ticket-id="<?= (int) $row['id'] ?>" data-chat-status="<?= htmlspecialchars($row['estatus'], ENT_QUOTES, 'UTF-8') ?>" aria-label="Abrir chat del ticket <?= (int) $row['id'] ?>" title="Abrir conversación con soporte" onclick="abrirChat(<?= (int) $row['id'] ?>)">
+            <i class="fas fa-comments" aria-hidden="true"></i> Abrir chat <span class="chat-unread-dot" hidden aria-hidden="true"></span>
         </button>
 
         <?php if($row['estatus']=='Pendiente'): ?>
@@ -281,7 +381,7 @@ $descripcionUsuarioLarga = mb_strlen($descripcionUsuario, 'UTF-8') > 140 || coun
 
 </div>
 
-<section id="chatFlotante" class="ticket-chat-panel" role="dialog" aria-modal="true" aria-labelledby="chatTitulo" hidden>
+<section id="chatFlotante" class="ticket-chat-panel" role="dialog" aria-labelledby="chatTitulo" hidden>
     <header class="ticket-chat-header">
         <div><span class="chat-eyebrow">SOPORTE</span><h2 id="chatTitulo">Conversación</h2></div>
         <button type="button" class="chat-close" onclick="cerrarChat()" aria-label="Cerrar chat"><i class="fas fa-times"></i></button>

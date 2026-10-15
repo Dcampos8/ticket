@@ -171,6 +171,7 @@
 }
 
 .btn-chat-ticket{
+    position:relative;
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -185,6 +186,10 @@
 }
 
 .btn-chat-ticket:hover{background:#fbd6d8;color:#a70d14;}
+.chat-unread-dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border:2px solid #fff;border-radius:50%;background:#ed1c24;box-shadow:0 1px 4px #18181b55;animation:chatUnreadPulse 1.8s ease-out infinite;}
+.chat-unread-dot[hidden]{display:none!important;}
+@keyframes chatUnreadPulse{0%,100%{box-shadow:0 0 0 0 #ed1c2444;}50%{box-shadow:0 0 0 4px #ed1c2400;}}
+@media(prefers-reduced-motion:reduce){.chat-unread-dot{animation:none;}}
 
 .btn-cancelar{
     border:none;
