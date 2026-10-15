@@ -47,6 +47,7 @@ window.usuarioActual = <?= json_encode((string) ($_SESSION['usuario'] ?? ''), JS
 window.ticketCsrfToken = <?= json_encode(asegurarTokenCsrf(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 window.ticketChatFirma = '';
 window.intervaloChatUsuario = null;
+window.intervaloChatActivo = null;
 window.ticketChatVigilados = [];
 window.ticketAudioContext = null;
 window.ticketChatSonidoActivo = leerPreferenciaSonidoChat();
@@ -143,31 +144,31 @@ function sonarMensajeNuevo() {
     oscilador.start(inicio); oscilador.stop(inicio + 0.3);
 }
 
-async function revisarMensajesNuevos(id) {
-    if (String(window.ticketActual) === String(id)) { await cargarChat(); return; }
+async function revisarChatsVigilados() {
+    const ids = window.ticketChatVigilados.filter(id => String(window.ticketActual) !== String(id));
+    if (!ids.length || document.hidden) return;
     try {
-        const response = await fetch('../../admin/tickets/backend/obtener_chat.php?ticket_id=' + id, {cache: 'no-store', credentials: 'same-origin'});
+        const response = await fetch('../../admin/tickets/backend/obtener_novedades_chat_usuario.php?ticket_ids=' + encodeURIComponent(ids.join(',')), {cache: 'no-store', credentials: 'same-origin'});
         if (!response.ok) return;
-        const mensajes = await response.json();
-        if (!Array.isArray(mensajes)) return;
-        const firmaEntrante = firmaUltimoMensajeSoporte(mensajes);
-        if (!firmaEntrante) return;
-        const firmaVista = leerDatoChat(id, 'ultimo_soporte_visto');
-        if (!firmaVista) {
-            guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
-        } else if (firmaVista !== firmaEntrante) {
-            guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
-            guardarDatoChat(id, 'no_leido', '1');
-            mostrarIndicadorChat(id, true);
-            sonarMensajeNuevo();
-        } else {
-            mostrarIndicadorChat(id, leerDatoChat(id, 'no_leido') === '1');
-        }
+        const respuesta = await response.json();
+        if (respuesta.status !== 'ok' || !respuesta.tickets) return;
+        Object.entries(respuesta.tickets).forEach(([id, mensaje]) => {
+            const firmaEntrante = mensaje ? firmaUltimoMensajeSoporte([mensaje]) : '';
+            const firmaVista = leerDatoChat(id, 'ultimo_soporte_visto');
+            const inicializado = leerDatoChat(id, 'chat_inicializado') === '1';
+            if (!inicializado) {
+                guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
+                guardarDatoChat(id, 'chat_inicializado', '1');
+            } else if (firmaEntrante && firmaVista !== firmaEntrante) {
+                guardarDatoChat(id, 'ultimo_soporte_visto', firmaEntrante);
+                guardarDatoChat(id, 'no_leido', '1');
+                mostrarIndicadorChat(id, true);
+                sonarMensajeNuevo();
+            } else {
+                mostrarIndicadorChat(id, leerDatoChat(id, 'no_leido') === '1');
+            }
+        });
     } catch (_) {}
-}
-
-function revisarChatsVigilados() {
-    window.ticketChatVigilados.forEach(id => revisarMensajesNuevos(id));
 }
 
 function abrirChat(id) {
@@ -179,12 +180,16 @@ function abrirChat(id) {
     document.getElementById('chatFlotante').hidden = false;
     document.getElementById('chatMensaje').focus();
     cargarChat();
-    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
+    window.clearInterval(window.intervaloChatActivo);
+    window.intervaloChatActivo = window.setInterval(cargarChat, 30000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 120000);
 }
 
 function cerrarChat() {
     document.getElementById('chatFlotante').hidden = true;
     window.ticketActual = null;
+    window.clearInterval(window.intervaloChatActivo);
+    window.intervaloChatActivo = null;
 }
 
 function alternarTextoChat(texto, boton) {
@@ -230,6 +235,7 @@ async function cargarChat() {
         });
         if (cercaDelFinal) cont.scrollTop = cont.scrollHeight;
         guardarDatoChat(window.ticketActual, 'ultimo_soporte_visto', firmaUltimoMensajeSoporte(data));
+        guardarDatoChat(window.ticketActual, 'chat_inicializado', '1');
         guardarDatoChat(window.ticketActual, 'no_leido', '0');
         mostrarIndicadorChat(window.ticketActual, false);
         document.getElementById('chatError').textContent = '';
@@ -245,7 +251,7 @@ function conectarFormularioChat() {
     window.ticketChatVigilados = Array.from(new Set(idsAbiertos.concat(idsRecientes)));
     botonesTicket.forEach(boton => mostrarIndicadorChat(boton.dataset.ticketId, leerDatoChat(boton.dataset.ticketId, 'no_leido') === '1'));
     revisarChatsVigilados();
-    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 5000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 120000);
     actualizarControlSonidoChat();
     formulario.onsubmit = async event => {
         event.preventDefault();

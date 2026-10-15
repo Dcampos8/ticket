@@ -116,7 +116,7 @@ document.getElementById('chatForm').addEventListener('submit', async event => {
 });
 
 cargarChat();
-window.setInterval(cargarChat, 5000);
+window.setInterval(cargarChat, 30000);
 </script>
 </body>
 </html>

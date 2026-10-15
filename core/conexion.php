@@ -18,16 +18,12 @@ if (!isset($GLOBALS['db_conexion'])) {
     } catch (mysqli_sql_exception $e) {
         error_log('Conexión a base de datos fallida (código ' . $e->getCode() . ').');
         http_response_code(503);
-        if (!empty($GLOBALS['mostrar_errores_php_login'])) throw $e;
         exit('El servicio no está disponible temporalmente.');
     }
 
     if ($conn->connect_error) {
         error_log('Conexión a base de datos fallida (código ' . $conn->connect_errno . ').');
         http_response_code(503);
-        if (!empty($GLOBALS['mostrar_errores_php_login'])) {
-            throw new RuntimeException($conn->connect_error, (int) $conn->connect_errno);
-        }
         exit('El servicio no está disponible temporalmente.');
     }
     $conn->set_charset("utf8mb4");
