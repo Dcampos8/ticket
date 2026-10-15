@@ -28,6 +28,10 @@ body { min-height: 100vh; margin: 0; background: var(--page); color: var(--ink);
 .chat-error { padding: 0 16px 12px; color: #b42318; font-size: 12px; }
 .ticket-context { padding: 18px; }.context-title { padding-bottom: 15px; border-bottom: 1px solid var(--line); font-weight: 750; }.context-title i { color: var(--blue); margin-right: 6px; }
 .context-item { padding: 14px 0; border-bottom: 1px solid #edf0f4; }.context-item small { display: block; margin-bottom: 5px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .5px; }.context-item strong { font-size: 13px; }.context-item p { margin: 0; color: #475467; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.context-item .ticket-description.is-collapsed { max-height: 7.5em; overflow: hidden; }
+.context-item .ticket-description.is-expanded { max-height: none; }
+.description-toggle { display: inline-block; margin-top: 7px; padding: 0; border: 0; background: transparent; color: #c81019; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.description-toggle:hover { color: #a70d14; text-decoration: underline; }
 .context-back { display: inline-flex; gap: 7px; align-items: center; margin-top: 16px; color: #c81019; font-size: 12px; font-weight: 700; text-decoration: none; }.context-back:hover { color: #a70d14; }
 @media (max-width: 800px) { .chat-layout { grid-template-columns: 1fr; }.ticket-context { order: -1; }.context-item:not(:last-child) { padding: 9px 0; } #chatBox { height: 55vh; } }
 @media (max-width: 560px) { .chat-header { gap: 10px; padding: 12px; }.ticket-details { width: 38px; overflow: hidden; font-size: 0; }.ticket-details i { font-size: 16px; }.ticket-heading h1 { font-size: 17px; }.ticket-heading p { font-size: 11px; }.chat-layout { width: calc(100% - 20px); margin: 10px auto; gap: 10px; }.conversation-top { padding: 13px; }.live-indicator { font-size: 0; }.live-indicator i { width: 9px; height: 9px; }.msg { max-width: 90%; } #chatBox { min-height: 300px; padding: 14px; }.composer { padding: 10px; } #sendButton { padding: 0 12px; } #sendButton span { display: none; } }

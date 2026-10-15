@@ -58,11 +58,32 @@
     color:#555;
     line-height:1.6;
     margin-bottom:18px;
+    overflow-wrap:anywhere;
+}
+
+.ticket-desc.is-collapsed{
     display:-webkit-box;
     -webkit-line-clamp:3;
     -webkit-box-orient:vertical;
     overflow:hidden;
 }
+
+.ticket-desc.is-expanded{display:block;overflow:visible;}
+
+.ticket-desc-toggle{
+    align-self:flex-start;
+    margin:-10px 0 14px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:#c81019;
+    font:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.ticket-desc-toggle:hover{color:#a70d14;text-decoration:underline;}
 
 .ticket-meta{
     display:grid;
@@ -143,8 +164,27 @@
     margin-top:auto;
     padding-top:18px;
     display:flex;
-    justify-content:flex-end;
+    justify-content:flex-start;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
 }
+
+.btn-chat-ticket{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    padding:9px 14px;
+    border:1px solid #f4b5b8;
+    border-radius:10px;
+    background:#fde9ea;
+    color:#c81019;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.btn-chat-ticket:hover{background:#fbd6d8;color:#a70d14;}
 
 .btn-cancelar{
     border:none;
@@ -165,4 +205,66 @@
     padding:60px;
     border-radius:18px;
     color:#95a5a6;
+}
+
+/* Chat de atención del usuario */
+.ticket-chat-panel{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    z-index:2100;
+    display:flex;
+    flex-direction:column;
+    width:min(390px,calc(100vw - 32px));
+    height:min(620px,calc(100vh - 48px));
+    overflow:hidden;
+    border:1px solid #dedee0;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 16px 48px rgba(24,24,27,.24);
+}
+
+.ticket-chat-panel[hidden]{display:none!important;}
+
+.ticket-chat-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 16px;
+    background:#373739;
+    color:#fff;
+    border-bottom:3px solid #ed1c24;
+}
+
+.chat-eyebrow{display:block;color:#d2d2d4;font-size:10px;font-weight:800;letter-spacing:1px;}
+.ticket-chat-header h2{margin:3px 0 0;color:#fff!important;font-size:16px;font-weight:700;}
+.chat-close{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:#ffffff1a;color:#fff;cursor:pointer;}
+.chat-close:hover{background:#ffffff30;}
+
+.ticket-chat-messages{display:flex;flex:1;flex-direction:column;gap:10px;min-height:0;padding:15px;overflow-y:auto;background:#f7f7f8;}
+.chat-message{max-width:88%;padding:10px 12px;border:1px solid #e4e4e6;border-radius:12px;background:#fff;color:#373739;overflow-wrap:anywhere;box-shadow:0 1px 3px #18181b0a;}
+.chat-message.user{align-self:flex-end;border-color:#f4b5b8;background:#fff2f2;}
+.chat-message.admin{align-self:flex-start;}
+.chat-message-author{display:block;margin-bottom:4px;color:#707074;font-size:11px;font-weight:750;}
+.chat-message-text{font-size:13px;line-height:1.5;white-space:pre-wrap;}
+.chat-message-text.is-collapsed{display:-webkit-box;max-height:7.5em;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden;}
+.chat-message-text.is-expanded{display:block;max-height:none;overflow:visible;}
+.chat-message-toggle{display:inline-block;margin-top:5px;padding:0;border:0;background:transparent;color:#c81019;font-size:12px;font-weight:700;cursor:pointer;}
+.chat-message-toggle:hover{color:#a70d14;text-decoration:underline;}
+.chat-message-date{display:block;margin-top:6px;color:#8a8a8e;font-size:10px;text-align:right;}
+.chat-vacio{margin:auto;padding:20px;color:#707074;font-size:13px;text-align:center;}
+.ticket-chat-error{padding:0 14px;color:#b42318;font-size:12px;}
+.ticket-chat-composer{display:flex;gap:8px;padding:12px;border-top:1px solid #dedee0;background:#fff;}
+.ticket-chat-composer input{flex:1;min-width:0;padding:10px 12px;border:1px solid #d5d5d8;border-radius:9px;font:inherit;font-size:13px;}
+.ticket-chat-composer input:focus{outline:none;border-color:#ed1c24;box-shadow:0 0 0 3px #ed1c241f;}
+.ticket-chat-composer button{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border:0;border-radius:9px;background:#ed1c24;color:#fff;cursor:pointer;}
+.ticket-chat-composer button:hover{background:#c81019;}
+.ticket-chat-composer button:disabled{opacity:.55;cursor:wait;}
+
+@media(max-width:600px){
+    .ticket-grid{grid-template-columns:minmax(0,1fr);gap:14px;}
+    .ticket-card{padding:16px;border-radius:14px;}
+    .ticket-chat-panel{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(78vh,640px);}
+    .ticket-actions{padding-top:12px;}
 }

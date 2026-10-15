@@ -9,6 +9,8 @@ $ticketId = filter_input(INPUT_GET, 'ticket_id', FILTER_VALIDATE_INT) ?: 0;
 if (!usuarioPuedeAccederTicket($conexion, $ticketId)) { http_response_code(404); exit('Ticket no encontrado'); }
 $stmt = $conexion->prepare('SELECT t.estatus, t.prioridad, t.tipo_ticket, t.descripcion, t.asignado_a, COALESCE(u.nombre_completo, t.nombre_completo) AS solicitante FROM tickets t LEFT JOIN usuarios u ON t.nombre = u.usuario WHERE t.id = ? LIMIT 1');
 $stmt->bind_param('i', $ticketId); $stmt->execute(); $ticket = $stmt->get_result()->fetch_assoc(); $stmt->close();
+$descripcionTicket = trim((string) ($ticket['descripcion'] ?? ''));
+$descripcionLarga = mb_strlen($descripcionTicket, 'UTF-8') > 180 || count(preg_split('/\R/u', $descripcionTicket)) > 4;
 $csrfToken = asegurarTokenCsrf();
 $usuarioActual = (string) ($_SESSION['usuario'] ?? '');
 $baseUrl = defined('BASE_URL') ? BASE_URL : '/';
@@ -42,7 +44,7 @@ $baseUrl = defined('BASE_URL') ? BASE_URL : '/';
         <div class="context-item"><small>SOLICITANTE</small><strong><?= htmlspecialchars($ticket['solicitante'] ?: 'Sin nombre') ?></strong></div>
         <div class="context-item"><small>ASIGNADO A</small><strong><?= htmlspecialchars($ticket['asignado_a'] ?: 'Sin asignar') ?></strong></div>
         <div class="context-item"><small>TIPO</small><strong><?= htmlspecialchars($ticket['tipo_ticket'] ?: 'Sin categoría') ?></strong></div>
-        <div class="context-item"><small>DESCRIPCIÓN</small><p><?= nl2br(htmlspecialchars($ticket['descripcion'] ?: 'Sin descripción')) ?></p></div>
+        <div class="context-item"><small>DESCRIPCIÓN</small><p id="ticketDescription" class="ticket-description<?= $descripcionLarga ? ' is-collapsed' : '' ?>"><?= nl2br(htmlspecialchars($descripcionTicket !== '' ? $descripcionTicket : 'Sin descripción')) ?></p><?php if ($descripcionLarga): ?><button type="button" id="toggleDescription" class="description-toggle" aria-expanded="false" aria-controls="ticketDescription">Ver más</button><?php endif; ?></div>
         <a href="index.php" class="context-back"><i class="fas fa-arrow-left"></i> Regresar a la bandeja</a>
     </aside>
 </main>
@@ -52,6 +54,16 @@ const currentUser = <?= json_encode(mb_strtolower(trim($usuarioActual)), JSON_HE
 const csrfToken = <?= json_encode($csrfToken, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 const chatBox = document.getElementById('chatBox');
 const chatError = document.getElementById('chatError');
+const descriptionToggle = document.getElementById('toggleDescription');
+if (descriptionToggle) {
+    descriptionToggle.addEventListener('click', () => {
+        const description = document.getElementById('ticketDescription');
+        const expanded = description.classList.toggle('is-expanded');
+        description.classList.toggle('is-collapsed', !expanded);
+        descriptionToggle.textContent = expanded ? 'Ver menos' : 'Ver más';
+        descriptionToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    });
+}
 let loading = false;
 let lastSignature = '';
 
