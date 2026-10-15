@@ -447,15 +447,17 @@ function claseTipoTicket($tipo) {
 
                                 <!-- Acciones -->
                                 <td class="ticket-actions">
-                                    <a href="chat_ticket.php?ticket_id=<?= (int) $f['id'] ?>" class="sd-action-chat" title="Abrir conversación del ticket #<?= (int) $f['id'] ?>" aria-label="Abrir conversación del ticket #<?= (int) $f['id'] ?>">
-                                        <i class="fas fa-comments"></i><span>Atender</span>
-                                    </a>
-                                    <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0 me-2" title="Ver quién atendió y qué cambios hizo">
-                                        <i class="fas fa-user-clock"></i>
-                                    </button>
-                                    <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    <div class="ticket-action-buttons">
+                                        <a href="chat_ticket.php?ticket_id=<?= (int) $f['id'] ?>" class="sd-action-chat" title="Abrir conversación del ticket #<?= (int) $f['id'] ?>" aria-label="Abrir conversación del ticket #<?= (int) $f['id'] ?>">
+                                            <i class="fas fa-comments"></i><span>Atender</span>
+                                        </a>
+                                        <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0" title="Ver quién atendió y qué cambios hizo">
+                                            <i class="fas fa-user-clock"></i>
+                                        </button>
+                                        <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
