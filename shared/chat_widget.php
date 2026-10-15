@@ -56,9 +56,13 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
     let civUltimoIdGrupo = 0;
     const civUltimoIdPrivado = {}; // por usuario_id
     let civUsuariosCache = [];
+    let civUsuariosCargados = false;
     let civNoLeidosPorUsuario = {};
     let civPanelAbierto = false;
     let civUltimoAvisoGrupo = 0;
+    let civBadgeEnCurso = false;
+    let civUltimoPollBadge = 0;
+    const civCargasMensajesEnCurso = new Set();
 
     function $(id) { return document.getElementById(id); }
 
@@ -72,7 +76,7 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
             $('civVistaUsuarios').style.display = 'none';
             $('civVistaMensajes').style.display = 'flex';
             $('civVolverLista').style.display = 'none';
-            civCargarMensajes('grupo', null, true);
+            civCargarMensajes('grupo', null, civUltimoIdGrupo === 0);
         } else {
             $('civVistaMensajes').style.display = 'none';
             $('civVistaUsuarios').style.display = 'block';
@@ -97,10 +101,12 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
     }
 
     function civCargarUsuarios() {
+        if (civUsuariosCargados) { civRenderUsuarios(civUsuariosCache); return; }
         fetch(BASE + 'shared/backend/chat_usuarios.php')
             .then(r => r.json())
             .then(data => {
                 civUsuariosCache = Array.isArray(data) ? data : [];
+                civUsuariosCargados = true;
                 civRenderUsuarios(civUsuariosCache);
             })
             .catch(() => {});
@@ -173,6 +179,10 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
     }
 
     function civCargarMensajes(tipo, con, reiniciar) {
+        if (!civPanelAbierto || document.hidden) return;
+        const claveCarga = tipo + ':' + (con || 'grupo');
+        if (civCargasMensajesEnCurso.has(claveCarga)) return;
+        civCargasMensajesEnCurso.add(claveCarga);
         let url = BASE + 'shared/backend/chat_obtener.php?tipo=' + tipo;
         if (tipo === 'privado') url += '&con=' + con;
         if (reiniciar) {
@@ -188,7 +198,7 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
             const maxId = Math.max(...mensajes.map(m => m.id));
             if (tipo === 'grupo') civUltimoIdGrupo = Math.max(civUltimoIdGrupo, maxId);
             else civUltimoIdPrivado[con] = Math.max(civUltimoIdPrivado[con] || 0, maxId);
-        });
+        }).catch(() => {}).finally(() => civCargasMensajesEnCurso.delete(claveCarga));
     }
 
     window.civChatEnviar = function () {
@@ -274,15 +284,13 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
     }
 
     // --- Polling del resumen (badge + disparo de notificaciones) ---
-    // AJUSTE: intervalo subido de 6s a 20s, y se pausa por completo cuando la
-    // pestaña está en segundo plano (Page Visibility API). Esto es lo que
-    // estaba disparando cientos de conexiones MySQL por hora y agotando el
-    // límite de max_connections_per_hour.
+    // Consultar cada 5 min reduce las conexiones nuevas a unas 12 por hora y
+    // pestaña; también se pausa cuando la página queda en segundo plano.
     let civIntervaloPolling = null;
 
     function civIniciarPolling() {
         if (civIntervaloPolling) return; // ya está corriendo, no duplicar
-        civIntervaloPolling = setInterval(civActualizarBadge, 20000); // antes: 6000
+        civIntervaloPolling = setInterval(civActualizarBadge, 300000);
     }
 
     function civDetenerPolling() {
@@ -293,6 +301,9 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
     }
 
     function civActualizarBadge() {
+        if (document.hidden || civBadgeEnCurso || Date.now() - civUltimoPollBadge < 30000) return;
+        civBadgeEnCurso = true;
+        civUltimoPollBadge = Date.now();
         fetch(BASE + 'shared/backend/chat_resumen.php').then(r => r.json()).then(data => {
             if (!data.success) return;
 
@@ -356,7 +367,7 @@ $chat_base = defined('BASE_URL') ? BASE_URL : '/';
 
             // Si el grupo está abierto y activo, refrescar mensajes nuevos también
             if (viendoGrupoActivo) civCargarMensajes('grupo', null, false);
-        }).catch(() => {});
+        }).catch(() => {}).finally(() => { civBadgeEnCurso = false; });
     }
 
     // Pausa/reanuda el polling según la visibilidad de la pestaña.

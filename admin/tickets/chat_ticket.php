@@ -88,7 +88,7 @@ function renderMessages(messages) {
 }
 
 async function cargarChat() {
-    if (loading) return;
+    if (loading || document.hidden) return;
     loading = true;
     try {
         const response = await fetch('backend/obtener_chat.php?ticket_id=' + ticketId, {cache: 'no-store', credentials: 'same-origin'});
@@ -116,7 +116,8 @@ document.getElementById('chatForm').addEventListener('submit', async event => {
 });
 
 cargarChat();
-window.setInterval(cargarChat, 30000);
+window.setInterval(cargarChat, 120000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) cargarChat(); });
 </script>
 </body>
 </html>

@@ -146,7 +146,8 @@ function sonarMensajeNuevo() {
 
 async function revisarChatsVigilados() {
     const ids = window.ticketChatVigilados.filter(id => String(window.ticketActual) !== String(id));
-    if (!ids.length || document.hidden) return;
+    if (!ids.length || document.hidden || window.ticketRevisandoVigilados) return;
+    window.ticketRevisandoVigilados = true;
     try {
         const response = await fetch('../../admin/tickets/backend/obtener_novedades_chat_usuario.php?ticket_ids=' + encodeURIComponent(ids.join(',')), {cache: 'no-store', credentials: 'same-origin'});
         if (!response.ok) return;
@@ -168,7 +169,7 @@ async function revisarChatsVigilados() {
                 mostrarIndicadorChat(id, leerDatoChat(id, 'no_leido') === '1');
             }
         });
-    } catch (_) {}
+    } catch (_) {} finally { window.ticketRevisandoVigilados = false; }
 }
 
 function abrirChat(id) {
@@ -181,8 +182,8 @@ function abrirChat(id) {
     document.getElementById('chatMensaje').focus();
     cargarChat();
     window.clearInterval(window.intervaloChatActivo);
-    window.intervaloChatActivo = window.setInterval(cargarChat, 30000);
-    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 120000);
+    window.intervaloChatActivo = window.setInterval(cargarChat, 120000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 300000);
 }
 
 function cerrarChat() {
@@ -200,7 +201,8 @@ function alternarTextoChat(texto, boton) {
 }
 
 async function cargarChat() {
-    if (!window.ticketActual) return;
+    if (!window.ticketActual || document.hidden || window.ticketChatCargando) return;
+    window.ticketChatCargando = true;
     const cont = document.getElementById('chatMensajes');
     try {
         const response = await fetch('../../admin/tickets/backend/obtener_chat.php?ticket_id=' + window.ticketActual, {cache: 'no-store', credentials: 'same-origin'});
@@ -240,6 +242,7 @@ async function cargarChat() {
         mostrarIndicadorChat(window.ticketActual, false);
         document.getElementById('chatError').textContent = '';
     } catch (error) { document.getElementById('chatError').textContent = error.message || 'Error de conexión.'; }
+    finally { window.ticketChatCargando = false; }
 }
 
 function conectarFormularioChat() {
@@ -251,7 +254,7 @@ function conectarFormularioChat() {
     window.ticketChatVigilados = Array.from(new Set(idsAbiertos.concat(idsRecientes)));
     botonesTicket.forEach(boton => mostrarIndicadorChat(boton.dataset.ticketId, leerDatoChat(boton.dataset.ticketId, 'no_leido') === '1'));
     revisarChatsVigilados();
-    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 120000);
+    if (!window.intervaloChatUsuario) window.intervaloChatUsuario = window.setInterval(revisarChatsVigilados, 300000);
     actualizarControlSonidoChat();
     formulario.onsubmit = async event => {
         event.preventDefault();
@@ -269,6 +272,12 @@ function conectarFormularioChat() {
         finally { boton.disabled = false; }
     };
 }
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    if (window.ticketActual) cargarChat();
+    revisarChatsVigilados();
+});
 </script>
 
 <div class="tickets-header">
