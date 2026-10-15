@@ -1,10 +1,13 @@
 <?php
-ini_set('display_errors', 0);
-ini_set('display_startup_errors', 0);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+
+// Deja que los errores reales de PHP/MySQL se muestren en el flujo de acceso.
+$GLOBALS['mostrar_errores_php_login'] = true;
 
 // Usamos @ para evitar que un include fallido dispare error 500 directamente
 if (!file_exists('../backend/conexion.php')) {
