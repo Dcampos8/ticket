@@ -1,4 +1,4 @@
-/* Estilos extraídos de admin\cotizaciones\cotizaciones.php */
+/* Cotizaciones: superficie limpia alineada con la marca Valadez. */
 
 body{ margin-top: 0; }
 
@@ -346,6 +346,119 @@ body{ margin-top: 0; }
         .cotz-page .btn-cotz-primary { width: 100%; }
     }
 
-    table#tablaHistorial {
-    width: 100%;
+    table#tablaHistorial { width: 100%; }
+
+/* Pulido visual y jerarquía */
+.cotz-page {
+    --cotz-bg: #f4f4f5;
+    --cotz-surface: #fff;
+    --cotz-border: #dedee0;
+    --cotz-border-soft: #eeeef0;
+    --cotz-text: #373739;
+    --cotz-muted: #707074;
+    --cotz-accent: #ed1c24;
+    --cotz-accent-dark: #c81019;
+    --cotz-accent-light: #fde9ea;
+    --cotz-danger: #c81019;
+    max-width: 1760px;
+    margin: 0 auto;
+    padding: 1.5rem clamp(12px, 2vw, 28px) 2rem;
+}
+.cotz-page .cotz-card {
+    overflow: hidden;
+    border-color: var(--cotz-border);
+    border-radius: 13px;
+    box-shadow: 0 2px 8px rgba(23, 32, 51, .05);
+}
+.cotz-page .cotz-card-header {
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+}
+.cotz-page .cotz-card-header h3,
+.cotz-page .cotz-card-header h5 { font-size: 1rem; letter-spacing: -.015em; }
+.cotz-page .cotz-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+}
+.cotz-page .cotz-card-body { padding: clamp(1rem, 2vw, 1.5rem); }
+.cotz-page .cotz-stat {
+    min-height: 92px;
+    padding: 1rem 1.1rem;
+    border-color: var(--cotz-border);
+    border-radius: 12px;
+    box-shadow: 0 2px 7px rgba(23, 32, 51, .04);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.cotz-page .cotz-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(23, 32, 51, .08);
+}
+.cotz-page .cotz-stat-icon { width: 40px; height: 40px; border-radius: 11px; }
+.cotz-page .cotz-stat-value { font-size: clamp(1.05rem, 1.5vw, 1.35rem); overflow-wrap: anywhere; }
+.cotz-page .form-label { color: #5c5c60; font-size: .72rem; }
+.cotz-page .form-control,
+.cotz-page .form-select {
+    min-height: 42px;
+    border-color: #d9d9dc;
+    border-radius: 8px;
+    color: var(--cotz-text);
+}
+.cotz-page .form-control:focus,
+.cotz-page .form-select:focus { border-color: var(--cotz-accent); box-shadow: 0 0 0 .2rem rgba(237, 28, 36, .12); }
+.cotz-page .cotz-logo-drop { border-color: #d9d9dc; background: #fafafa; }
+.cotz-page h5.mt-4 {
+    display: flex;
+    align-items: center;
+    color: var(--cotz-text);
+    font-size: .95rem;
+    font-weight: 700;
+}
+.cotz-page #tablaArticulos { margin-bottom: 0; }
+.cotz-page #tablaArticulos thead th {
+    padding: .75rem .65rem;
+    background: #373739;
+    color: #fff;
+    border-color: #505054;
+}
+.cotz-page #tablaArticulos td { padding: .65rem; }
+.cotz-page #tablaArticulos tbody tr:nth-child(even) { background: #fcfcfc; }
+.cotz-page #tablaArticulos input,
+.cotz-page #tablaArticulos select { font-size: .85rem; }
+.cotz-page #tablaArticulos .input-group-text {
+    border-color: #d9d9dc;
+    background: #f6f6f7;
+    color: #626267;
+}
+.cotz-page .cotz-subtotal { color: #65656a; font-size: .73rem; }
+.cotz-page .cotz-form-footer { border-top-color: var(--cotz-border-soft); }
+.cotz-page .cotz-total-box .cotz-total-value { color: var(--cotz-accent-dark); }
+.cotz-page .btn-cotz-primary {
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(200, 16, 25, .15);
+}
+.cotz-page .btn-cotz-outline { border-color: #d7d7da; }
+.cotz-page #tablaHistorial { min-width: 800px; }
+.cotz-page #tablaHistorial thead th {
+    padding: .8rem .75rem;
+    background: #373739;
+    color: #fff;
+    border-color: #505054;
+}
+.cotz-page #tablaHistorial td { padding: .8rem .75rem; }
+.cotz-page #tablaHistorial tbody tr:hover { --bs-table-accent-bg: #fff7f7; }
+.cotz-page .cotz-folio { color: #c81019; }
+.cotz-page .cotz-icon-btn { transition: color .15s ease, background .15s ease, border-color .15s ease; }
+.cotz-page .cotz-icon-btn:hover { border-color: #c9c9cc; }
+.cotz-page .cotz-empty { padding: 3.5rem 1rem; }
+
+@media (max-width: 767.98px) {
+    .cotz-page { padding-top: 1rem; }
+    .cotz-page .cotz-card-header { padding: .9rem 1rem; }
+    .cotz-page .cotz-search { max-width: none; width: 100%; }
+    .cotz-page #tablaHistorial { min-width: 800px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cotz-page *, #mainContent .kpi { transition-duration: .01ms !important; }
 }

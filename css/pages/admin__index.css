@@ -1,10 +1,119 @@
 /* Estilos extraídos de admin\index.php */
 
 body{
-        margin-top: 0;
-    }
-    div#modalTicketsEstatus {
-    margin-top: 66;
+    margin-top: 0;
+}
+
+/* Dashboard de administración */
+#mainContent {
+    max-width: 1760px;
+    margin: 0 auto;
+    padding: clamp(18px, 2.2vw, 32px);
+}
+#mainContent > h2 {
+    margin: 0 0 1.25rem !important;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid #dedee0;
+    color: #373739;
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+    font-weight: 750;
+    letter-spacing: -.035em;
+}
+#mainContent > form.row {
+    align-items: end;
+    row-gap: .9rem;
+    margin: 0 0 1.5rem !important;
+    padding: 1.15rem 1.25rem;
+    background: #fff;
+    border: 1px solid #dedee0;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(23, 32, 51, .05);
+}
+#mainContent > form.row label {
+    display: block;
+    margin-bottom: .4rem;
+    color: #707074;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+}
+#mainContent > form.row .btn {
+    min-height: 42px;
+    padding: .6rem 1rem;
+}
+#mainContent > form.row .btn-success {
+    background: #373739;
+    border-color: #373739;
+}
+#mainContent > form.row .btn-success:hover { background: #29292b; border-color: #29292b; }
+#mainContent .kpi {
+    min-height: 112px;
+    padding: 1rem 1.1rem;
+    gap: .9rem;
+    border: 1px solid #e2e2e4;
+    border-radius: 13px;
+    box-shadow: 0 2px 7px rgba(23, 32, 51, .045);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+#mainContent .kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(23, 32, 51, .09);
+}
+#mainContent .kpi-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    box-shadow: none;
+    font-size: 1.15rem;
+}
+#mainContent .kpi-info { min-width: 0; }
+#mainContent .kpi-info span {
+    font-size: .68rem;
+    line-height: 1.35;
+    letter-spacing: .045em;
+}
+#mainContent .kpi-info strong {
+    display: block;
+    margin-top: .3rem;
+    font-size: clamp(1.2rem, 1.6vw, 1.55rem);
+    overflow-wrap: anywhere;
+}
+#mainContent > .small.text-muted { max-width: 1000px; line-height: 1.6; }
+#mainContent .dashboard-panel {
+    padding: 1.15rem;
+    border-color: #e2e2e4;
+    border-radius: 13px;
+    box-shadow: 0 2px 7px rgba(23, 32, 51, .045);
+}
+#mainContent .dashboard-panel h6 {
+    padding-bottom: .75rem;
+    border-bottom: 1px solid #eeeef0;
+    color: #373739;
+}
+#mainContent .rank-list li {
+    padding: .75rem .85rem;
+    border: 1px solid #eeeef0;
+    border-radius: 9px;
+    background: #f8f8f9;
+}
+#mainContent .rank-list li:hover { transform: none; background: #f2f2f3; }
+#mainContent .rank-list li > strong {
+    min-width: 2rem;
+    padding: .28rem .55rem;
+    border-radius: 7px;
+    background: #fde9ea;
+    color: #c81019;
+    text-align: center;
+}
+
+@media (max-width: 575.98px) {
+    #mainContent { padding: 16px 12px 24px; }
+    #mainContent > form.row { padding: 1rem; }
+    #mainContent > form.row .col-md-3 { width: 100%; }
+    #mainContent > form.row .btn { width: 100%; }
+    #mainContent .kpi { min-height: 92px; padding: .8rem; }
+    #mainContent .kpi-icon { width: 40px; height: 40px; }
 }
 #modalTicketsEstatus .modal-dialog{
     max-width: 95%;
