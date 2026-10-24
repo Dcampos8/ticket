@@ -401,12 +401,21 @@ include (ROOT_PATH . 'admin/menu.php');
                         <?php
                             $moneda_limpia = explode(' ', $row['currency'])[0];
                             $inicial = mb_strtoupper(mb_substr(trim($row['client_name']), 0, 1));
+                            $logoUrl = !empty($row['company_logo'])
+                                ? (defined('BASE_URL') ? BASE_URL : '/') . 'uploads/' . rawurlencode(basename($row['company_logo']))
+                                : '';
                         ?>
                         <tr>
                             <td><span class="cotz-folio"><?= htmlspecialchars($row['folio'], ENT_QUOTES, 'UTF-8') ?></span></td>
                             <td>
                                 <div class="cotz-client">
-                                    <span class="cotz-avatar"><?= htmlspecialchars($inicial, ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span class="cotz-avatar"<?= $logoUrl !== '' ? ' title="Logo de ' . htmlspecialchars($row['client_name'], ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+                                        <?php if ($logoUrl !== ''): ?>
+                                            <img src="<?= htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Logo de <?= htmlspecialchars($row['client_name'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($inicial, ENT_QUOTES, 'UTF-8') ?>
+                                        <?php endif; ?>
+                                    </span>
                                     <?= htmlspecialchars($row['client_name']) ?>
                                 </div>
                             </td>

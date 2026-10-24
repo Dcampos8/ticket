@@ -448,6 +448,18 @@ body{ margin-top: 0; }
 .cotz-page #tablaHistorial td { padding: .8rem .75rem; }
 .cotz-page #tablaHistorial tbody tr:hover { --bs-table-accent-bg: #fff7f7; }
 .cotz-page .cotz-folio { color: #c81019; }
+.cotz-page .cotz-avatar {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #eeeef0;
+}
+.cotz-page .cotz-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 3px;
+    object-fit: contain;
+}
 .cotz-page .cotz-icon-btn { transition: color .15s ease, background .15s ease, border-color .15s ease; }
 .cotz-page .cotz-icon-btn:hover { border-color: #c9c9cc; }
 .cotz-page .cotz-empty { padding: 3.5rem 1rem; }
