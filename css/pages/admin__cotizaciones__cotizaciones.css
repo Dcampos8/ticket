@@ -345,3 +345,7 @@ body{ margin-top: 0; }
         .cotz-page .cotz-form-footer { flex-direction: column; align-items: stretch; }
         .cotz-page .btn-cotz-primary { width: 100%; }
     }
+
+    table#tablaHistorial {
+    width: 100%;
+}
