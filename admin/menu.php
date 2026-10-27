@@ -57,8 +57,8 @@ $submenusModulos = [
 
 $navGroups = [
     'Personal' => ['usuarios', 'asistencias'],
-    'Activos y operación' => ['inventario', 'lineas', 'mantenimiento', 'licencias'],
-    'Seguimiento' => ['auditorias', 'reportes', 'calificaciones'],
+    'Activos y operación' => ['inventario', 'lineas', 'mantenimiento'],
+    'Seguimiento' => ['auditorias', 'reportes', 'calificaciones','licencias'],
     'Herramientas' => ['cotizaciones', 'firmas', 'avisos', 'mail', 'notificaciones', 'integraciones']
 ];
 $navGroupIcons = [
