@@ -13,30 +13,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf()) {
 }
 
 /* ================= 2. RECEPCIÓN Y LIMPIEZA DE DATOS ================= */
-$userId   = intval($_POST['user_id'] ?? 0);
-$puesto   = trim($_POST['puesto'] ?? '');
-$correo   = trim($_POST['correo'] ?? '');
-$telefono = trim($_POST['telefono'] ?? '');
+$nombre   = trim((string) ($_POST['nombre'] ?? ''));
+$area     = trim((string) ($_POST['area'] ?? ''));
+$puesto   = trim((string) ($_POST['puesto'] ?? ''));
+$correo   = trim((string) ($_POST['correo'] ?? ''));
+$telefono = trim((string) ($_POST['telefono'] ?? ''));
 
-if ($userId === 0 || empty($correo) || empty($puesto)) {
-    die("Error: Faltan datos obligatorios (Usuario, Puesto o Correo).");
+if ($nombre === '' || $puesto === '' || !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+    header("Location: " . BASE_URL . "admin/firmas/firmas.php?error=Revisa+el+nombre,+el+puesto+y+el+correo.");
+    exit();
 }
+
+$nombre = mb_strtoupper($nombre, 'UTF-8');
 
 // Formatear Puesto para que se vea profesional
 $puesto = mb_convert_case(mb_strtolower($puesto, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
-
-/* ================= 3. OBTENER NOMBRE DEL USUARIO ================= */
-$stmt = $conexion->prepare("SELECT nombre_completo FROM usuarios WHERE id = ?");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$res = $stmt->get_result();
-$user = $res->fetch_assoc();
-
-if (!$user) {
-    die("Error: Usuario no encontrado.");
-}
-
-$nombre = mb_strtoupper($user['nombre_completo'], 'UTF-8'); // Nombre en Mayúsculas como en la imagen
 
 /* ================= 4. CONFIGURACIÓN DE LIENZO (GD) ================= */
 $anchoImg = 650;
@@ -106,8 +97,12 @@ do {
 
 imagettftext($img, $fontSizePuesto, 0, $xInicio, 90, $gris, $fontPath, $puesto);
 
-// --- DATOS DE CONTACTO (Tamaño fijo) ---
-$yContacto = 120;
+// --- AREA Y DATOS DE CONTACTO ---
+$yContacto = 112;
+if ($area !== '') {
+    imagettftext($img, 11, 0, $xInicio, $yContacto, $gris, $fontPath, $area);
+    $yContacto += 20;
+}
 if (!empty($telefono)) {
     imagettftext($img, 11, 0, $xInicio, $yContacto, $negro, $fontPath, "Tel. " . $telefono);
     $yContacto += 22;
@@ -118,7 +113,7 @@ imagettftext($img, 11, 0, $xInicio, $yContacto, $rojo_tv, $fontPath, mb_strtolow
 $dirTmp = __DIR__.'/../tmp';
 if (!is_dir($dirTmp)) { mkdir($dirTmp, 0755, true); }
 
-$nombreArchivo = 'firma_' . $userId . '_' . bin2hex(random_bytes(12)) . '.jpg';
+$nombreArchivo = 'firma_' . bin2hex(random_bytes(12)) . '.jpg';
 $rutaFirma = $dirTmp.'/'.$nombreArchivo;
 
 imagejpeg($img, $rutaFirma, 95);
@@ -147,7 +142,7 @@ $correoEnviado = mail($correo, $subject, $mensaje, $headers);
 if($correoEnviado) {
     header("Location: " . BASE_URL . "admin/firmas/firmas.php?ok=1");
 } else {
-    echo "Error al enviar el correo.";
+    header("Location: " . BASE_URL . "admin/firmas/firmas.php?error=No+se+pudo+enviar+el+correo.+Verifica+la+configuracion+de+correo.");
 }
 exit();
 ?>

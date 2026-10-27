@@ -1,91 +1,37 @@
-/* Estilos extraídos de admin\firmas\firmas.php */
-
-/* Base y Tipografía */
-    body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; }
-    
-    /* Contenedor Pro */
-    .container { 
-        background: #ffffff; 
-        padding: 30px; 
-        border-radius: 20px; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-        margin-top: 0 !important;
-    }
-
-    h4 { 
-        color: #1e3a8a; 
-        font-weight: 700; 
-        border-left: 5px solid #e31e24; 
-        padding-left: 15px; 
-        margin-bottom: 25px;
-        text-transform: uppercase;
-        font-size: 1.2rem;
-    }
-
-    /* Tabla Estilo Dashboard */
-    .table { border: none; border-collapse: separate; border-spacing: 0 10px; }
-    .table thead th { 
-        background-color: #1e3a8a !important; 
-        color: white !important; 
-        border: none; 
-        padding: 15px;
-        font-size: 0.85rem;
-        text-align: center;
-    }
-    .table thead th:first-child { border-radius: 10px 0 0 10px; }
-    .table thead th:last-child { border-radius: 0 10px 10px 0; }
-
-    .table tbody tr { 
-        background-color: #fdfdfd; 
-        transition: all 0.2s;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-    .table tbody tr:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        background-color: #fff;
-    }
-
-    .table td { 
-        padding: 12px !important; 
-        vertical-align: middle; 
-        border: none !important;
-        color: #475569;
-        font-size: 0.9rem;
-    }
-
-    /* Inputs dentro de la tabla */
-    .form-control-sm { 
-        border-radius: 8px; 
-        border: 1px solid #e2e8f0; 
-        padding: 8px 12px;
-        transition: all 0.3s;
-    }
-    .form-control-sm:focus { 
-        border-color: #e31e24; 
-        box-shadow: 0 0 0 3px rgba(227, 30, 36, 0.1); 
-    }
-
-    /* Botón Generar */
-    .btn-primary { 
-        background: #1e3a8a;
-        border: none; 
-        border-radius: 8px; 
-        padding: 8px 15px; 
-        font-weight: 600; 
-        transition: transform 0.2s;
-    }
-    .btn-primary:hover { 
-        transform: scale(1.05); 
-        box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
-    }
-
-    /* Badge de Área */
-    .area-badge {
-        background: #eff6ff;
-        color: #1e40af;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.8rem;
-    }
+.firmas-page {
+    max-width: 980px;
+    margin: 28px auto;
+    padding: 0 20px;
+    color: #182230;
+}
+.firmas-header { margin-bottom: 22px; }
+.firmas-eyebrow { margin: 0 0 6px; color: #64748b; font-size: .75rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.firmas-header h1 { margin: 0; color: #172554; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+.firmas-intro { max-width: 660px; margin: 8px 0 0; color: #64748b; line-height: 1.55; }
+.firmas-form { padding: clamp(20px, 4vw, 34px); border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; box-shadow: 0 8px 28px rgba(15, 23, 42, .06); }
+.firmas-section-title { display: flex; align-items: center; gap: 13px; margin-bottom: 24px; }
+.firmas-section-title > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: #eff6ff; color: #1e3a8a; font-weight: 700; }
+.firmas-section-title h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.firmas-section-title p { margin: 3px 0 0; color: #64748b; font-size: .875rem; }
+.firmas-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.firmas-field { display: grid; gap: 7px; color: #334155; font-size: .875rem; font-weight: 600; }
+.firmas-field b { color: #dc2626; }
+.firmas-field input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #0f172a; font: inherit; font-weight: 400; outline: none; transition: border-color .15s, box-shadow .15s; }
+.firmas-field input::placeholder { color: #94a3b8; }
+.firmas-field input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, .12); }
+.firmas-field-wide { grid-column: 1 / -1; }
+.firmas-actions { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 26px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+.firmas-actions p { margin: 0; color: #64748b; font-size: .85rem; }
+.firmas-submit { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: #1e3a8a; color: #fff; font-weight: 650; cursor: pointer; transition: background .15s, transform .15s; }
+.firmas-submit:hover { background: #1d4ed8; transform: translateY(-1px); }
+.firmas-submit:focus-visible { outline: 3px solid rgba(37, 99, 235, .35); outline-offset: 2px; }
+.firmas-alert { margin: 0 0 18px; padding: 12px 15px; border-radius: 8px; font-size: .9rem; }
+.firmas-alert.success { border: 1px solid #a7f3d0; background: #ecfdf5; color: #065f46; }
+.firmas-alert.error { border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; }
+@media (max-width: 640px) {
+    .firmas-page { margin: 20px auto; padding: 0 14px; }
+    .firmas-fields { grid-template-columns: 1fr; gap: 15px; }
+    .firmas-field-wide { grid-column: auto; }
+    .firmas-actions { align-items: stretch; flex-direction: column; }
+    .firmas-submit { width: 100%; }
+}
