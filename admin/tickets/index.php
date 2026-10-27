@@ -121,7 +121,7 @@ if ($filtros['vista'] === 'abiertos') {
 } elseif ($filtros['vista'] === 'resueltos_hoy') {
     $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = '$hoyLocal'";
 } elseif ($filtros['vista'] === 'reabiertos') {
-    $condiciones[] = $historialTicketsDisponible ? "t.estatus IN ('Pendiente','En proceso') AND EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%'))" : '1 = 0';
+    $condiciones[] = $historialTicketsDisponible ? "t.estatus IN ('Pendiente','En proceso') AND EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%'))" : '1 = 0';
 }
 
 $whereSql = $condiciones ? ('WHERE ' . implode(' AND ', $condiciones)) : '';
@@ -157,7 +157,7 @@ if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
     foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
 }
 if ($historialTicketsDisponible) {
-    $resultadoReabiertos = $conexion->query("SELECT COUNT(DISTINCT t.id) AS total FROM tickets t INNER JOIN ticket_actividad_historial tah ON tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%') WHERE t.estatus IN ('Pendiente','En proceso')");
+    $resultadoReabiertos = $conexion->query("SELECT COUNT(DISTINCT t.id) AS total FROM tickets t INNER JOIN ticket_actividad_historial tah ON tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%') WHERE t.estatus IN ('Pendiente','En proceso')");
     if ($resultadoReabiertos) $resumenTickets['reabiertos'] = (int) ($resultadoReabiertos->fetch_assoc()['total'] ?? 0);
 }
 
@@ -172,7 +172,7 @@ if ($qAreasTickets) while ($r = $qAreasTickets->fetch_assoc()) $resumenAreas[] =
 include(ROOT_PATH . 'admin/menu.php');
 
 // 4. Consulta de Datos (respetando filtros + paginación)
-$campoReabiertoSql = $historialTicketsDisponible ? "EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%'))" : '0';
+$campoReabiertoSql = $historialTicketsDisponible ? "EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%'))" : '0';
 $sql = "SELECT t.*, u.nombre_completo AS usuario_nombre_completo, u.area AS usuario_area,
                $campoReabiertoSql AS reabierto
         FROM tickets t
@@ -534,6 +534,11 @@ function claseTipoTicket($tipo) {
                                         <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0" title="Ver quién atendió y qué cambios hizo">
                                             <i class="fas fa-user-clock"></i>
                                         </button>
+                                        <?php if (in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['admin', 'superadmin'], true)): ?>
+                                            <button type="button" onclick="reabrirTicket(<?= (int) $f['id'] ?>)" class="btn btn-link text-primary p-0 ticket-action-reopen" title="Reabrir como Pendiente" aria-label="Reabrir ticket #<?= (int) $f['id'] ?>">
+                                                <i class="fas fa-rotate-left"></i>
+                                            </button>
+                                        <?php endif; ?>
                                         <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
@@ -869,6 +874,37 @@ function eliminarTicket(id) {
         error: function(xhr) {
             console.error("ERROR AJAX:", xhr.responseText);
             alert("Error al intentar eliminar.");
+        }
+    });
+}
+
+// Reabrir cualquier ticket y devolverlo a Pendiente.
+function reabrirTicket(id) {
+    if (!confirm('¿Reabrir el ticket #' + id + ' y dejarlo como Pendiente?')) return;
+    const boton = document.querySelector('button.ticket-action-reopen[onclick="reabrirTicket(' + id + ')"]');
+    if (boton) boton.disabled = true;
+
+    $.ajax({
+        url: 'backend/reabrir_ticket.php',
+        type: 'POST',
+        data: { ticket_id: id, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+        dataType: 'json',
+        success: function(respuesta) {
+            if (respuesta.status === 'ok') {
+                if (respuesta.changed) {
+                    location.reload();
+                } else {
+                    alert(respuesta.message || 'El ticket ya se encuentra Pendiente.');
+                }
+                return;
+            }
+            alert(respuesta.message || 'No se pudo reabrir el ticket.');
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON?.message || 'No se pudo reabrir el ticket.');
+        },
+        complete: function() {
+            if (boton) boton.disabled = false;
         }
     });
 }
