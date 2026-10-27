@@ -37,7 +37,6 @@ if (!defined('ADMIN_SHARED_JS_LOADED')):
 <?php
 $submenusModulos = [
     'mantenimiento' => [
-        ['ruta' => 'admin/mantenimiento/plan_mantenimiento.php', 'icon' => 'fa-calendar-alt', 'label' => 'Plan anual'],
         ['ruta' => 'admin/mantenimiento/programacion_mantenimientos.php', 'icon' => 'fa-calendar-check', 'label' => 'Programación'],
         ['ruta' => 'admin/mantenimiento/historial_mantenimientos.php', 'icon' => 'fa-history', 'label' => 'Historial']
     ],
