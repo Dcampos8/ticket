@@ -69,6 +69,14 @@ $navGroups = [
     'Seguimiento' => ['auditorias', 'reportes', 'calificaciones'],
     'Herramientas' => ['cotizaciones', 'firmas', 'avisos', 'mail', 'notificaciones', 'integraciones']
 ];
+$navGroupIcons = [
+    'Personal' => 'fa-users',
+    'Activos y operación' => 'fa-boxes-stacked',
+    'Seguimiento' => 'fa-chart-line',
+    'Herramientas' => 'fa-screwdriver-wrench',
+    'Más herramientas' => 'fa-ellipsis'
+];
+$navGroupLabels = ['Activos y operación' => 'Operación'];
 $groupedKeys = [];
 foreach ($navGroups as $groupKeys) {
     $groupedKeys = array_merge($groupedKeys, $groupKeys);
@@ -120,7 +128,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
             if (!$visibleKeys) continue;
           ?>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle <?= checkActive($groupLabel, $currentAdminPath, $dropdownPaths) ?>" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-layer-group"></i> <span><?= htmlspecialchars($groupLabel, ENT_QUOTES, 'UTF-8') ?></span></a>
+            <a class="nav-link dropdown-toggle <?= checkActive($groupLabel, $currentAdminPath, $dropdownPaths) ?>" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid <?= htmlspecialchars($navGroupIcons[$groupLabel] ?? 'fa-folder-open', ENT_QUOTES, 'UTF-8') ?>"></i> <span><?= htmlspecialchars($navGroupLabels[$groupLabel] ?? $groupLabel, ENT_QUOTES, 'UTF-8') ?></span></a>
             <ul class="dropdown-menu shadow-lg">
               <?php foreach ($visibleKeys as $moduleKey): ?>
                 <?php
@@ -129,7 +137,6 @@ function checkActive($target, $currentPath, $dropdowns = []) {
                   $moduleRoute = trim((string) ($module['ruta'] ?? ''), '/');
                   $moduleUrl = BASE_URL . $moduleRoute;
                 ?>
-                <?php if (count($visibleKeys) > 1): ?><li><h6 class="dropdown-header"><?= htmlspecialchars($moduleLabel, ENT_QUOTES, 'UTF-8') ?></h6></li><?php endif; ?>
                 <?php if ($moduleRoute !== ''): ?>
                   <?php
                     $unreadSurveys = 0;
@@ -144,7 +151,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
                   <?php if (!empty($item['superadmin']) && !esSuperAdmin()) continue; ?>
                   <li><a class="dropdown-item" href="<?= BASE_URL . htmlspecialchars($item['ruta'], ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid <?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?> me-2"></i><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></a></li>
                 <?php endforeach; ?>
-                <?php if ($moduleKey !== end($visibleKeys)): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
+                <?php if ($moduleKey !== end($visibleKeys) && !empty($submenusModulos[$moduleKey])): ?><li><hr class="dropdown-divider"></li><?php endif; ?>
               <?php endforeach; ?>
             </ul>
           </li>
