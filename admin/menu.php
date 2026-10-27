@@ -53,10 +53,7 @@ $submenusModulos = [
         ['ruta' => 'admin/usuarios/index.php', 'icon' => 'fa-users', 'label' => 'Cuentas de usuario'],
         ['ruta' => 'admin/usuarios/crear_usuario.php', 'icon' => 'fa-user-plus', 'label' => 'Alta de usuario'],
         ['ruta' => 'admin/usuarios/subir_usuarios.php', 'icon' => 'fa-file-upload', 'label' => 'Carga de usuarios'],
-        ['superadmin' => true, 'ruta' => 'admin/usuarios/permisos_modulos.php', 'icon' => 'fa-shield-halved', 'label' => 'Permisos de módulos'],
-        ['ruta' => 'admin/usuarios/employees/', 'icon' => 'fa-id-card', 'label' => 'Directorio de empleados'],
-        ['ruta' => 'admin/usuarios/employees/add_empleado.php', 'icon' => 'fa-user-tag', 'label' => 'Alta de empleado'],
-        ['ruta' => 'admin/usuarios/employees/subir_employees.php', 'icon' => 'fa-file-csv', 'label' => 'Carga de empleados']
+        ['superadmin' => true, 'ruta' => 'admin/usuarios/permisos_modulos.php', 'icon' => 'fa-shield-halved', 'label' => 'Permisos de módulos']
     ]
 ];
 
