@@ -50,7 +50,6 @@ $submenusModulos = [
     'usuarios' => [
         ['ruta' => 'admin/usuarios/entregas/entrega_recursos.php', 'icon' => 'fa-exchange-alt', 'label' => 'Entrada/salida de recursos'],
         ['ruta' => 'admin/usuarios/entregas/h_entregas_datos.php', 'icon' => 'fa-folder-open', 'label' => 'Historial de recursos'],
-        ['ruta' => 'admin/usuarios/index.php', 'icon' => 'fa-users', 'label' => 'Cuentas de usuario'],
         ['ruta' => 'admin/usuarios/crear_usuario.php', 'icon' => 'fa-user-plus', 'label' => 'Alta de usuario'],
         ['ruta' => 'admin/usuarios/subir_usuarios.php', 'icon' => 'fa-file-upload', 'label' => 'Carga de usuarios'],
         ['superadmin' => true, 'ruta' => 'admin/usuarios/permisos_modulos.php', 'icon' => 'fa-shield-halved', 'label' => 'Permisos de módulos']
