@@ -36,9 +36,6 @@ if (!defined('ADMIN_SHARED_JS_LOADED')):
 <?php endif; ?>
 <?php
 $submenusModulos = [
-    'lineas' => [
-        ['ruta' => 'admin/lineas/', 'icon' => 'fa-list', 'label' => 'Gestión']
-    ],
     'mantenimiento' => [
         ['ruta' => 'admin/mantenimiento/plan_mantenimiento.php', 'icon' => 'fa-calendar-alt', 'label' => 'Plan anual'],
         ['ruta' => 'admin/mantenimiento/programacion_mantenimientos.php', 'icon' => 'fa-calendar-check', 'label' => 'Programación'],
@@ -135,6 +132,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
                   $module = MODULOS_DISPONIBLES[$moduleKey];
                   $moduleLabel = (string) ($module['label'] ?? $moduleKey);
                   $moduleRoute = trim((string) ($module['ruta'] ?? ''), '/');
+                  if ($moduleKey === 'lineas') $moduleRoute = 'admin/lineas/';
                   $moduleUrl = BASE_URL . $moduleRoute;
                 ?>
                 <?php if ($moduleRoute !== ''): ?>
