@@ -38,6 +38,8 @@ En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como
 4. Configura la base de datos del sistema. Los respaldos completos con datos reales no se versionan; guarda únicamente migraciones incrementales revisadas en `sql/migrations/`.
 5. Asegura que `uploads/` exista, sea escribible por PHP y no permita ejecutar scripts subidos.
 
+La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una fecha de creación para las cuentas nuevas y la lista de usuarios. Los registros anteriores quedan sin fecha porque la tabla no conserva el dato histórico.
+
 ## Tickets: asignación, SLA y ayuda
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.

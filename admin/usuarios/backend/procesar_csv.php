@@ -47,7 +47,7 @@ if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || 
             $errores[] = 'Faltan columnas requeridas: ' . implode(', ', $faltantes) . '.';
         } else {
             $stmtExiste = $conexion->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
-            $stmtInsertar = $conexion->prepare('INSERT INTO usuarios (usuario, contrasena, email, phone, nombre_completo, area, rol) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmtInsertar = $conexion->prepare('INSERT INTO usuarios (usuario, contrasena, email, phone, nombre_completo, area, rol, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())');
             $stmtActualizar = $conexion->prepare('UPDATE usuarios SET contrasena = ?, email = ?, phone = ?, nombre_completo = ?, area = ? WHERE usuario = ?');
             $stmtLeer = $conexion->prepare('SELECT contrasena FROM usuarios WHERE usuario = ? LIMIT 1');
             if (!$stmtExiste || !$stmtInsertar || !$stmtActualizar || !$stmtLeer) {

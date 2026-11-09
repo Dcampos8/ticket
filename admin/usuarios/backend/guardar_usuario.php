@@ -76,8 +76,8 @@ $check->close();
 
 // 6. INSERT actualizado con el campo 'email' y 'modulos_permitidos'
 $stmt = $conexion->prepare("
-    INSERT INTO usuarios (usuario, contrasena, nombre_completo, email, phone, area, rol, modulos_permitidos)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO usuarios (usuario, contrasena, nombre_completo, email, phone, area, rol, modulos_permitidos, fecha_creacion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
 ");
 
 $stmt->bind_param("ssssssss", $usuario, $contrasena_hash, $nombre, $email, $phone, $area, $rol, $modulosCsv);

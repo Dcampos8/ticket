@@ -19,7 +19,7 @@ include(ROOT_PATH . 'admin/menu.php');
 
 // 5. Consulta de Datos
 
-$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol FROM usuarios ORDER BY nombre_completo ASC";
+$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol, fecha_creacion FROM usuarios ORDER BY nombre_completo ASC";
 $resultado = $conexion->query($sql);
 
 // 6. Helper: iniciales para el avatar
@@ -68,6 +68,7 @@ function colorRol($rol) {
             <th>Teléfono</th>
             <th>Área</th>
             <th>Rol</th>
+            <th>Fecha de creación</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -94,6 +95,7 @@ function colorRol($rol) {
                     <?= ucfirst($u['rol']) ?>
                   </span>
                 </td>
+                <td><?= !empty($u['fecha_creacion']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($u['fecha_creacion'])), ENT_QUOTES, 'UTF-8') : 'No registrada' ?></td>
                 <td class="acciones">
                   <?php if (strtolower(trim((string) ($_SESSION['rol'] ?? ''))) === 'admin'
                     && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
@@ -110,7 +112,7 @@ function colorRol($rol) {
             <?php endwhile; ?>
           <?php else: ?>
             <tr>
-              <td colspan="7">
+              <td colspan="8">
                 <div class="estado-vacio">
                   <span class="icono">📭</span>
                   No hay usuarios registrados.
