@@ -12,6 +12,7 @@ $campos = [
     'MAIL_MENSAJERIA_USER' => ['Correo de mensajería', 'Usuario', false, 'text'],
     'MAIL_MENSAJERIA_PASS' => ['Correo de mensajería', 'Contraseña', true, 'password'],
     'MAIL_TICKETS_TO' => ['Correo de mensajería', 'Destinatario de avisos de tickets', false, 'email'],
+    'REPORTES_DIARIOS_TO' => ['Reportes de tickets', 'Destinatarios del resumen diario (separa varios con coma)', false, 'text'],
     'MAIL_SISTEMAS_HOST' => ['Correo de sistemas', 'Servidor IMAP', false, 'text'],
     'MAIL_SISTEMAS_USER' => ['Correo de sistemas', 'Usuario', false, 'text'],
     'MAIL_SISTEMAS_PASS' => ['Correo de sistemas', 'Contraseña', true, 'password'],
@@ -38,6 +39,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $valor = trim((string) ($_POST[$clave] ?? ''));
             if ($secreto && $valor === '') continue;
             if ($secreto && !$keyCifradoConfigurado) { $ok = false; $error = 'Configura APP_SETTINGS_ENCRYPTION_KEY en el .env antes de guardar claves.'; break; }
+            if ($clave === 'REPORTES_DIARIOS_TO' && $valor !== '') {
+                $correos = array_filter(array_map('trim', explode(',', $valor)), static fn($correo) => $correo !== '');
+                foreach ($correos as $correo) if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) { $ok = false; $error = 'Revisa los correos del resumen diario; sepáralos con coma.'; break 2; }
+            }
             if ($tipo === 'email' && $valor !== '' && !filter_var($valor, FILTER_VALIDATE_EMAIL)) { $ok = false; $error = 'El correo destinatario no tiene un formato válido.'; break; }
             if ($tipo === 'url' && !filter_var($valor, FILTER_VALIDATE_URL)) { $ok = false; $error = 'La URL base debe ser válida e incluir https://'; break; }
             if ($clave === 'INTRANET_TICKET_API_SECRET' && strlen($valor) < 32) { $ok = false; $error = 'El secreto de intranet debe tener al menos 32 caracteres.'; break; }
@@ -70,7 +75,7 @@ include ROOT_PATH . 'admin/menu.php';
       <?php endif; $valorPredeterminado = $clave === 'GEMINI_MODEL' ? 'gemini-3.5-flash-lite' : ($clave === 'MAIL_SISTEMAS_HOST' ? '{imap.hostinger.com:993/imap/ssl}INBOX' : ''); $valor = obtenerConfiguracionIntegracion($clave, $valorPredeterminado); ?>
       <div class="col-12 col-md-6"><label class="form-label" for="<?= $clave ?>"><?= htmlspecialchars($etiqueta) ?></label>
         <?php if ($secreto): ?><input class="form-control" type="password" id="<?= $clave ?>" name="<?= $clave ?>" autocomplete="new-password" placeholder="<?= $valor !== '' ? 'Configurado; vacío conserva el valor actual' : 'Sin configurar' ?>" <?= !$keyCifradoConfigurado ? 'disabled' : '' ?>>
-        <?php else: ?><input class="form-control" type="<?= $tipo ?>" id="<?= $clave ?>" name="<?= $clave ?>" value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>" <?= $clave === 'INTRANET_TICKET_API_SECRET' ? 'minlength="32"' : '' ?>><?php endif; ?>
+        <?php else: ?><input class="form-control" type="<?= in_array($tipo, ['email', 'url'], true) ? $tipo : 'text' ?>" id="<?= $clave ?>" name="<?= $clave ?>" value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>" <?= $clave === 'INTRANET_TICKET_API_SECRET' ? 'minlength="32"' : '' ?>><?php endif; ?>
       </div>
     <?php endforeach; ?></div></div></section>
     <div class="d-flex justify-content-end"><button class="btn btn-danger px-4" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar configuración</button></div>

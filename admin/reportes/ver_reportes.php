@@ -28,8 +28,10 @@ $validarFecha = static function ($valor): bool {
 $fecha_inicio = $validarFecha($_GET['fecha_inicio'] ?? '') ? $_GET['fecha_inicio'] : '';
 $fecha_fin = $validarFecha($_GET['fecha_fin'] ?? '') ? $_GET['fecha_fin'] : '';
 $aplicarFiltroFechas = $fecha_inicio !== '' && $fecha_fin !== '';
-$sql = "SELECT t.id, t.nombre, t.estatus, t.descripcion, t.fecha_creacion, u.area, t.fecha_modificacion
-        FROM tickets t LEFT JOIN usuarios u ON t.nombre = u.usuario" . ($aplicarFiltroFechas ? " WHERE DATE(t.fecha_creacion) BETWEEN ? AND ?" : '') . " ORDER BY t.fecha_creacion DESC";
+$sql = "SELECT t.id, t.nombre, t.estatus, t.descripcion, t.fecha_creacion, u.area,
+               CASE WHEN t.estatus IN ('Finalizado','Cerrado') THEN COALESCE(t.fecha_resolucion, t.fecha_modificacion) ELSE NULL END AS fecha_cierre,
+               t.fecha_modificacion
+        FROM tickets t LEFT JOIN usuarios u ON t.nombre = u.usuario" . ($aplicarFiltroFechas ? " WHERE t.fecha_creacion >= ? AND t.fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)" : '') . " ORDER BY t.fecha_creacion DESC";
 $stmtReporte = $conexion->prepare($sql);
 if ($aplicarFiltroFechas) $stmtReporte->bind_param('ss', $fecha_inicio, $fecha_fin);
 $stmtReporte->execute();
@@ -63,8 +65,8 @@ $resultado = $stmtReporte->get_result();?>
           <th>Descripción</th>
           <th>Estatus</th>
           <th>Fecha Creación</th>
-          <th>Fecha Finalizado</th>
-          <th>Tiempo Transcurrido</th>
+          <th>Fecha de cierre</th>
+          <th>Tiempo de atención</th>
         </tr>
       </thead>
       <tbody>
@@ -77,21 +79,21 @@ $resultado = $stmtReporte->get_result();?>
               <td class="descripcion"><?= nl2br(htmlspecialchars($r['descripcion'])) ?></td>
               <td><?= htmlspecialchars($r['estatus'] ?? 'N/A') ?></td>
               <td class="fecha"><?= date('d/m/Y H:i', strtotime($r['fecha_creacion'])) ?></td>
-              <td class="fecha"><?= date('d/m/Y H:i', strtotime($r['fecha_modificacion'])) ?></td>
+              <td class="fecha"><?= $r['fecha_cierre'] ? date('d/m/Y H:i', strtotime($r['fecha_cierre'])) : '—' ?></td>
               <?php
                 $creacion = new DateTime($r['fecha_creacion']);
-                $modificacion = new DateTime($r['fecha_modificacion']);
-                $diferencia = $creacion->diff($modificacion);
+                $finAtencion = $r['fecha_cierre'] ? new DateTime($r['fecha_cierre']) : new DateTime();
+                $diferencia = $creacion->diff($finAtencion);
             
                 $horas = $diferencia->days * 24 + $diferencia->h;
                 $minutos = $diferencia->i;
                 $tiempo = "{$horas}h {$minutos}m";
               ?>
-            <td><?= $tiempo ?></td>
+              <td><?= $r['fecha_cierre'] ? $tiempo : $tiempo . ' (en curso)' ?></td>
             </tr>
           <?php endwhile; ?>
         <?php else: ?>
-          <tr><td colspan="5">No hay reportes en ese rango de fechas.</td></tr>
+          <tr><td colspan="8">No hay reportes en ese rango de fechas.</td></tr>
         <?php endif; ?>
       </tbody>
     </table>

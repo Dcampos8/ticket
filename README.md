@@ -20,6 +20,18 @@ En una copia nueva, abre `instalar.php` desde el navegador. El asistente permite
 
 El asistente crea `.env`, pero no crea tablas ni usuarios. Importa el esquema de la base de datos de la aplicación y aplica las migraciones de `sql/migrations/` según corresponda. Después de instalar, elimina `instalar.php` del servidor. No uses el asistente sobre una instalación ya configurada: se bloquea cuando detecta los valores principales en `.env`.
 
+### Resumen diario de tickets por correo
+
+En **Conexiones e integraciones**, configura `REPORTES_DIARIOS_TO` con el correo destinatario. Para varios destinatarios, sepáralos con comas. Configura también el host, usuario y contraseña SMTP de mensajería; si el destinatario del resumen queda vacío, el proceso no enviará correos.
+
+Programa diariamente el script `admin/reportes/enviar_resumen_diario.php` con el PHP de línea de comandos del servidor. Envía los tickets creados durante los siete días completos anteriores (de medianoche a medianoche, hora de Ciudad de México), en formato HTML. Ejemplo de cron en Linux, reemplazando las rutas por las de la instalación:
+
+```cron
+0 8 * * * /usr/bin/php /ruta/a/ticket/admin/reportes/enviar_resumen_diario.php
+```
+
+En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como programa y la ruta del script como argumento. El horario de ejecución lo define esa tarea del servidor; el destinatario se cambia desde el panel sin editar el cron.
+
 1. Usa PHP 8.x con `mysqli` y `curl` habilitados, más una base de datos MySQL/MariaDB.
 2. Crea `.env` a partir de `.env.example` y configura las credenciales de base de datos y correo que realmente use la instalación.
 3. Nunca subas `.env`, contraseñas, tokens ni claves al repositorio. Si una credencial estuvo en un commit compartido, revócala y genera una nueva.
