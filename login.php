@@ -37,7 +37,7 @@ session_start();
       <label class="field-label" for="contrasena">Contraseña</label>
       <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required autocomplete="current-password" />
 
-      <span class="login-note"><b>Nota:</b> la contraseña distingue entre mayúsculas y minúsculas.</span>
+      <span class="login-note"><b>Nota:</b> la contraseña no distingue entre mayúsculas y minúsculas.</span>
 
       <button type="submit">Ingresar</button>
     </form>

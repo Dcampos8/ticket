@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../../config.php';
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 require_once ROOT_PATH . 'shared/permisos.php';
 require_once ROOT_PATH . 'shared/security.php';
+require_once ROOT_PATH . 'shared/passwords.php';
 requerirAdmin();
 if (!esSuperAdmin() && !tieneModulo('usuarios')) {
     http_response_code(403);
@@ -17,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !validarTokenCsrf()) {
 
 $escape = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $agregados = 0;
+$actualizados = [];
 $duplicados = [];
 $errores = [];
 $archivo = $_FILES['archivoUsuarios'] ?? null;
@@ -46,8 +48,9 @@ if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || 
         } else {
             $stmtExiste = $conexion->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
             $stmtInsertar = $conexion->prepare('INSERT INTO usuarios (usuario, contrasena, email, phone, nombre_completo, area, rol) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmtActualizar = $conexion->prepare('UPDATE usuarios SET contrasena = ?, email = ?, phone = ?, nombre_completo = ?, area = ? WHERE usuario = ?');
             $stmtLeer = $conexion->prepare('SELECT contrasena FROM usuarios WHERE usuario = ? LIMIT 1');
-            if (!$stmtExiste || !$stmtInsertar || !$stmtLeer) {
+            if (!$stmtExiste || !$stmtInsertar || !$stmtActualizar || !$stmtLeer) {
                 $errores[] = 'No se pudieron preparar las consultas de importación.';
             } else {
                 $numeroFila = 1;
@@ -78,34 +81,39 @@ if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || 
                     $stmtExiste->bind_param('s', $usuario);
                     $stmtExiste->execute();
                     $stmtExiste->store_result();
-                    if ($stmtExiste->num_rows > 0) {
-                        $duplicados[] = $usuario;
-                        $stmtExiste->free_result();
-                        continue;
-                    }
+                    $yaExiste = $stmtExiste->num_rows > 0;
                     $stmtExiste->free_result();
 
                     $rolesPermitidos = esSuperAdmin() ? ['usuario', 'admin', 'superadmin'] : ['usuario'];
                     $rol = in_array($rolArchivo, $rolesPermitidos, true) ? $rolArchivo : 'usuario';
-                    $hash = password_hash($contrasenaOriginal, PASSWORD_DEFAULT);
-                    if (!is_string($hash) || !password_verify($contrasenaOriginal, $hash)) {
+                    $contrasenaNormalizada = normalizarContrasena($contrasenaOriginal);
+                    $hash = password_hash($contrasenaNormalizada, PASSWORD_DEFAULT);
+                    if (!is_string($hash) || !password_verify($contrasenaNormalizada, $hash)) {
                         $errores[] = "Fila {$numeroFila} ({$usuario}): no se pudo preparar el hash de contraseña.";
                         continue;
                     }
 
                     try {
                         $conexion->begin_transaction();
-                        $stmtInsertar->bind_param('sssssss', $usuario, $hash, $email, $phone, $nombre, $area, $rol);
-                        $stmtInsertar->execute();
+                        if ($yaExiste) {
+                            // Actualiza datos de perfil y contraseña; preserva el rol
+                            // existente para que el CSV no cambie privilegios.
+                            $stmtActualizar->bind_param('ssssss', $hash, $email, $phone, $nombre, $area, $usuario);
+                            $stmtActualizar->execute();
+                        } else {
+                            $stmtInsertar->bind_param('sssssss', $usuario, $hash, $email, $phone, $nombre, $area, $rol);
+                            $stmtInsertar->execute();
+                        }
 
                         $stmtLeer->bind_param('s', $usuario);
                         $stmtLeer->execute();
                         $filaGuardada = $stmtLeer->get_result()->fetch_assoc();
-                        if (!$filaGuardada || !password_verify($contrasenaOriginal, (string) $filaGuardada['contrasena'])) {
+                        if (!$filaGuardada || !password_verify($contrasenaNormalizada, (string) $filaGuardada['contrasena'])) {
                             throw new RuntimeException('El hash guardado no pasó la verificación.');
                         }
                         $conexion->commit();
-                        $agregados++;
+                        if ($yaExiste) $actualizados[] = $usuario;
+                        else $agregados++;
                     } catch (Throwable $e) {
                         $conexion->rollback();
                         if ((int) $e->getCode() === 1062) {
@@ -122,13 +130,15 @@ if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || 
     fclose($handle);
 }
 $duplicados = array_values(array_unique($duplicados));
+$actualizados = array_values(array_unique($actualizados));
 ?>
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Resultado de importación</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></head>
 <body class="bg-light"><main class="container py-5" style="max-width:850px"><section class="card shadow-sm"><div class="card-body p-4">
 <h1 class="h3 mb-4">Resultado de importación de usuarios</h1>
 <div class="alert alert-success">Usuarios agregados: <strong><?= $agregados ?></strong></div>
-<?php if ($duplicados): ?><div class="alert alert-warning"><h2 class="h5">Usuarios duplicados (no se modificaron)</h2><ul class="mb-0"><?php foreach ($duplicados as $duplicado): ?><li><?= $escape($duplicado) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<?php if ($actualizados): ?><div class="alert alert-info"><h2 class="h5">Usuarios duplicados detectados y actualizados</h2><p>Se actualizaron sus datos y contraseña desde el archivo; su rol actual se conservó.</p><ul class="mb-0"><?php foreach ($actualizados as $actualizado): ?><li><?= $escape($actualizado) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<?php if ($duplicados): ?><div class="alert alert-warning"><h2 class="h5">Usuarios duplicados</h2><ul class="mb-0"><?php foreach ($duplicados as $duplicado): ?><li><?= $escape($duplicado) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 <?php if ($errores): ?><div class="alert alert-danger"><h2 class="h5">Filas que requieren atención</h2><ul class="mb-0"><?php foreach ($errores as $error): ?><li><?= $escape($error) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 <a class="btn btn-primary" href="<?= htmlspecialchars(BASE_URL . 'admin/usuarios/subir_usuarios.php', ENT_QUOTES, 'UTF-8') ?>">Volver a importar</a>
 <a class="btn btn-outline-secondary" href="<?= htmlspecialchars(BASE_URL . 'admin/usuarios/', ENT_QUOTES, 'UTF-8') ?>">Ver usuarios</a>

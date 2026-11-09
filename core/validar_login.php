@@ -12,6 +12,7 @@ if (!file_exists('../backend/conexion.php')) {
 }
 require_once('../backend/conexion.php');
 require_once(__DIR__ . '/../shared/permisos.php');
+require_once(__DIR__ . '/../shared/passwords.php');
 
 $usuario = $_POST['usuario'] ?? '';
 $contrasena = $_POST['contrasena'] ?? '';
@@ -27,7 +28,24 @@ $stmt->execute();
 $resultado = $stmt->get_result();
 
 if ($fila = $resultado->fetch_assoc()) {
-    if (password_verify($contrasena, $fila['contrasena'])) {
+    $contrasenaNormalizada = normalizarContrasena($contrasena);
+    $contrasenaValida = password_verify($contrasenaNormalizada, (string) $fila['contrasena']);
+    // Compatibilidad: hashes anteriores no están normalizados. Si la
+    // contraseña exacta todavía valida, actualiza el hash al formato nuevo.
+    if (!$contrasenaValida && $contrasenaNormalizada !== $contrasena
+        && password_verify($contrasena, (string) $fila['contrasena'])) {
+        $contrasenaValida = true;
+        $hashNuevo = password_hash($contrasenaNormalizada, PASSWORD_DEFAULT);
+        if (is_string($hashNuevo)) {
+            $actualizarHash = $conexion->prepare('UPDATE usuarios SET contrasena = ? WHERE id = ?');
+            if ($actualizarHash) {
+                $actualizarHash->bind_param('si', $hashNuevo, $fila['id']);
+                $actualizarHash->execute();
+                $actualizarHash->close();
+            }
+        }
+    }
+    if ($contrasenaValida) {
         session_regenerate_id(true);
         $_SESSION['logueado'] = true;
         $_SESSION['id'] = $fila['id'];

@@ -42,7 +42,7 @@ include(ROOT_PATH . 'admin/menu.php');
         <i class="fa-solid fa-circle-info me-2"></i>
         <div><i class="fa-solid fa-circle-info me-2"></i>El CSV debe incluir estas columnas en este orden:</div>
         <div class="my-2"><code>usuario,nombre_completo,<strong>contrasena</strong>,email,phone,area,rol</code></div>
-        <small>La columna <strong>contrasena</strong> es obligatoria para cada usuario nuevo. El sistema la guarda como hash. Si un usuario ya existe, se reportará como duplicado y se continuará con las demás filas.</small>
+        <small>La columna <strong>contrasena</strong> es obligatoria. Se guarda como hash y no distingue mayúsculas. Si el usuario ya existe, se actualizan sus datos y contraseña desde el archivo, se conserva su rol y se muestra en el resumen.</small>
         <div class="mt-3"><a href="#" onclick="descargarPlantilla(); return false;" class="btn btn-outline-info">
           <i class="fa-solid fa-download me-2"></i>Descargar Plantilla CSV
         </a></div>

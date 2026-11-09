@@ -11,6 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirAdmin();
 require_once(ROOT_PATH . 'shared/security.php');
+require_once(ROOT_PATH . 'shared/passwords.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Acceso inválido");
@@ -54,8 +55,9 @@ if ($contrasena === '') {
     http_response_code(400);
     exit('La contraseña es obligatoria.');
 }
-$contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
-if (!is_string($contrasena_hash) || !password_verify($contrasena, $contrasena_hash)) {
+$contrasenaNormalizada = normalizarContrasena($contrasena);
+$contrasena_hash = password_hash($contrasenaNormalizada, PASSWORD_DEFAULT);
+if (!is_string($contrasena_hash) || !password_verify($contrasenaNormalizada, $contrasena_hash)) {
     error_log('No se pudo generar/verificar el hash al crear un usuario.');
     http_response_code(500);
     exit('No se pudo preparar la contraseña. No se creó el usuario.');
@@ -97,7 +99,7 @@ try {
     $verificar->execute();
     $filaGuardada = $verificar->get_result()->fetch_assoc();
     $verificar->close();
-    if (!$filaGuardada || !password_verify($contrasena, (string) $filaGuardada['contrasena'])) {
+    if (!$filaGuardada || !password_verify($contrasenaNormalizada, (string) $filaGuardada['contrasena'])) {
         throw new RuntimeException('El hash guardado no pasó la verificación de contraseña.');
     }
 

@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../../../shared/permisos.php';
+require_once __DIR__ . '/../../../shared/passwords.php';
 
 // Requiere estar logueado, ser admin/superadmin y tener el módulo "usuarios".
 // (BASE_URL/ROOT_PATH aún no están definidas aquí porque este archivo no
@@ -80,7 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (!empty($_POST['contrasena'])) {
-        $hash = password_hash($_POST['contrasena'], PASSWORD_DEFAULT);
+        $contrasenaNormalizada = normalizarContrasena((string) $_POST['contrasena']);
+        $hash = password_hash($contrasenaNormalizada, PASSWORD_DEFAULT);
 
         // SQL: orden estricto de columnas
         $stmt = $conexion->prepare("UPDATE usuarios SET usuario=?, nombre_completo=?, email=?, phone=?, area=?, rol=?, modulos_permitidos=?, contrasena=? WHERE id=?");
