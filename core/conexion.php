@@ -12,9 +12,10 @@ if (!isset($GLOBALS['db_conexion'])) {
     $usuario = env('DB_USER');
     $contrasena = env('DB_PASS');
     $basedatos = env('DB_NAME');
+    $puerto = (int) env('DB_PORT', '3306');
 
     try {
-        $conn = new mysqli($host, $usuario, $contrasena, $basedatos);
+        $conn = new mysqli($host, $usuario, $contrasena, $basedatos, $puerto > 0 ? $puerto : 3306);
     } catch (mysqli_sql_exception $e) {
         error_log('Conexión a base de datos fallida (código ' . $e->getCode() . ').');
         http_response_code(503);

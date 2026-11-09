@@ -14,6 +14,12 @@ Aplicación PHP para registrar y administrar tickets, evidencias y módulos admi
 
 ## Configuración
 
+### Asistente de instalación
+
+En una copia nueva, abre `instalar.php` desde el navegador. El asistente permite configurar MySQL local o remoto, valida la conexión antes de guardar y genera automáticamente la llave de cifrado. Solo solicita URL base y credenciales de la base principal; correo, Telegram, Gemini y otros conectores se configuran desde el panel cuando se necesiten.
+
+El asistente crea `.env`, pero no crea tablas ni usuarios. Importa el esquema de la base de datos de la aplicación y aplica las migraciones de `sql/migrations/` según corresponda. Después de instalar, elimina `instalar.php` del servidor. No uses el asistente sobre una instalación ya configurada: se bloquea cuando detecta los valores principales en `.env`.
+
 1. Usa PHP 8.x con `mysqli` y `curl` habilitados, más una base de datos MySQL/MariaDB.
 2. Crea `.env` a partir de `.env.example` y configura las credenciales de base de datos y correo que realmente use la instalación.
 3. Nunca subas `.env`, contraseñas, tokens ni claves al repositorio. Si una credencial estuvo en un commit compartido, revócala y genera una nueva.
