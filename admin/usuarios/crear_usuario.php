@@ -11,9 +11,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 3. Cargar helper de permisos y verificar seguridad (necesita el módulo "usuarios")
+// Solo administradores pueden abrir el alta rápida desde el menú de cuenta.
 require_once(ROOT_PATH . 'shared/permisos.php');
-requerirModulo('usuarios');
+requerirAdmin();
+require_once(ROOT_PATH . 'shared/security.php');
+$csrfToken = asegurarTokenCsrf();
 
 // 4. Cargar el menú usando la ruta absoluta
 include(ROOT_PATH . 'admin/menu.php');
@@ -34,6 +36,7 @@ $puedeAsignarRoles = esSuperAdmin();
 
           <!-- Usamos BASE_URL para la acción del formulario -->
           <form action="<?= BASE_URL ?>admin/usuarios/backend/guardar_usuario.php" method="POST" id="create">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
             <div class="mb-3 position-relative">
               <label class="form-label">Nombre de usuario</label>
@@ -68,10 +71,10 @@ $puedeAsignarRoles = esSuperAdmin();
             </div>
 
             <div class="mb-3 position-relative">
-              <label class="form-label">Correo Electrónico</label>
+              <label class="form-label">Teléfono</label>
               <div class="input-group">
-                <span class="form-icon"><i class="fa-solid fa-envelope"></i></span>
-                <input type="number" class="form-control" name="phone" placeholder="4491234567">
+                <span class="form-icon"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" class="form-control" name="phone" placeholder="4491234567" autocomplete="tel">
               </div>
             </div>
 

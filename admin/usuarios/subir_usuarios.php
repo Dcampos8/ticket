@@ -10,6 +10,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // 3. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
 requerirModulo('usuarios');
+requerirAdmin();
+require_once(ROOT_PATH . 'shared/security.php');
+$csrfToken = asegurarTokenCsrf();
 
 // 4. Cargar el menú usando la ruta absoluta
 include(ROOT_PATH . 'admin/menu.php');
@@ -23,6 +26,7 @@ include(ROOT_PATH . 'admin/menu.php');
   <div class="card shadow-sm p-4" style="max-width: 700px;">
     <!-- El action ahora usa BASE_URL para apuntar correctamente al backend -->
     <form action="<?= BASE_URL ?>admin/usuarios/backend/procesar_csv.php" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
       <div class="mb-3">
         <label for="archivoUsuarios" class="form-label">Seleccionar archivo CSV</label>
@@ -36,13 +40,12 @@ include(ROOT_PATH . 'admin/menu.php');
 
       <div class="alert alert-info py-2">
         <i class="fa-solid fa-circle-info me-2"></i>
-        <small>
-          El archivo debe contener las siguientes columnas: 
-          <strong>usuario</strong>, <strong>nombre_completo</strong>,<strong>contrasena</strong>,<strong>email</strong>,<strong>phone</strong>, <strong>área</strong>, <strong>rol</strong>.
-        </small>
-        <a href="#" onclick="descargarPlantilla()" class="btn btn-outline-info">
+        <div><i class="fa-solid fa-circle-info me-2"></i>El CSV debe incluir estas columnas en este orden:</div>
+        <div class="my-2"><code>usuario,nombre_completo,<strong>contrasena</strong>,email,phone,area,rol</code></div>
+        <small>La columna <strong>contrasena</strong> es obligatoria para cada usuario nuevo. El sistema la guarda como hash. Si un usuario ya existe, se reportará como duplicado y se continuará con las demás filas.</small>
+        <div class="mt-3"><a href="#" onclick="descargarPlantilla(); return false;" class="btn btn-outline-info">
           <i class="fa-solid fa-download me-2"></i>Descargar Plantilla CSV
-        </a>
+        </a></div>
       </div>
 
       <div class="d-flex gap-2">

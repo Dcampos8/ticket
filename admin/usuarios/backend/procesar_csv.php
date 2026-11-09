@@ -1,86 +1,135 @@
-<!-- Aquí incluyes tu plantilla de menú -->
-<?php 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+<?php
+declare(strict_types=1);
 
-
-
-session_start();
-
-require_once('../../../backend/conexion.php');
-
-
-if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'admin') {
-    header("Location: login.php");
-    exit();
+require_once __DIR__ . '/../../../config.php';
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+require_once ROOT_PATH . 'shared/permisos.php';
+require_once ROOT_PATH . 'shared/security.php';
+requerirAdmin();
+if (!esSuperAdmin() && !tieneModulo('usuarios')) {
+    http_response_code(403);
+    exit('No tienes permiso para importar usuarios.');
+}
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !validarTokenCsrf()) {
+    http_response_code(403);
+    exit('La sesión expiró o la solicitud no es válida. Regresa al formulario e inténtalo de nuevo.');
 }
 
-$currentPage = basename($_SERVER['PHP_SELF']); // Para el menú
+$escape = static fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+$agregados = 0;
+$duplicados = [];
+$errores = [];
+$archivo = $_FILES['archivoUsuarios'] ?? null;
 
-// Inicializa variables de resultado
-$mensaje = "";
-$contador = 0;
-$duplicados = 0;
+if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($archivo['tmp_name'])) {
+    $errores[] = 'No se recibió un archivo CSV válido.';
+} elseif (($handle = fopen($archivo['tmp_name'], 'rb')) === false) {
+    $errores[] = 'No se pudo abrir el archivo CSV.';
+} else {
+    $encabezados = fgetcsv($handle, 0, ',', '"', '');
+    if (!$encabezados) {
+        $errores[] = 'El CSV está vacío o no contiene encabezados.';
+    } else {
+        $encabezados[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $encabezados[0]);
+        $mapa = [];
+        foreach ($encabezados as $indice => $nombre) {
+            $nombre = strtolower(trim((string) $nombre));
+            $nombre = strtr($nombre, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ñ' => 'n']);
+            $nombre = str_replace([' ', '-'], '_', $nombre);
+            $alias = ['nombre' => 'nombre_completo', 'contrasena' => 'contrasena', 'password' => 'contrasena', 'telefono' => 'phone', 'area' => 'area'];
+            $mapa[$alias[$nombre] ?? $nombre] = $indice;
+        }
+        $requeridos = ['usuario', 'nombre_completo', 'contrasena', 'email', 'phone', 'area', 'rol'];
+        $faltantes = array_values(array_diff($requeridos, array_keys($mapa)));
+        if ($faltantes) {
+            $errores[] = 'Faltan columnas requeridas: ' . implode(', ', $faltantes) . '.';
+        } else {
+            $stmtExiste = $conexion->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
+            $stmtInsertar = $conexion->prepare('INSERT INTO usuarios (usuario, contrasena, email, phone, nombre_completo, area, rol) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmtLeer = $conexion->prepare('SELECT contrasena FROM usuarios WHERE usuario = ? LIMIT 1');
+            if (!$stmtExiste || !$stmtInsertar || !$stmtLeer) {
+                $errores[] = 'No se pudieron preparar las consultas de importación.';
+            } else {
+                $numeroFila = 1;
+                while (($datos = fgetcsv($handle, 0, ',', '"', '')) !== false) {
+                    $numeroFila++;
+                    if ($datos === [null] || (count($datos) === 1 && trim((string) $datos[0]) === '')) continue;
+                    $valor = static function (string $campo) use ($mapa, $datos): string {
+                        return (string) ($datos[$mapa[$campo]] ?? '');
+                    };
+                    $usuario = trim($valor('usuario'));
+                    $nombre = trim($valor('nombre_completo'));
+                    // No aplicar trim a la contraseña: espacios pueden formar parte de ella.
+                    $contrasenaOriginal = $valor('contrasena');
+                    $email = trim($valor('email'));
+                    $phone = trim($valor('phone'));
+                    $area = trim($valor('area'));
+                    $rolArchivo = strtolower(trim($valor('rol')));
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["archivoUsuarios"]) && $_FILES["archivoUsuarios"]["error"] === UPLOAD_ERR_OK) {
-    $archivo = $_FILES["archivoUsuarios"]["tmp_name"];
+                    if ($usuario === '' || $nombre === '' || trim($contrasenaOriginal) === '' || $email === '' || $area === '') {
+                        $errores[] = "Fila {$numeroFila}: faltan usuario, nombre, contraseña, correo o área.";
+                        continue;
+                    }
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $errores[] = "Fila {$numeroFila} ({$usuario}): correo no válido.";
+                        continue;
+                    }
 
-    if ($conexion->connect_error) {
-        die("Error de conexión: " . $conexion->connect_error);
-    }
+                    $stmtExiste->bind_param('s', $usuario);
+                    $stmtExiste->execute();
+                    $stmtExiste->store_result();
+                    if ($stmtExiste->num_rows > 0) {
+                        $duplicados[] = $usuario;
+                        $stmtExiste->free_result();
+                        continue;
+                    }
+                    $stmtExiste->free_result();
 
-    if (($handle = fopen($archivo, "r")) !== FALSE) {
-        // Leer encabezado
-        fgetcsv($handle, 1000, ",");
+                    $rolesPermitidos = esSuperAdmin() ? ['usuario', 'admin', 'superadmin'] : ['usuario'];
+                    $rol = in_array($rolArchivo, $rolesPermitidos, true) ? $rolArchivo : 'usuario';
+                    $hash = password_hash($contrasenaOriginal, PASSWORD_DEFAULT);
+                    if (!is_string($hash) || !password_verify($contrasenaOriginal, $hash)) {
+                        $errores[] = "Fila {$numeroFila} ({$usuario}): no se pudo preparar el hash de contraseña.";
+                        continue;
+                    }
 
-        while (($datos = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            // Asegúrate de que el CSV tenga al menos 7 columnas ahora
-            if (count($datos) >= 7) { 
-                $usuario         = trim($datos[0]);
-                $nombre_completo = trim($datos[1]);
-                $contrasena_orig = trim($datos[2]);
-                $email           = trim($datos[3]);
-                $phone           = trim($datos[4]);
-                $area            = trim($datos[5]);
-                $rol             = trim($datos[6]);
+                    try {
+                        $conexion->begin_transaction();
+                        $stmtInsertar->bind_param('sssssss', $usuario, $hash, $email, $phone, $nombre, $area, $rol);
+                        $stmtInsertar->execute();
 
-                $contrasena = password_hash($contrasena_orig, PASSWORD_DEFAULT);
-
-                // CORRECCIÓN: 7 signos de interrogación para 7 columnas
-                $sql = "INSERT IGNORE INTO usuarios (usuario, contrasena, email, phone, nombre_completo, area, rol) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $stmt = $conexion->prepare($sql);
-                
-                // CORRECCIÓN: "sssssss" (7 letras 's' para 7 parámetros)
-                $stmt->bind_param("sssssss", $usuario, $contrasena, $email, $phone, $nombre_completo, $area, $rol);
-                
-                $stmt->execute();
-
-                if ($stmt->affected_rows > 0) $contador++;
-                else $duplicados++;
-
-                $stmt->close();
+                        $stmtLeer->bind_param('s', $usuario);
+                        $stmtLeer->execute();
+                        $filaGuardada = $stmtLeer->get_result()->fetch_assoc();
+                        if (!$filaGuardada || !password_verify($contrasenaOriginal, (string) $filaGuardada['contrasena'])) {
+                            throw new RuntimeException('El hash guardado no pasó la verificación.');
+                        }
+                        $conexion->commit();
+                        $agregados++;
+                    } catch (Throwable $e) {
+                        $conexion->rollback();
+                        if ((int) $e->getCode() === 1062) {
+                            $duplicados[] = $usuario;
+                        } else {
+                            error_log("Importación CSV, fila {$numeroFila}: " . $e->getMessage());
+                            $errores[] = "Fila {$numeroFila} ({$usuario}): no se pudo guardar o verificar la contraseña.";
+                        }
+                    }
+                }
             }
         }
-
-        fclose($handle);
-        $conexion->close();
-
-        $mensaje = "<div class='alert alert-success'>
-                        <h4>✅ Carga completada</h4>
-                        <p>Usuarios agregados: <strong>$contador</strong></p>
-                        <p>Usuarios duplicados ignorados: <strong>$duplicados</strong></p>
-                        <a href='../admin/usuarios/' class='btn btn-primary mt-2'>← Volver al listado</a>
-                    </div>";
-    } else {
-        $mensaje = "<div class='alert alert-danger'>❌ No se pudo abrir el archivo CSV.</div>";
     }
-} else {
-    $mensaje = "<div class='alert alert-danger'>❌ Archivo no válido o no se ha subido correctamente.</div>";
+    fclose($handle);
 }
+$duplicados = array_values(array_unique($duplicados));
 ?>
-
-
-<div id="mainContent">
-    <?= $mensaje ?>
-</div>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Resultado de importación</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></head>
+<body class="bg-light"><main class="container py-5" style="max-width:850px"><section class="card shadow-sm"><div class="card-body p-4">
+<h1 class="h3 mb-4">Resultado de importación de usuarios</h1>
+<div class="alert alert-success">Usuarios agregados: <strong><?= $agregados ?></strong></div>
+<?php if ($duplicados): ?><div class="alert alert-warning"><h2 class="h5">Usuarios duplicados (no se modificaron)</h2><ul class="mb-0"><?php foreach ($duplicados as $duplicado): ?><li><?= $escape($duplicado) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<?php if ($errores): ?><div class="alert alert-danger"><h2 class="h5">Filas que requieren atención</h2><ul class="mb-0"><?php foreach ($errores as $error): ?><li><?= $escape($error) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+<a class="btn btn-primary" href="<?= htmlspecialchars(BASE_URL . 'admin/usuarios/subir_usuarios.php', ENT_QUOTES, 'UTF-8') ?>">Volver a importar</a>
+<a class="btn btn-outline-secondary" href="<?= htmlspecialchars(BASE_URL . 'admin/usuarios/', ENT_QUOTES, 'UTF-8') ?>">Ver usuarios</a>
+</div></section></main></body></html>

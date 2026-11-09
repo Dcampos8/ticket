@@ -9,10 +9,15 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once(ROOT_PATH . 'shared/permisos.php');
-requerirModulo('usuarios');
+requerirAdmin();
+require_once(ROOT_PATH . 'shared/security.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Acceso inválido");
+}
+if (!validarTokenCsrf()) {
+    http_response_code(403);
+    exit('La sesión expiró. Regresa al formulario e inténtalo de nuevo.');
 }
 
 // 1. Capturar datos incluyendo el nuevo campo 'email'
@@ -44,8 +49,17 @@ if ($rol === 'admin') {
     $modulosCsv = serializarModulos($modulosRecibidos);
 }
 
-// 4. Cifrar la contraseña
+// 4. Hashear la contraseña antes de guardarla.
+if ($contrasena === '') {
+    http_response_code(400);
+    exit('La contraseña es obligatoria.');
+}
 $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+if (!is_string($contrasena_hash) || !password_verify($contrasena, $contrasena_hash)) {
+    error_log('No se pudo generar/verificar el hash al crear un usuario.');
+    http_response_code(500);
+    exit('No se pudo preparar la contraseña. No se creó el usuario.');
+}
 
 // 5. VALIDAR SI YA EXISTE
 $check = $conexion->prepare("SELECT id FROM usuarios WHERE usuario = ?");
@@ -66,10 +80,34 @@ $stmt = $conexion->prepare("
 
 $stmt->bind_param("ssssssss", $usuario, $contrasena_hash, $nombre, $email, $phone, $area, $rol, $modulosCsv);
 
-if ($stmt->execute()) {
+try {
+    $conexion->begin_transaction();
+    if (!$stmt->execute()) {
+        throw new RuntimeException('No se pudo insertar el registro.');
+    }
+
+    // Verifica el hash que realmente quedó persistido; detecta columnas
+    // demasiado cortas o cualquier alteración antes de confirmar el alta.
+    $idNuevo = (int) $conexion->insert_id;
+    $verificar = $conexion->prepare('SELECT contrasena FROM usuarios WHERE id = ? LIMIT 1');
+    if (!$verificar) {
+        throw new RuntimeException('No se pudo verificar el registro insertado.');
+    }
+    $verificar->bind_param('i', $idNuevo);
+    $verificar->execute();
+    $filaGuardada = $verificar->get_result()->fetch_assoc();
+    $verificar->close();
+    if (!$filaGuardada || !password_verify($contrasena, (string) $filaGuardada['contrasena'])) {
+        throw new RuntimeException('El hash guardado no pasó la verificación de contraseña.');
+    }
+
+    $conexion->commit();
     header("Location: " . BASE_URL . "admin/usuarios/index.php?msg=success");
     exit();
-} else {
-    echo "❌ Error al crear usuario: " . $stmt->error;
+} catch (Throwable $e) {
+    $conexion->rollback();
+    error_log('Alta de usuario cancelada durante la verificación de contraseña: ' . $e->getMessage());
+    http_response_code(500);
+    exit('No se pudo confirmar el alta del usuario. Verifica la configuración de la base de datos o contacta a soporte.');
 }
 ?>

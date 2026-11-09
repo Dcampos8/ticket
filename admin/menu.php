@@ -168,6 +168,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
           </a>
           <ul class="dropdown-menu dropdown-menu-end shadow-lg">
             <li><a class="dropdown-item" href="<?= BASE_URL ?>admin/usuarios/perfil.php"><i class="fas fa-id-badge me-2"></i>Mi perfil</a></li>
+            <?php if (esAdminOSuperior()): ?><li><a class="dropdown-item" href="<?= BASE_URL ?>admin/usuarios/crear_usuario.php"><i class="fas fa-user-plus me-2"></i>Agregar usuario</a></li><?php endif; ?>
             <?php if (tieneModulo('avisos')): ?><li><a class="dropdown-item" href="<?= BASE_URL ?>admin/avisos/gestionar_aviso.php"><i class="fas fa-bullhorn me-2"></i>Gestionar avisos</a></li><?php endif; ?>
             <?php if (esSuperAdmin()): ?><li><a class="dropdown-item" href="<?= BASE_URL ?>admin/integraciones/"><i class="fas fa-plug me-2"></i>Conexiones e integraciones</a></li><?php endif; ?>
             <li><hr class="dropdown-divider"></li>
