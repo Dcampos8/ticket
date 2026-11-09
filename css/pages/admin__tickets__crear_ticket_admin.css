@@ -1,0 +1,9 @@
+/* Estilos extraídos de admin\tickets\crear_ticket_admin.php */
+
+/* Ajuste para que el contenido respete el menú lateral del admin */
+    .ticket-admin-content {
+        margin-left: 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }

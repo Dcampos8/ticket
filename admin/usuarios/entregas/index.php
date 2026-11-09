@@ -1,0 +1,160 @@
+<?php
+require_once __DIR__ . '/../../../config.php';
+require_once ROOT_PATH . 'shared/permisos.php';
+requerirModulo('usuarios');
+include_once ROOT_PATH . 'admin/menu.php';
+?>
+    <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__index.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
+<div class="container">
+    <div class="card card-captura">
+        <div class="card-header card-header-custom">
+            <h4 class="mb-0"><i class="fas fa-id-card me-2"></i> Registro de Entrega de Credenciales</h4>
+        </div>
+        <div class="card-body p-4">
+            <form id="formCredenciales">
+                <!-- DATOS PERSONALES -->
+                <div class="section-title">Información del Empleado</div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Nombre Completo del Empleado</label>
+                        <input type="text" name="nombre" class="form-control" placeholder="Ej. Juan Pérez López" required>
+                    </div>
+                </div>
+
+                <!-- ACCESOS DE SISTEMA -->
+                <div class="section-title">Accesos de Sistemas</div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario Sistema Interno</label>
+                        <input type="text" name="sistema_user" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña Sistema Interno</label>
+                        <input type="text" name="sistema_pass" class="form-control" required>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Correo Institucional Asignado</label>
+                        <input type="email" name="correo" class="form-control" placeholder="usuario@transportesvaladez.com">
+                    </div>
+                </div>
+
+                <!-- CONTPAQi (NÓMINAS Y CONTABILIDAD) -->
+                <div class="section-title">Accesos CONTPAQi</div>
+                
+                <!-- CONTPAQi Nóminas -->
+                <div class="contpaq-box">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="check_nominas" onchange="toggleContpaq('nominas')">
+                        <label class="form-check-label fw-bold text-dark" for="check_nominas">
+                            <i class="fas fa-users-gear me-1"></i> Asignar acceso a CONTPAQi Nóminas
+                        </label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Usuario Nóminas</label>
+                            <input type="text" id="nominas_user" name="nominas_user" class="form-control" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contraseña Nóminas</label>
+                            <input type="text" id="nominas_pass" name="nominas_pass" class="form-control" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTPAQi Contabilidad -->
+                <div class="contpaq-box">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="check_contabilidad" onchange="toggleContpaq('contabilidad')">
+                        <label class="form-check-label fw-bold text-dark" for="check_contabilidad">
+                            <i class="fas fa-calculator me-1"></i> Asignar acceso a CONTPAQi Contabilidad
+                        </label>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Usuario Contabilidad</label>
+                            <input type="text" id="conta_user" name="conta_user" class="form-control" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Contraseña Contabilidad</label>
+                            <input type="text" id="conta_pass" name="conta_pass" class="form-control" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CHECADOR Y ALMACEN -->
+                <div class="section-title mt-4">Checador y Almacén</div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">ID Checador</label>
+                        <input type="text" name="checador_user" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Código Checador</label>
+                        <input type="text" name="checador_code" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">NIP Almacén</label>
+                        <input type="text" name="nip_almacen" class="form-control">
+                    </div>
+                </div>
+
+                <!-- EQUIPO DE COMPUTO -->
+                <div class="section-title">Equipo de Cómputo (PC)</div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Usuario de Windows</label>
+                        <input type="text" name="pc_user" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contraseña de Windows</label>
+                        <input type="text" name="pc_pass" class="form-control">
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="fas fa-print me-2"></i> Generar Formato para Imprimir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Función para activar/desactivar inputs de CONTPAQi según el switch
+function toggleContpaq(tipo) {
+    if (tipo === 'nominas') {
+        const active = document.getElementById('check_nominas').checked;
+        const user = document.getElementById('nominas_user');
+        const pass = document.getElementById('nominas_pass');
+        user.disabled = !active;
+        pass.disabled = !active;
+        if (!active) { user.value = ''; pass.value = ''; }
+        else { user.focus(); }
+    } else if (tipo === 'contabilidad') {
+        const active = document.getElementById('check_contabilidad').checked;
+        const user = document.getElementById('conta_user');
+        const pass = document.getElementById('conta_pass');
+        user.disabled = !active;
+        pass.disabled = !active;
+        if (!active) { user.value = ''; pass.value = ''; }
+        else { user.focus(); }
+    }
+}
+
+document.getElementById('formCredenciales').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Obtener todos los datos del formulario (los campos 'disabled' se ignoran automáticamente)
+    const formData = new FormData(this);
+    const params = new URLSearchParams(formData).toString();
+    
+    // Abrir la ventana de impresión enviando los datos por URL
+    const urlImpresion = 'formato_imprimir.php?' + params;
+    window.open(urlImpresion, '_blank');
+});
+</script>

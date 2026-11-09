@@ -1,0 +1,56 @@
+/* Estilos extraídos de admin\usuarios\subir_usuarios.php */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+  .content {
+    padding: 1.5rem 2rem;
+    min-height: calc(100vh - 56px);
+    background: #fff;
+    transition: margin-left 0.3s ease;
+  }
+
+  h1 {
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+  }
+
+  form label {
+    font-weight: 500;
+  }
+
+  .form-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  button {
+    padding: 0.55rem 1.4rem;
+    font-size: 1rem;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 992px) {
+    .content {
+      margin-left: 0;
+      padding: 1.2rem;
+    }
+    h1 {
+      font-size: 1.6rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .content {
+      padding: 1rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+      text-align: center;
+    }
+    button {
+      /* Ajustado de 15% a 100% para mejor usabilidad en móvil */
+      width: 100%; 
+      font-size: 1rem;
+    }
+  }

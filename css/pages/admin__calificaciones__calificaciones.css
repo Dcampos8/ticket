@@ -1,0 +1,6 @@
+/* Estilos extraídos de admin\calificaciones\calificaciones.php */
+
+.estrellas-view i { color: #f5b301; }
+.estrellas-view i.vacia { color: #e2e8f0; }
+.card-stat { border-radius: 14px; }
+#calif{margin-top:0 !important;}

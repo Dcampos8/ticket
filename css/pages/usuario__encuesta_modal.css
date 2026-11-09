@@ -1,0 +1,21 @@
+/* Estilos extraídos de usuario\encuesta_modal.php */
+
+.estrellas-encuesta {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 6px;
+    font-size: 34px;
+    margin: 10px 0 20px;
+}
+.estrellas-encuesta input { display: none; }
+.estrellas-encuesta label {
+    color: #d1d5db;
+    cursor: pointer;
+    transition: color .15s;
+}
+.estrellas-encuesta input:checked ~ label,
+.estrellas-encuesta label:hover,
+.estrellas-encuesta label:hover ~ label {
+    color: #f5b301;
+}

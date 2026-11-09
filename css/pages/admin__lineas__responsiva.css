@@ -1,0 +1,17 @@
+/* Estilos extraídos de admin\lineas\responsiva.php */
+
+body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.3; color: #000; margin: 0; padding: 20px; }
+        .page { max-width: 800px; margin: 0 auto 30px auto; background: #fff; padding: 25px; border: 1px solid #ccc; page-break-after: always; }
+        h2 { font-size: 11pt; text-align: center; text-transform: uppercase; margin-bottom: 15px; font-weight: bold; }
+        h4 { font-size: 10pt; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        p, li { text-align: justify; margin: 4px 0; }
+        ul { padding-left: 20px; margin: 4px 0; }
+        .info-box { margin: 10px 0; line-height: 1.5; }
+        .firmas { margin-top: 40px; text-align: center; }
+        .linea-firma { width: 300px; border-top: 1px solid #000; margin: 0 auto 5px auto; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; }
+            .page { border: none; padding: 0; margin: 0; page-break-after: always; }
+        }

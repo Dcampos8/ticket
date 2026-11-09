@@ -1,0 +1,82 @@
+/* Estilos extraídos de admin\usuarios\entregas\entrega_recursos.php */
+
+:root {
+            --primary: #003366;
+            --accent: #b8922e;
+        }
+
+
+        body {
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+            margin-top: 0;
+        }
+
+
+        .card-header {
+            background: var(--primary);
+            color: white;
+            border-bottom: 4px solid var(--accent);
+        }
+
+
+        .section-header {
+            background: #eee;
+            padding: 7px 12px;
+            font-weight: bold;
+            color: var(--primary);
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 0.85rem;
+            border-left: 4px solid var(--accent);
+        }
+
+
+        .detail-box {
+            border-left: 3px solid var(--accent);
+            padding: 5px 10px;
+            background: #fffdf5;
+            margin-top: 8px;
+            border-radius: 0 5px 5px 0;
+        }
+
+
+        .form-switch .form-check-input {
+            width: 2.5em;
+            height: 1.25em;
+            cursor: pointer;
+        }
+
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.25rem rgba(184, 146, 46, 0.15);
+        }
+
+
+        .btn-primary {
+            background-color: var(--primary);
+            border: none;
+        }
+
+
+        .btn-primary:hover {
+            background-color: #002244;
+        }
+
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+
+        .password-toggle {
+            cursor: pointer;
+        }
+
+
+        .required-label::after {
+            content: " *";
+            color: #dc3545;
+        }

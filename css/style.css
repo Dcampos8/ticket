@@ -1,0 +1,174 @@
+div#report {
+    text-align: end;
+}
+ button#update {
+    width: 100%;
+  }
+  a#cancel {
+    width: 100%;
+    margin-left: 0px !important;
+  }
+  .container.mt-5#edit {
+     width: 20%;
+  }
+  .page-title {
+  padding-top: 130px; /* ajusta según la altura de tu navbar */
+  margin-bottom: 30px;
+}
+  ul.navega li {
+        display: inline;
+        padding: 15px;
+  }
+  ul.navega {
+    text-align: center;
+  }
+  table {
+    border-collapse: collapse;
+    width: 80%;
+    text-align: center;
+    margin: auto;
+  }
+  form#estat{
+    text-align: -webkit-center;
+    width: auto;
+    margin: auto;
+  }
+  .padding{
+      padding: 15px;
+      text-align: justify;
+      align-content: center;
+  }
+  td {
+    width: auto;
+    padding: 15px;
+  }
+  h2{
+    text-align: center;
+  }
+  div#muser {
+    width: 20%;
+}
+body {
+      background-color: #f5f5f5; /* Gris claro */
+      color: #333;
+    }
+    .card {
+      background-color: #ffffff; /* Blanco para la tarjeta */
+      border: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .card-header {
+      background-color: #e31e24; /* Rojo fuego */
+      color: white;
+      font-weight: bold;
+    }
+    .btn-primary {
+      background-color: #e31e24; /* Rojo fuego */
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #b91c1c; /* Rojo más oscuro al hover */
+    }
+    label {
+      color: #333;
+    }
+    input.form-control {
+      background-color: #fff;
+      border: 1px solid #e31e24;
+      color: #333;
+    }
+    input.form-control:focus {
+      background-color: #fff;
+      border-color: #f28b8b;
+      color: #333;
+      box-shadow: 0 0 5px #f28b8b;
+    }
+    
+    table.table td:last-child,
+table.table th:last-child {
+  min-width: 180px; /* o el ancho que desees */
+  width: 180px;
+  white-space: nowrap; /* evita que el contenido haga salto de línea */
+}
+.formpad{
+    padding-right: 5px;
+}
+    table {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    th, td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    tbody tr:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 220px;
+    background-color: #1e3a8a;
+    color: white;
+    padding-top: 1rem;
+    transition: width 0.3s;
+  }
+  .sidebar.collapsed {
+    width: 60px;
+  }
+  .sidebar a {
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .sidebar a:hover, .sidebar a.active {
+    background-color: #172554;
+    text-decoration: none;
+  }
+  .sidebar a i {
+    width: 25px;
+    font-size: 18px;
+  }
+  .sidebar .text {
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  .content {
+    margin-left: 220px;
+    padding: 20px;
+    transition: margin-left 0.3s;
+  }
+  .content.expanded {
+    margin-left: 60px;
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 60px;
+    }
+    .content {
+      margin-left: 60px;
+    }
+  }
+  .navbar-brand {
+    font-weight: 700;
+    font-size: 1.4rem;
+  }
+  #sidebarToggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 15px;
+  }

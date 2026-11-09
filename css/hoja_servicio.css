@@ -1,0 +1,104 @@
+/* ====== CONFIGURACIÓN GENERAL ====== */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+    background: #fff;
+}
+
+#hojaServicio {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px 30px;
+}
+
+/* ====== TÍTULO ====== */
+#hojaServicio h4 {
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+#hojaServicio h5 {
+    margin-top: 20px;
+    font-weight: bold;
+    border-left: 4px solid #e31e24;
+    padding-left: 8px;
+}
+
+/* ====== LÍNEAS ====== */
+hr {
+    border: none;
+    border-top: 1px solid #bbb;
+    margin: 15px 0;
+}
+
+/* ====== TEXTO SUPERIOR ====== */
+#hojaServicio p {
+    margin: 4px 0;
+}
+
+/* ====== TABLA DE DATOS ====== */
+.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.tabla-datos th {
+    background: #f1f1f1;
+    font-weight: bold;
+    text-align: left;
+    padding: 6px;
+    border: 1px solid #ccc;
+    width: 15%;
+}
+
+.tabla-datos td {
+    padding: 6px;
+    border: 1px solid #ccc;
+    width: 35%;
+}
+
+/* ====== SECCIONES DE TEXTO ====== */
+#hojaServicio h5 + p {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 60px;
+    background: #fafafa;
+    white-space: pre-wrap;
+}
+
+/* ====== FIRMA ====== */
+.firma {
+    margin-top: 50px;
+    width: 300px;
+    text-align: center;
+}
+
+.firma .linea {
+    border-bottom: 1px solid #000;
+    margin-bottom: 5px;
+}
+
+.firma .texto {
+    font-size: 11px;
+}
+
+/* ====== IMPRESIÓN ====== */
+@media print {
+    body {
+        margin: 0;
+    }
+
+    #hojaServicio {
+        padding: 0;
+    }
+
+    .btn,
+    .modal-header,
+    .modal-footer {
+        display: none !important;
+    }
+}

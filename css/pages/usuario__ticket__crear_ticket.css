@@ -1,0 +1,143 @@
+/* Estilos extraídos de usuario\ticket\crear_ticket.php */
+
+.ticket-page{
+    padding:20px;
+}
+
+.form-container{
+    max-width:850px;
+    margin:auto;
+    background:#fff;
+    border-radius:18px;
+    padding:35px;
+    box-shadow:
+        0 10px 25px rgba(0,0,0,.08),
+        0 2px 10px rgba(0,0,0,.04);
+    border:1px solid #eef1f4;
+}
+
+.form-header{
+    margin-bottom:30px;
+    text-align:center;
+}
+
+.form-header h2{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+    color:var(--tv-ink,#0f172a);
+}
+
+.form-header p{
+    color:#7f8c8d;
+    margin-top:8px;
+}
+
+.campo{
+    margin-bottom:20px;
+}
+
+.campo label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:var(--tv-text,#334155);
+}
+
+.campo input,
+.campo select,
+.campo textarea{
+    width:100%;
+    border:1px solid #dfe6e9;
+    border-radius:12px;
+    padding:12px 15px;
+    font-size:15px;
+    transition:.25s;
+    background:#fafafa;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus{
+    outline:none;
+    border-color:var(--tv-navy,#1e3a8a);
+    box-shadow:0 0 0 4px rgba(30,58,138,.12);
+    background:#fff;
+}
+
+.campo input:disabled{
+    background:#f5f7fa;
+    color:#495057;
+}
+
+.user-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+}
+
+#dropArea{
+    border:2px dashed var(--tv-navy,#1e3a8a);
+    border-radius:15px;
+    padding:35px;
+    background:#f5f7fc;
+    transition:.3s;
+    text-align:center;
+}
+
+#dropArea:hover{
+    background:#eaeffb;
+    transform:translateY(-2px);
+}
+
+#uploadIcon{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+#dropText{
+    color:#6c757d;
+    margin-bottom:0;
+}
+
+#preview{
+    max-width:250px;
+    max-height:250px;
+    border-radius:12px;
+    margin-top:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.12);
+}
+
+#btnEnviarTicket{
+    width:100%;
+    border:none;
+    border-radius:12px;
+    padding:14px;
+    font-size:16px;
+    font-weight:600;
+    background:var(--tv-navy,#1e3a8a);
+    color:white;
+    transition:.3s;
+}
+
+#btnEnviarTicket:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(30,58,138,.3);
+}
+
+#btnEnviarTicket:disabled{
+    opacity:.8;
+    cursor:wait;
+}
+
+#respuestaCrear{
+    margin-top:15px;
+}
+
+.ticket-card{
+    background:#f8fafc;
+    border-radius:14px;
+    padding:18px;
+    border:1px solid #e9ecef;
+    margin-bottom:25px;
+}

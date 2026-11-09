@@ -1,0 +1,98 @@
+    :root {
+        --primary-color: #1e3a8a;
+        --accent-color: #3b82f6;
+    }
+
+    body {
+        background-color: #f1f5f9;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .main-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filter-section {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
+    }
+
+    /* Tabla Estilo Pro */
+    .table-custom {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .table-custom thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 15px;
+        border: none;
+    }
+
+    .table-custom tbody tr {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background-color: #fdfdfd !important;
+        transform: scale(1.005);
+    }
+
+    .table-custom td {
+        padding: 15px;
+        border-top: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .badge-status {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+    }
+
+    .resguardo-text {
+        font-family: 'Monaco', 'Consolas', monospace;
+        color: #1e40af;
+        background: #eff6ff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
+    
+    /* Fuerza el fondo del menú si se volvió transparente */
+.navbar {
+    background-color: #ffffff !important; /* O el color corporativo de Transportes Valadez */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Si los textos no se ven */
+.navbar-nav .nav-link {
+    color: #333 !important;
+}

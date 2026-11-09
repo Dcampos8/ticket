@@ -1,0 +1,911 @@
+<?php
+/*
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('display_startup_errors', 0);
+error_reporting(E_ALL);
+*/
+// 1. Cargar la configuración global
+require_once(__DIR__ . '/../../config.php');
+date_default_timezone_set('America/Mexico_City');
+$hoyLocal = date('Y-m-d');
+$ahoraLocal = date('Y-m-d H:i:s');
+$checkHistorial = $conexion->query("SHOW TABLES LIKE 'ticket_actividad_historial'");
+$historialTicketsDisponible = $checkHistorial && $checkHistorial->num_rows > 0;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// 2. Verificar Sesión y módulo
+require_once(ROOT_PATH . 'shared/permisos.php');
+requerirModulo('tickets');
+if (!esAdminOSuperior()) {
+    http_response_code(403);
+    exit('No autorizado');
+}
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// -----------------------------------------------------------------
+// Filtros (GET) - búsqueda de texto, área, tipo, estatus y fechas
+// -----------------------------------------------------------------
+$filtros = [
+    'busqueda'    => trim($_GET['busqueda'] ?? ''),
+    'area'        => trim($_GET['area'] ?? ''),
+    'tipo'        => trim($_GET['tipo'] ?? ''),
+    'estatus'     => trim($_GET['estatus'] ?? ''),
+    'fecha_desde' => trim($_GET['fecha_desde'] ?? ''),
+    'fecha_hasta' => trim($_GET['fecha_hasta'] ?? ''),
+    'resuelto_desde' => trim($_GET['resuelto_desde'] ?? ''),
+    'resuelto_hasta' => trim($_GET['resuelto_hasta'] ?? ''),
+    'vista'       => trim($_GET['vista'] ?? ''),
+];
+$hayFiltrosActivos = count(array_filter($filtros, fn($v) => $v !== '')) > 0;
+
+// Construye la cadena de query string preservando los filtros activos.
+// $overrides permite cambiar/añadir valores puntuales (ej. la página).
+function construirQueryString(array $overrides = []): string {
+    $params = array_merge($_GET, $overrides);
+    foreach ($params as $k => $v) {
+        if ($v === '' || $v === null) {
+            unset($params[$k]);
+        }
+    }
+    return http_build_query($params);
+}
+
+// Paginación
+$rango = 3;
+$registros_por_pagina = 10;
+$pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
+$inicio = ($pagina - 1) * $registros_por_pagina;
+
+// -----------------------------------------------------------------
+// Condiciones SQL dinámicas según los filtros activos
+// -----------------------------------------------------------------
+$condiciones = [];
+$parametros  = [];
+$tiposParam  = '';
+
+if ($filtros['busqueda'] !== '') {
+    $like = '%' . $filtros['busqueda'] . '%';
+    $condiciones[] = "(CAST(t.id AS CHAR) LIKE ? OR COALESCE(u.nombre_completo, t.nombre_completo) LIKE ? OR COALESCE(u.area, t.area) LIKE ? OR t.descripcion LIKE ? OR t.comentario_admin LIKE ?)";
+    array_push($parametros, $like, $like, $like, $like, $like);
+    $tiposParam .= 'sssss';
+}
+if ($filtros['area'] !== '') {
+    $condiciones[] = "COALESCE(u.area, t.area) = ?";
+    $parametros[] = $filtros['area'];
+    $tiposParam .= 's';
+}
+if ($filtros['tipo'] !== '') {
+    $condiciones[] = "t.tipo_ticket = ?";
+    $parametros[] = $filtros['tipo'];
+    $tiposParam .= 's';
+}
+if ($filtros['estatus'] !== '') {
+    $condiciones[] = "t.estatus = ?";
+    $parametros[] = $filtros['estatus'];
+    $tiposParam .= 's';
+}
+if ($filtros['fecha_desde'] !== '') {
+    $condiciones[] = "t.fecha_creacion >= ?";
+    $parametros[] = $filtros['fecha_desde'] . ' 00:00:00';
+    $tiposParam .= 's';
+}
+if ($filtros['fecha_hasta'] !== '') {
+    $condiciones[] = "t.fecha_creacion <= ?";
+    $parametros[] = $filtros['fecha_hasta'] . ' 23:59:59';
+    $tiposParam .= 's';
+}
+foreach (['resuelto_desde' => '>=', 'resuelto_hasta' => '<='] as $filtroFecha => $operadorFecha) {
+    if ($filtros[$filtroFecha] !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $filtros[$filtroFecha])) {
+        $fechaFiltro = DateTimeImmutable::createFromFormat('!Y-m-d', $filtros[$filtroFecha]);
+        if ($fechaFiltro && $fechaFiltro->format('Y-m-d') === $filtros[$filtroFecha]) {
+            $condiciones[] = "t.estatus IN ('Finalizado','Cerrado') AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) $operadorFecha ?";
+            $parametros[] = $filtros[$filtroFecha];
+            $tiposParam .= 's';
+        }
+    }
+}
+if ($filtros['vista'] === 'abiertos') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso')";
+} elseif ($filtros['vista'] === 'sin_asignar') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND (t.asignado_a IS NULL OR t.asignado_a = '')";
+} elseif ($filtros['vista'] === 'sla_vencido') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, '$ahoraLocal') > t.objetivo_respuesta_minutos";
+} elseif ($filtros['vista'] === 'resolucion_vencida') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)";
+} elseif ($filtros['vista'] === 'resolucion_proxima') {
+    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)) <= 240";
+} elseif ($filtros['vista'] === 'resueltos_hoy') {
+    $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = '$hoyLocal'";
+} elseif ($filtros['vista'] === 'reabiertos') {
+    $condiciones[] = $historialTicketsDisponible ? "t.estatus IN ('Pendiente','En proceso') AND EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%'))" : '1 = 0';
+}
+
+$whereSql = $condiciones ? ('WHERE ' . implode(' AND ', $condiciones)) : '';
+
+// Total de registros (respetando filtros)
+$totalSql = "SELECT COUNT(*) as total
+             FROM tickets t
+             LEFT JOIN usuarios u ON t.nombre = u.usuario
+             $whereSql";
+$stmtTotal = $conexion->prepare($totalSql);
+if ($tiposParam !== '') {
+    $stmtTotal->bind_param($tiposParam, ...$parametros);
+}
+$stmtTotal->execute();
+$total_row = $stmtTotal->get_result()->fetch_assoc();
+$total_registros = (int)$total_row['total'];
+$total_paginas = (int)ceil($total_registros / $registros_por_pagina);
+$stmtTotal->close();
+
+// Indicadores operativos del Service Desk (independientes de los filtros de la tabla).
+$resumenTickets = ['abiertos' => 0, 'pendientes' => 0, 'en_proceso' => 0, 'sin_asignar' => 0, 'sla_vencido' => 0, 'resueltos_hoy' => 0, 'reabiertos' => 0, 'resolucion_vencida' => 0, 'resolucion_proxima' => 0];
+$resumenResult = $conexion->query("SELECT
+    SUM(estatus IN ('Pendiente','En proceso')) AS abiertos,
+    SUM(estatus = 'Pendiente') AS pendientes,
+    SUM(estatus = 'En proceso') AS en_proceso,
+    SUM(estatus IN ('Pendiente','En proceso') AND (asignado_a IS NULL OR asignado_a = '')) AS sin_asignar,
+    SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, '$ahoraLocal') > objetivo_respuesta_minutos) AS sla_vencido,
+    SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = '$hoyLocal') AS resueltos_hoy,
+    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) AS resolucion_vencida,
+    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) <= 240) AS resolucion_proxima
+    FROM tickets");
+if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
+    foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
+}
+if ($historialTicketsDisponible) {
+    $resultadoReabiertos = $conexion->query("SELECT COUNT(DISTINCT t.id) AS total FROM tickets t INNER JOIN ticket_actividad_historial tah ON tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%') WHERE t.estatus IN ('Pendiente','En proceso')");
+    if ($resultadoReabiertos) $resumenTickets['reabiertos'] = (int) ($resultadoReabiertos->fetch_assoc()['total'] ?? 0);
+}
+
+$resumenResponsables = [];
+$qResponsables = $conexion->query("SELECT COALESCE(NULLIF(u.nombre_completo,''), NULLIF(t.asignado_a,''), 'Sin asignar') AS etiqueta, COUNT(*) AS total FROM tickets t LEFT JOIN usuarios u ON u.usuario = t.asignado_a WHERE t.estatus IN ('Pendiente','En proceso') GROUP BY etiqueta ORDER BY total DESC, etiqueta LIMIT 5");
+if ($qResponsables) while ($r = $qResponsables->fetch_assoc()) $resumenResponsables[] = $r;
+$resumenAreas = [];
+$qAreasTickets = $conexion->query("SELECT COALESCE(NULLIF(u.area,''), NULLIF(t.area,''), 'Sin área') AS etiqueta, COUNT(*) AS total FROM tickets t LEFT JOIN usuarios u ON u.usuario = t.nombre WHERE t.estatus IN ('Pendiente','En proceso') GROUP BY etiqueta ORDER BY total DESC, etiqueta LIMIT 5");
+if ($qAreasTickets) while ($r = $qAreasTickets->fetch_assoc()) $resumenAreas[] = $r;
+
+// 3. Cargar el menú
+include(ROOT_PATH . 'admin/menu.php');
+
+// 4. Consulta de Datos (respetando filtros + paginación)
+$campoReabiertoSql = $historialTicketsDisponible ? "EXISTS (SELECT 1 FROM ticket_actividad_historial tah WHERE tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%'))" : '0';
+$sql = "SELECT t.*, u.nombre_completo AS usuario_nombre_completo, u.area AS usuario_area,
+               $campoReabiertoSql AS reabierto
+        FROM tickets t
+        LEFT JOIN usuarios u ON t.nombre = u.usuario
+        $whereSql
+        ORDER BY t.fecha_creacion DESC
+        LIMIT ?, ?";
+$tiposData = $tiposParam . 'ii';
+$parametrosData = array_merge($parametros, [$inicio, $registros_por_pagina]);
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param($tiposData, ...$parametrosData);
+$stmt->execute();
+$resultado = $stmt->get_result();
+
+// Opciones para los selects de filtro (Área / Tipo)
+$areasDisponibles = [];
+$resAreas = $conexion->query("SELECT DISTINCT area FROM usuarios WHERE area IS NOT NULL AND TRIM(area) <> '' ORDER BY area ASC");
+if ($resAreas) {
+    while ($row = $resAreas->fetch_assoc()) {
+        $areasDisponibles[] = $row['area'];
+    }
+}
+$tiposDisponibles = [];
+$resTipos = $conexion->query("SELECT DISTINCT tipo_ticket FROM tickets WHERE tipo_ticket IS NOT NULL AND TRIM(tipo_ticket) <> '' ORDER BY tipo_ticket ASC");
+if ($resTipos) {
+    while ($row = $resTipos->fetch_assoc()) {
+        $tiposDisponibles[] = $row['tipo_ticket'];
+    }
+}
+$estatusDisponibles = ['Pendiente', 'En proceso', 'Finalizado', 'Cancelado'];
+$usuariosSoporte = [];
+$resSoporte = $conexion->query("SELECT usuario, nombre_completo, rol, modulos_permitidos FROM usuarios WHERE rol IN ('admin','superadmin') ORDER BY nombre_completo");
+if ($resSoporte) {
+    while ($usuarioSoporte = $resSoporte->fetch_assoc()) {
+        if ($usuarioSoporte['rol'] === 'superadmin' || in_array('tickets', parsearModulos($usuarioSoporte['modulos_permitidos'] ?? ''), true)) {
+            $usuariosSoporte[] = $usuarioSoporte;
+        }
+    }
+}
+
+// Asigna una clase de color al badge de "Tipo" según palabras clave.
+// Es solo visual: el valor guardado en BD (tipo_ticket) no se toca.
+function claseTipoTicket($tipo) {
+    $t = mb_strtolower(trim((string)$tipo));
+    if ($t === '') return 'tipo-default';
+    if (str_contains($t, 'factura')) return 'tipo-facturas';
+    if (str_contains($t, 'soporte')) return 'tipo-soporte';
+    if (str_contains($t, 'sistema')) return 'tipo-sistema';
+    if (str_contains($t, 'hardware') || str_contains($t, 'equipo')) return 'tipo-hardware';
+    if (str_contains($t, 'recursos') || str_contains($t, 'rh')) return 'tipo-rh';
+    if (str_contains($t, 'general')) return 'tipo-general';
+    return 'tipo-default';
+}
+?>
+<!-- Estilos personalizados -->
+<link rel="stylesheet" href="<?= BASE_URL ?>css/listar_tickets.css?v=<?= time() ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__tickets__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__index.css') ?>">
+<link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
+<div class="container px-4 mb-5" style="margin-top:0;">
+    <div class="table-container-custom">
+        <div class="tickets-header">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-headset"></i> Service Desk
+                </h1>
+                <span class="subtitle-count">
+                    <?php if ($hayFiltrosActivos): ?>
+                        Mostrando <?= (int)$total_registros ?> resultado(s) filtrado(s)
+                    <?php else: ?>
+                        <?= (int)$total_registros ?> en total
+                    <?php endif; ?>
+                </span>
+            </div>
+            <a class="service-desk-new" href="crear_ticket_admin.php"><i class="fas fa-plus"></i> Crear ticket</a>
+        </div>
+
+        <section class="sd-summary" aria-label="Resumen de operación">
+            <a class="sd-metric metric-open" href="?vista=abiertos"><span class="sd-metric-icon"><i class="fas fa-inbox"></i></span><span><small>Tickets abiertos</small><strong><?= $resumenTickets['abiertos'] ?></strong></span></a>
+            <a class="sd-metric metric-pending" href="?estatus=Pendiente"><span class="sd-metric-icon"><i class="fas fa-hourglass-half"></i></span><span><small>Pendientes</small><strong><?= $resumenTickets['pendientes'] ?></strong></span></a>
+            <a class="sd-metric metric-progress" href="?estatus=En+proceso"><span class="sd-metric-icon"><i class="fas fa-spinner"></i></span><span><small>En proceso</small><strong><?= $resumenTickets['en_proceso'] ?></strong></span></a>
+            <a class="sd-metric metric-unassigned" href="?vista=sin_asignar"><span class="sd-metric-icon"><i class="fas fa-user-slash"></i></span><span><small>Sin asignar</small><strong><?= $resumenTickets['sin_asignar'] ?></strong></span></a>
+            <a class="sd-metric metric-overdue" href="?vista=sla_vencido"><span class="sd-metric-icon"><i class="fas fa-clock"></i></span><span><small>SLA de respuesta vencido</small><strong><?= $resumenTickets['sla_vencido'] ?></strong></span></a>
+            <a class="sd-metric metric-resolved" href="?vista=resueltos_hoy"><span class="sd-metric-icon"><i class="fas fa-check"></i></span><span><small>Resueltos hoy</small><strong><?= $resumenTickets['resueltos_hoy'] ?></strong></span></a>
+            <a class="sd-metric metric-overdue" href="?vista=resolucion_vencida"><span class="sd-metric-icon"><i class="fas fa-triangle-exclamation"></i></span><span><small>SLA resolución vencido</small><strong><?= $resumenTickets['resolucion_vencida'] ?></strong></span></a>
+            <a class="sd-metric metric-pending" href="?vista=resolucion_proxima"><span class="sd-metric-icon"><i class="fas fa-hourglass"></i></span><span><small>Vencen en ≤ 4 h</small><strong><?= $resumenTickets['resolucion_proxima'] ?></strong></span></a>
+            <a class="sd-metric metric-reopened" href="?vista=reabiertos"><span class="sd-metric-icon"><i class="fas fa-rotate-left"></i></span><span><small>Reabiertos activos</small><strong><?= $resumenTickets['reabiertos'] ?></strong></span></a>
+        </section>
+
+        <section class="sd-breakdown" aria-label="Carga de tickets abiertos">
+            <div class="sd-breakdown-card"><h2><i class="fas fa-user-gear"></i> Carga por responsable</h2>
+                <?php if ($resumenResponsables): foreach ($resumenResponsables as $item): ?>
+                    <div class="sd-breakdown-row"><span><?= htmlspecialchars($item['etiqueta']) ?></span><strong><?= (int)$item['total'] ?></strong></div>
+                <?php endforeach; else: ?><p class="sd-empty">No hay tickets abiertos.</p><?php endif; ?>
+            </div>
+            <div class="sd-breakdown-card"><h2><i class="fas fa-building"></i> Carga por área</h2>
+                <?php if ($resumenAreas): foreach ($resumenAreas as $item): ?>
+                    <div class="sd-breakdown-row"><span><?= htmlspecialchars($item['etiqueta']) ?></span><strong><?= (int)$item['total'] ?></strong></div>
+                <?php endforeach; else: ?><p class="sd-empty">No hay tickets abiertos.</p><?php endif; ?>
+            </div>
+        </section>
+
+        <!-- Barra de filtros -->
+        <div class="filtros-card">
+            <div class="filtros-titulo"><i class="fas fa-sliders-h"></i> Filtrar tickets</div>
+            <form method="GET" action="" id="formFiltros">
+                <input type="hidden" name="vista" value="<?= htmlspecialchars($filtros['vista'], ENT_QUOTES, 'UTF-8') ?>">
+                <div class="filtros-grid">
+                    <div class="campo-busqueda">
+                        <label for="f_busqueda">Búsqueda</label>
+                        <input type="text" id="f_busqueda" name="busqueda" class="form-control form-control-sm"
+                            placeholder="Nombre, área, descripción o respuesta..."
+                            value="<?= htmlspecialchars($filtros['busqueda']) ?>">
+                    </div>
+                    <div>
+                        <label for="f_area">Área</label>
+                        <select id="f_area" name="area" class="form-select form-select-sm auto-submit">
+                            <option value="">Todas</option>
+                            <?php foreach ($areasDisponibles as $a): ?>
+                                <option value="<?= htmlspecialchars($a) ?>" <?= $filtros['area'] === $a ? 'selected' : '' ?>><?= htmlspecialchars($a) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="f_tipo">Tipo</label>
+                        <select id="f_tipo" name="tipo" class="form-select form-select-sm auto-submit">
+                            <option value="">Todos</option>
+                            <?php foreach ($tiposDisponibles as $t): ?>
+                                <option value="<?= htmlspecialchars($t) ?>" <?= $filtros['tipo'] === $t ? 'selected' : '' ?>><?= htmlspecialchars($t) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="f_estatus">Estatus</label>
+                        <select id="f_estatus" name="estatus" class="form-select form-select-sm auto-submit">
+                            <option value="">Todos</option>
+                            <?php foreach ($estatusDisponibles as $e): ?>
+                                <option value="<?= htmlspecialchars($e) ?>" <?= $filtros['estatus'] === $e ? 'selected' : '' ?>><?= htmlspecialchars($e) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="f_desde">Desde</label>
+                        <input type="date" id="f_desde" name="fecha_desde" class="form-control form-control-sm auto-submit" value="<?= htmlspecialchars($filtros['fecha_desde']) ?>">
+                    </div>
+                    <div>
+                        <label for="f_hasta">Hasta</label>
+                        <input type="date" id="f_hasta" name="fecha_hasta" class="form-control form-control-sm auto-submit" value="<?= htmlspecialchars($filtros['fecha_hasta']) ?>">
+                    </div>
+                    <div>
+                        <label for="f_resuelto_desde">Resuelto desde</label>
+                        <input type="date" id="f_resuelto_desde" name="resuelto_desde" class="form-control form-control-sm" value="<?= htmlspecialchars($filtros['resuelto_desde']) ?>">
+                    </div>
+                    <div>
+                        <label for="f_resuelto_hasta">Resuelto hasta</label>
+                        <input type="date" id="f_resuelto_hasta" name="resuelto_hasta" class="form-control form-control-sm" value="<?= htmlspecialchars($filtros['resuelto_hasta']) ?>">
+                    </div>
+                    <div class="filtros-acciones">
+                        <button type="submit" class="btn-filtrar"><i class="fas fa-search me-1"></i>Buscar</button>
+                        <?php if ($hayFiltrosActivos): ?>
+                            <a href="?" class="btn-limpiar"><i class="fas fa-times"></i>Limpiar</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="saved-filter-tools">
+                    <label for="savedFilterSelect">Mis filtros</label>
+                    <select id="savedFilterSelect" class="form-select form-select-sm"><option value="">Cargar filtro guardado…</option></select>
+                    <button type="button" class="btn-limpiar" id="saveCurrentFilter"><i class="fas fa-bookmark"></i> Guardar filtros actuales</button>
+                </div>
+            </form>
+            <?php if ($hayFiltrosActivos): ?>
+                <div class="filtros-activas-aviso"><i class="fas fa-check-circle me-1"></i>Filtros activos</div>
+            <?php endif; ?>
+        </div>
+
+        <div class="table-card">
+            <div class="table-responsive p-3">
+                <div class="small text-muted px-2 pb-2 d-lg-none"><i class="fas fa-arrows-left-right me-1"></i>Desliza horizontalmente para ver todas las columnas.</div>
+                <table id="tablaTickets" class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Área</th>
+                            <th>Nombre</th>
+                            <th>Comentario</th>
+                            <th>Tipo</th>
+                            <th>Responsable / prioridad</th>
+                            <th>User Adj.</th>
+                            <th>Admin Adj.</th>
+                            <th>Estatus</th>
+                            <th>Fecha</th>
+                            <th>Atención / respuesta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($resultado && $resultado->num_rows > 0): ?>
+                            <?php while ($f = $resultado->fetch_assoc()): ?>
+                            <?php
+                                $descSegura = (string)($f['descripcion'] ?? '');
+                                $comSeguro = (string)($f['comentario_admin'] ?? '');
+                                $textoHTML = nl2br(htmlspecialchars(trim($descSegura)));
+                                $comentarioHTML = nl2br(htmlspecialchars(trim($comSeguro)));
+                                $esFinalizado = in_array($f['estatus'], ['Finalizado', 'Cerrado', 'Cancelado'], true);
+                                // Umbrales para decidir si mostramos "Ver más" (texto largo o con varias líneas/lista)
+                                $descLineas = substr_count(trim($descSegura), "\n") + 1;
+                                $descLarga = (mb_strlen(trim($descSegura)) > 120) || ($descLineas > 3);
+                                $comLineas = substr_count(trim($comSeguro), "\n") + 1;
+                                $comLargo = (mb_strlen(trim($comSeguro)) > 120) || ($comLineas > 3);
+                                // Fecha de última actualización (solo si es distinta a la de creación)
+                                $tieneModificacion = !empty($f['fecha_modificacion'])
+                                    && strtotime($f['fecha_modificacion']) > strtotime($f['fecha_creacion']);
+                            ?>
+                            <tr data-id="<?= $f['id'] ?>">
+                                <td><span class="id-pill">#<?= $f['id'] ?></span></td>
+                                <td><span class="area-pill"><?= htmlspecialchars($f['usuario_area'] ?: ($f['area'] ?? 'N/A')) ?></span></td>
+                                <td><span class="nombre-usuario"><?= htmlspecialchars($f['usuario_nombre_completo'] ?: ($f['nombre_completo'] ?? 'N/A')) ?></span></td>
+
+                                <td style="min-width: 200px;">
+                                    <?php if ($esFinalizado): ?>
+                                        <?php if ($descLarga): ?>
+                                            <div class="texto-expandible">
+                                                <div class="texto-clamp"><?= $textoHTML ?></div>
+                                                <span class="btn-ver-mas" onclick="toggleTexto(this)">Ver más</span>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="smaller"><?= $textoHTML ?></div>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <textarea class="form-control form-control-sm desc-text" rows="2" data-id="<?= $f['id'] ?>"><?= htmlspecialchars(trim($descSegura)) ?></textarea>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td><span class="tipo-badge <?= claseTipoTicket($f['tipo_ticket'] ?? '') ?>"><?= htmlspecialchars($f['tipo_ticket'] ?? 'N/A') ?></span></td>
+
+                                <td class="ticket-asignacion">
+                                    <?php if (!$esFinalizado): ?>
+                                        <select class="form-select form-select-sm ticket-responsable mb-1" aria-label="Responsable del ticket">
+                                            <option value="">Sin asignar</option>
+                                            <?php foreach ($usuariosSoporte as $usuarioSoporte): ?>
+                                                <option value="<?= htmlspecialchars($usuarioSoporte['usuario'], ENT_QUOTES, 'UTF-8') ?>" <?= ($f['asignado_a'] ?? '') === $usuarioSoporte['usuario'] ? 'selected' : '' ?>><?= htmlspecialchars($usuarioSoporte['nombre_completo'] ?: $usuarioSoporte['usuario']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <select class="form-select form-select-sm ticket-prioridad" data-prioridad-guardada="<?= htmlspecialchars($f['prioridad'] ?? 'Normal', ENT_QUOTES, 'UTF-8') ?>" aria-label="Prioridad del ticket">
+                                            <?php foreach (['Baja','Normal','Alta','Urgente'] as $prioridad): ?>
+                                                <option value="<?= $prioridad ?>" <?= ($f['prioridad'] ?? 'Normal') === $prioridad ? 'selected' : '' ?>><?= $prioridad ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <?php if (!empty($f['fecha_resolucion']) || in_array($f['estatus'], ['Finalizado','Cancelado'], true)): ?>
+                                            <small class="text-muted">Resuelto: <?= !empty($f['fecha_resolucion']) ? date('d/m/y H:i', strtotime($f['fecha_resolucion'])) : 'sin registro previo' ?></small>
+                                        <?php elseif (!empty($f['fecha_primera_respuesta'])): ?>
+                                            <small class="text-muted">1a respuesta: <?= date('d/m/y H:i', strtotime($f['fecha_primera_respuesta'])) ?></small>
+                                        <?php else: ?>
+                                            <?php $limiteRespuesta = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_respuesta_minutos'] ?? 480) * 60); ?>
+                                            <small class="<?= time() > $limiteRespuesta ? 'text-danger fw-semibold' : 'text-muted' ?>">
+                                                <?= time() > $limiteRespuesta ? 'Respuesta vencida' : 'Responder antes de ' . date('d/m H:i', $limiteRespuesta) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                        <?php if (in_array($f['estatus'], ['Pendiente','En proceso'], true)):
+                                            $limiteResolucion = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_resolucion_minutos'] ?? 2880) * 60);
+                                            $minutosResolucion = (int) floor(($limiteResolucion - time()) / 60);
+                                        ?>
+                                            <small class="sla-resolution <?= $minutosResolucion < 0 ? 'is-late' : ($minutosResolucion <= 240 ? 'is-soon' : '') ?>">
+                                                <?= $minutosResolucion < 0 ? 'Resolución vencida' : ($minutosResolucion <= 240 ? 'Vence en ' . max(0, $minutosResolucion) . ' min' : 'Resolver antes de ' . date('d/m H:i', $limiteResolucion)) ?>
+                                            </small>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <span><?= htmlspecialchars($f['asignado_a'] ?? 'Sin asignar') ?></span><br>
+                                        <span class="badge bg-secondary" title="La prioridad no se puede cambiar cuando el ticket está cerrado">
+                                            <?= htmlspecialchars($f['prioridad'] ?? 'Normal') ?> · Cerrado
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Adjunto Usuario -->
+                                <td class="text-center">
+                                    <?php if (!empty($f['imagen'])): ?>
+                                        <a href="javascript:void(0)" class="adjunto-link" onclick="verImagen('../../uploads/<?= htmlspecialchars($f['imagen']) ?>')" title="Ver adjunto del usuario">
+                                            <i class="fas fa-image"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted smaller">---</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Adjunto Admin -->
+                                <td class="text-center">
+                                    <?php if (!empty($f['imagen_admin'])): ?>
+                                        <a href="javascript:void(0)" class="adjunto-link admin" onclick="verImagen('../../uploads/<?= htmlspecialchars($f['imagen_admin']) ?>')" title="Ver adjunto del admin">
+                                            <i class="fas fa-paperclip"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if (($_SESSION['rol'] ?? '') === 'admin' && !$esFinalizado): ?>
+                                        <form action="backend/subir_imagen_admin_ticket.php" method="POST" enctype="multipart/form-data" class="d-inline">
+                                            <input type="hidden" name="ticket_id" value="<?= (int) $f['id'] ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                                            <label for="img_adm_<?= $f['id'] ?>" class="adjunto-upload-label" title="Subir adjunto de admin">
+                                                <i class="fas fa-upload"></i>
+                                            </label>
+                                            <input type="file" name="imagen_admin" id="img_adm_<?= $f['id'] ?>" hidden onchange="this.form.submit()">
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Estatus -->
+                                <td>
+                                    <?php if (!empty($f['reabierto']) && in_array($f['estatus'], ['Pendiente','En proceso'], true)): ?><span class="reopened-tag">Reabierto</span><br><?php endif; ?>
+                                    <?php if ($esFinalizado): ?>
+                                        <span class="status-badge <?= $f['estatus'] == 'Finalizado' ? 'status-finalizado' : 'status-cancelado' ?>"><?= $f['estatus'] ?></span>
+                                    <?php else: ?>
+                                        <select class="estatus form-select form-select-sm">
+                                            <option value="Pendiente" <?= $f['estatus'] == 'Pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                                            <option value="En proceso" <?= $f['estatus'] == 'En proceso' ? 'selected' : '' ?>>En proceso</option>
+                                            <option value="Finalizado" <?= $f['estatus'] == 'Finalizado' ? 'selected' : '' ?>>Finalizado</option>
+                                            <option value="Cancelado" <?= $f['estatus'] == 'Cancelado' ? 'selected' : '' ?>>Cancelado</option>
+                                        </select>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="smaller">
+                                    <?= date("d/m/y H:i", strtotime($f['fecha_creacion'])) ?>
+                                    <?php if (!empty($f['fecha_resolucion']) || in_array($f['estatus'], ['Finalizado','Cerrado'], true)): ?>
+                                        <div class="fecha-resolucion"><i class="fas fa-check-circle"></i> <?= !empty($f['fecha_resolucion']) ? date('d/m/y H:i', strtotime($f['fecha_resolucion'])) : date('d/m/y H:i', strtotime($f['fecha_modificacion'])) ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($tieneModificacion): ?>
+                                        <div class="fecha-mod" title="Última actualización">
+                                            <i class="fas fa-clock"></i> <?= date("d/m/y H:i", strtotime($f['fecha_modificacion'])) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                <!-- Respuesta Admin -->
+                                <td style="min-width: 200px;">
+                                    <div class="d-flex align-items-start">
+                                        <?php if ($esFinalizado): ?>
+                                            <?php if ($comSeguro === ''): ?>
+                                                <span class="smaller">-</span>
+                                            <?php elseif ($comLargo): ?>
+                                                <div class="texto-expandible w-100">
+                                                    <div class="texto-clamp"><?= $comentarioHTML ?></div>
+                                                    <span class="btn-ver-mas" onclick="toggleTexto(this)">Ver más</span>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="smaller"><?= $comentarioHTML ?></div>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <textarea class="form-control form-control-sm comentario-text" rows="2" data-id="<?= $f['id'] ?>"><?= htmlspecialchars(trim($comSeguro)) ?></textarea>
+                                            <span class="ms-1 text-success d-none check-icon">✅</span>
+                                        <?php endif; ?>
+                                        <span class="historial-link" title="Ver historial de comentarios" onclick="verHistorial(<?= $f['id'] ?>)">
+                                            <i class="fas fa-history"></i>
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Acciones -->
+                                <td class="ticket-actions">
+                                    <div class="ticket-action-buttons">
+                                        <a href="chat_ticket.php?ticket_id=<?= (int) $f['id'] ?>" class="sd-action-chat" title="Abrir conversación del ticket #<?= (int) $f['id'] ?>" aria-label="Abrir conversación del ticket #<?= (int) $f['id'] ?>">
+                                            <i class="fas fa-comments"></i><span>Atender</span>
+                                        </a>
+                                        <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0" title="Ver quién atendió y qué cambios hizo">
+                                            <i class="fas fa-user-clock"></i>
+                                        </button>
+                                        <?php if (in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['admin', 'superadmin'], true)): ?>
+                                            <button type="button" onclick="reabrirTicket(<?= (int) $f['id'] ?>)" class="btn btn-link text-primary p-0 ticket-action-reopen" title="Reabrir como Pendiente" aria-label="Reabrir ticket #<?= (int) $f['id'] ?>">
+                                                <i class="fas fa-rotate-left"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <tr><td colspan="12" class="text-center py-5 text-muted">
+                                <?= $hayFiltrosActivos ? 'No hay tickets que coincidan con los filtros aplicados.' : 'No hay tickets registrados.' ?>
+                            </td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Paginación -->
+        <div class="d-flex justify-content-end mt-3">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item <?= ($pagina <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?<?= construirQueryString(['pagina' => $pagina - 1]) ?>">Anterior</a>
+                    </li>
+
+                    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                        <?php if ($i == 1 || $i == $total_paginas || ($i >= $pagina - $rango && $i <= $pagina + $rango)): ?>
+                            <li class="page-item <?= ($i == $pagina) ? 'active' : '' ?>">
+                                <a class="page-link" href="?<?= construirQueryString(['pagina' => $i]) ?>"><?= $i ?></a>
+                            </li>
+                        <?php elseif ($i == $pagina - $rango - 1 || $i == $pagina + $rango + 1): ?>
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+
+                    <li class="page-item <?= ($pagina >= $total_paginas) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?<?= construirQueryString(['pagina' => $pagina + 1]) ?>">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <!-- Modal Visor de Imagen -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+        <div class="modal-body text-center bg-dark rounded d-flex align-items-center justify-content-center position-relative">
+            <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            <img src="" id="imgPreview" style="max-width:100%; max-height:90vh; border-radius:5px; object-fit:contain;">
+        </div>
+        </div>
+    </div>
+    </div>
+    <!-- Modal Historial de Comentarios -->
+    <div class="modal fade" id="historialModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title"><i class="fas fa-history me-2"></i>Historial de comentarios</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="historialBody">
+            <p class="text-muted text-center mb-0">Cargando...</p>
+        </div>
+        </div>
+    </div>
+    </div>
+    <div class="modal fade" id="actividadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title"><i class="fas fa-user-clock me-2"></i>Actividad y responsables</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body" id="actividadBody">
+            <p class="text-muted text-center mb-0">Cargando...</p>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+<!-- Scripts (Única inclusión limpia) -->
+<script>
+// Filtros: los selects y fechas se auto-envían al cambiar de valor
+document.querySelectorAll('#formFiltros .auto-submit').forEach(function (el) {
+    el.addEventListener('change', function () {
+        document.getElementById('formFiltros').submit();
+    });
+});
+
+// Filtros guardados en este navegador, separados por usuario.
+(function () {
+    const key = 'serviceDeskSavedFilters:' + <?= json_encode((string)($_SESSION['usuario'] ?? 'soporte')) ?>;
+    const select = document.getElementById('savedFilterSelect');
+    const button = document.getElementById('saveCurrentFilter');
+    const form = document.getElementById('formFiltros');
+    if (!select || !button || !form) return;
+    const readSaved = () => { try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { return []; } };
+    const saved = readSaved();
+    const refresh = () => {
+        select.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
+        saved.forEach((item, index) => {
+            const option = document.createElement('option'); option.value = String(index); option.textContent = item.name; select.appendChild(option);
+        });
+    };
+    refresh();
+    select.addEventListener('change', () => {
+        const item = saved[Number(select.value)]; if (!item) return;
+        for (const field of form.elements) if (field.name in item.params) field.value = item.params[field.name];
+        form.submit();
+    });
+    button.addEventListener('click', () => {
+        const name = window.prompt('¿Cómo quieres llamar a este filtro?'); if (!name || !name.trim()) return;
+        const params = {};
+        for (const field of form.elements) if (field.name && field.value) params[field.name] = field.value;
+        saved.push({ name: name.trim().slice(0, 40), params });
+        if (saved.length > 12) saved.shift();
+        try { localStorage.setItem(key, JSON.stringify(saved)); }
+        catch (_) { window.alert('No se pudo guardar el filtro en este navegador.'); return; }
+        refresh(); select.value = String(saved.length - 1);
+    });
+})();
+
+// Modal Imagen
+function verImagen(url) {
+    $('#imgPreview').attr('src', url);
+    let modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+}
+// Ver más / Ver menos para textos largos en tickets finalizados
+function toggleTexto(link) {
+    let contenedor = link.previousElementSibling;
+    let expandido = contenedor.classList.toggle('expandido');
+    link.textContent = expandido ? 'Ver menos' : 'Ver más';
+}
+// Modal Historial de Comentarios
+function escapeHtml(texto) {
+    return $('<div>').text(texto).html();
+}
+function verHistorial(id) {
+    let modalEl = document.getElementById('historialModal');
+    let modal = new bootstrap.Modal(modalEl);
+    $('#historialBody').html('<p class="text-muted text-center mb-0">Cargando...</p>');
+    modal.show();
+    $.ajax({
+        url: 'backend/obtener_historial_comentarios.php',
+        type: 'GET',
+        data: { ticket_id: id },
+        dataType: 'json',
+        success: function(r) {
+            if (r.status === 'ok' && r.historial.length > 0) {
+                let html = '';
+                r.historial.forEach(function(h) {
+                    html += '<div class="historial-item">'
+                        + '<div class="d-flex justify-content-between align-items-baseline">'
+                        + '<span class="historial-admin">' + escapeHtml(h.admin_usuario) + '</span>'
+                        + '<span class="historial-fecha">' + escapeHtml(h.fecha_fmt) + '</span>'
+                        + '</div>'
+                        + '<div class="historial-texto">' + escapeHtml(h.comentario) + '</div>'
+                        + '</div>';
+                });
+                $('#historialBody').html(html);
+            } else {
+                $('#historialBody').html('<p class="text-muted text-center mb-0">Sin historial de comentarios todavía.</p>');
+            }
+        },
+        error: function(xhr) {
+            console.error("ERROR AJAX:", xhr.responseText);
+            $('#historialBody').html('<p class="text-danger text-center mb-0">No se pudo cargar el historial.</p>');
+        }
+    });
+}
+function verActividad(id) {
+    const modal = new bootstrap.Modal(document.getElementById('actividadModal'));
+    const etiquetasAccion = {
+        creacion: 'Creación', chat: 'Chat', comentario: 'Comentario', estatus: 'Cambio de estatus',
+        descripcion: 'Edición de descripción', asignacion: 'Asignación', prioridad: 'Cambio de prioridad', adjunto: 'Adjunto'
+    };
+    $('#actividadBody').html('<p class="text-muted text-center mb-0">Cargando actividad...</p>');
+    modal.show();
+    $.ajax({
+        url: 'backend/obtener_actividad.php',
+        data: { ticket_id: id },
+        dataType: 'json',
+        success: function(r) {
+            if (r.status === 'ok' && r.actividad.length > 0) {
+                let html = '';
+                r.actividad.forEach(function(item) {
+                    html += '<div class="historial-item">'
+                        + '<div class="d-flex justify-content-between gap-2">'
+                        + '<span class="historial-admin">' + escapeHtml(item.actor_nombre) + '</span>'
+                        + '<span class="historial-fecha">' + escapeHtml(item.fecha_fmt) + '</span>'
+                        + '</div>'
+                        + '<div class="small text-muted">@' + escapeHtml(item.actor_usuario) + ' · ' + escapeHtml(etiquetasAccion[item.accion] || item.accion) + '</div>'
+                        + '<div class="historial-texto">' + escapeHtml(item.detalle || 'Interacción registrada.') + '</div>'
+                        + '</div>';
+                });
+                $('#actividadBody').html(html);
+            } else {
+                $('#actividadBody').html('<p class="text-muted text-center mb-0">Aún no hay actividad registrada.</p>');
+            }
+        },
+        error: function() {
+            $('#actividadBody').html('<p class="text-danger text-center mb-0">No se pudo cargar la actividad.</p>');
+        }
+    });
+}
+$(document).ready(function() {
+    function guardarAsignacion(select) {
+        const fila = select.closest('tr');
+        const responsable = fila.find('.ticket-responsable').val();
+        const prioridad = fila.find('.ticket-prioridad').val();
+        $.ajax({
+            url: 'backend/actualizar_asignacion.php', type: 'POST', dataType: 'json',
+            data: { ticket_id: fila.data('id'), asignado_a: responsable, prioridad: prioridad, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            error: function(xhr) { alert(xhr.responseJSON?.message || 'No se pudo guardar responsable y prioridad.'); }
+        });
+    }
+    function guardarPrioridad(select) {
+        const fila = select.closest('tr');
+        const prioridadAnterior = select.data('prioridad-guardada') || select.val();
+        fila.addClass('saving-row');
+        $.ajax({
+            url: 'backend/actualizar_prioridad.php', type: 'POST', dataType: 'json',
+            data: { ticket_id: fila.data('id'), prioridad: select.val(), csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            success: function() {
+                select.data('prioridad-guardada', select.val()).addClass('is-valid');
+                setTimeout(() => select.removeClass('is-valid'), 1200);
+            },
+            error: function(xhr) {
+                select.val(prioridadAnterior);
+                alert(xhr.responseJSON?.message || 'No se pudo guardar la prioridad.');
+            },
+            complete: function() { fila.removeClass('saving-row'); }
+        });
+    }
+    $(document).on('change', '.ticket-responsable', function() { guardarAsignacion($(this)); });
+    $(document).on('change', '.ticket-prioridad', function() { guardarPrioridad($(this)); });
+    // 1. ACTUALIZAR ESTATUS
+    $(document).on('change', '.estatus', function() {
+        let select = $(this);
+        let fila = select.closest('tr');
+        let idTicket = fila.data('id');
+        let nuevoEstatus = select.val();
+        fila.addClass('saving-row');
+        $.ajax({
+            url: 'backend/actualizar_ticket_inline.php',
+            type: 'POST',
+            data: { id: idTicket, estatus: nuevoEstatus, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            dataType: 'json',
+            success: function(response) {
+                fila.removeClass('saving-row');
+                if (response.success || response.status === 'ok') {
+                    fila.addClass('updated-flash');
+                    setTimeout(() => fila.removeClass('updated-flash'), 1500);
+                    if (nuevoEstatus === 'Finalizado' || nuevoEstatus === 'Cancelado') {
+                        location.reload();
+                    }
+                } else {
+                    alert("Error al actualizar estatus: " + (response.message || 'Desconocido'));
+                }
+            },
+            error: function(xhr) {
+                fila.removeClass('saving-row');
+                console.error("ERROR AJAX:", xhr.responseText);
+                alert("Error en la petición de estatus.");
+            }
+        });
+    });
+    // 2. ACTUALIZAR COMENTARIO ADMIN
+    $(document).on('blur', '.comentario-text', function() {
+        let textarea = $(this);
+        let fila = textarea.closest('tr');
+        let id = textarea.data('id');
+        let texto = textarea.val().trim();
+        let check = textarea.siblings('.check-icon');
+        $.ajax({
+            url: 'backend/actualizar_comentario.php',
+            type: 'POST',
+            data: { ticket_id: id, comentario_admin: texto, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            dataType: 'json',
+            success: function(r) {
+                if (r.status === 'ok' || r.success) {
+                    check.removeClass('d-none').fadeIn();
+                    fila.addClass('updated-flash');
+                    setTimeout(() => {
+                        check.fadeOut();
+                        fila.removeClass('updated-flash');
+                    }, 2000);
+                } else {
+                    alert("Error guardando comentario: " + (r.message || 'Error inesperado'));
+                }
+            },
+            error: function(xhr) {
+                console.error("ERROR AJAX:", xhr.responseText);
+                alert("Error al guardar comentario.");
+            }
+        });
+    });
+    // 3. ACTUALIZAR DESCRIPCIÓN (Opcional)
+    $(document).on('blur', '.desc-text', function() {
+        let textarea = $(this);
+        let id = textarea.data('id');
+        let texto = textarea.val().trim();
+        $.ajax({
+            url: 'backend/actualizar_descripcion.php',
+            type: 'POST',
+            data: { ticket_id: id, descripcion: texto, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+            dataType: 'json',
+            success: function(r) {
+                if (r.status !== 'ok' && !r.success) {
+                    console.warn("No se actualizó la descripción:", r.message);
+                }
+            }
+        });
+    });
+});
+// 4. ELIMINAR TICKET
+function eliminarTicket(id) {
+    if (!confirm("¿Eliminar ticket #" + id + "?")) return;
+    let fila = $('tr[data-id="' + id + '"]');
+    $.ajax({
+        url: 'backend/eliminar_ticket.php',
+        type: 'POST',
+        data: { ticket_id: id, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+        dataType: 'json',
+        success: function(r) {
+            if (r.status === 'ok' || r.success) {
+                fila.fadeOut(400, function() { $(this).remove(); });
+            } else {
+                alert("Error al eliminar: " + (r.message || 'Error desconocido'));
+            }
+        },
+        error: function(xhr) {
+            console.error("ERROR AJAX:", xhr.responseText);
+            alert("Error al intentar eliminar.");
+        }
+    });
+}
+
+// Reabrir cualquier ticket y devolverlo a Pendiente.
+function reabrirTicket(id) {
+    if (!confirm('¿Reabrir el ticket #' + id + ' y dejarlo como Pendiente?')) return;
+    const boton = document.querySelector('button.ticket-action-reopen[onclick="reabrirTicket(' + id + ')"]');
+    if (boton) boton.disabled = true;
+
+    $.ajax({
+        url: 'backend/reabrir_ticket.php',
+        type: 'POST',
+        data: { ticket_id: id, csrf_token: <?= json_encode($_SESSION['csrf_token']) ?> },
+        dataType: 'json',
+        success: function(respuesta) {
+            if (respuesta.status === 'ok') {
+                if (respuesta.changed) {
+                    location.reload();
+                } else {
+                    alert(respuesta.message || 'El ticket ya se encuentra Pendiente.');
+                }
+                return;
+            }
+            alert(respuesta.message || 'No se pudo reabrir el ticket.');
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON?.message || 'No se pudo reabrir el ticket.');
+        },
+        complete: function() {
+            if (boton) boton.disabled = false;
+        }
+    });
+}
+</script>
