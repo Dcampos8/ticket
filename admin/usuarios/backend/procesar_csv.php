@@ -69,11 +69,11 @@ if (!$archivo || ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || 
                     $area = trim($valor('area'));
                     $rolArchivo = strtolower(trim($valor('rol')));
 
-                    if ($usuario === '' || $nombre === '' || trim($contrasenaOriginal) === '' || $email === '' || $area === '') {
-                        $errores[] = "Fila {$numeroFila}: faltan usuario, nombre, contraseña, correo o área.";
+                    if ($usuario === '' || $nombre === '' || trim($contrasenaOriginal) === '' || $area === '') {
+                        $errores[] = "Fila {$numeroFila}: faltan usuario, nombre, contraseña o área.";
                         continue;
                     }
-                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                         $errores[] = "Fila {$numeroFila} ({$usuario}): correo no válido.";
                         continue;
                     }
