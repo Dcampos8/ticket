@@ -1,25 +1,108 @@
-/* Estilos extraídos de admin\lineas\responsiva.php */
+/* Formato de responsiva compatible con la hoja original de líneas. */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.35;
+    color: #000;
+    margin: 0;
+    padding: 20px;
+}
 
-body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.3; color: #000; margin: 0; padding: 20px; }
-        .page { position: relative; isolation: isolate; overflow: hidden; max-width: 800px; min-height: 10in; margin: 0 auto 30px auto; background: #fff; padding: 25px; border: 1px solid #ccc; page-break-after: always; }
-        .page-bg { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: .22; }
-        .page-content { position: relative; z-index: 1; }
-        h2 { font-size: 11pt; text-align: center; text-transform: uppercase; margin-bottom: 15px; font-weight: bold; }
-        h4 { font-size: 10pt; margin-top: 10px; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-        p, li { text-align: justify; margin: 4px 0; }
-        ul { padding-left: 20px; margin: 4px 0; }
-        .info-box { margin: 10px 0; line-height: 1.5; }
-        .firmas { margin-top: 85px; text-align: center; }
-        .linea-firma { width: 300px; border-top: 1px solid #000; margin: 0 auto 5px auto; }
-        .document-picker { display:flex; justify-content:center; gap:10px; margin:0 auto 16px; }
-        .document-picker button { padding:9px 15px; font-weight:bold; cursor:pointer; }
-        .responsiva-page[hidden] { display:none !important; }
-        
-        @media print {
-            .no-print { display: none !important; }
-            body { padding: 0; }
-            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .page { border: none; padding: 0; margin: 0; min-height: 0; page-break-after: auto; }
-            .page-bg { opacity: .22; }
-            .page[hidden] { display: none !important; }
-        }
+.page {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    max-width: 800px;
+    min-height: 1000px;
+    box-sizing: border-box;
+    margin: 0 auto 30px;
+    padding: 50px 40px;
+    border: 1px solid #ccc;
+    background: #fff;
+    page-break-after: always;
+}
+
+.page-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.page-content { position: relative; z-index: 1; }
+
+h2 {
+    margin: 0 0 12px;
+    font-size: 11pt;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.fecha-responsiva {
+    margin: 10px 0 45px;
+    font-size: 10pt;
+    font-weight: bold;
+    text-align: right;
+}
+
+h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 5px;
+    font-size: 9.5pt;
+    font-weight: normal;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+h4::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 15px;
+    flex: 0 0 4px;
+    background: #dc2626;
+}
+
+p, li { margin: 2px 0; font-size: 9.5pt; }
+p { text-align: justify; }
+ul { margin: 2px 0; padding-left: 20px; }
+.info-box { margin: 6px 0; line-height: 1.35; }
+.info-box p { margin: 2px 0; text-align: left; }
+.firmas { margin-top: 150px; text-align: center; }
+.linea-firma { width: 300px; max-width: 100%; margin: 0 auto 5px; border-top: 1px solid #000; }
+.document-picker { display: flex; justify-content: center; gap: 10px; margin: 0 auto 16px; }
+.document-picker button { padding: 9px 15px; font-weight: bold; cursor: pointer; }
+.responsiva-page[hidden] { display: none !important; }
+
+@page { size: letter portrait; margin: 0; }
+
+@media print {
+    html, body { width: 8.5in; height: 11in; margin: 0 !important; padding: 0 !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .page {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 8.5in;
+        height: 11in;
+        max-width: none;
+        min-height: 0;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 80px 60px 40px;
+        border: 0;
+        page-break-after: auto;
+        break-after: auto;
+    }
+    .page-bg { object-fit: fill; }
+    .page[hidden] { display: none !important; }
+    .fecha-responsiva { margin-top: 5px; margin-bottom: 45px; }
+    .firmas { margin-top: 100px; }
+}

@@ -94,7 +94,7 @@ if ($fechaResponsiva !== '') {
   <img class="page-bg" src="<?= $e(BASE_URL . 'admin/lineas/img/fondo.png') ?>" alt="">
   <div class="page-content">
     <h2>RESPONSIVA DE EQUIPO CELULAR CORPORATIVO</h2>
-    <p style="text-align:right;">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
+    <p class="fecha-responsiva">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
     <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> el siguiente equipo para uso laboral:</p>
     
     <div class="info-box">
@@ -141,7 +141,7 @@ if ($fechaResponsiva !== '') {
   <img class="page-bg" src="<?= $e(BASE_URL . 'admin/lineas/img/fondo.png') ?>" alt="">
   <div class="page-content">
     <h2>RESPONSIVA DE SIM CORPORATIVA</h2>
-    <p style="text-align:right;">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
+    <p class="fecha-responsiva">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
     <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> una línea telefónica corporativa (SIM) para uso exclusivo en actividades laborales.</p>
     
     <div class="info-box">
