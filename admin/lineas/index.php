@@ -270,6 +270,10 @@ function lt_renderTimeline($q_hist): void {
                 echo '    <div class="lt-timeline-notas">' . nl2br(htmlspecialchars($h['notas'])) . '</div>';
             }
             echo '    <div class="lt-timeline-autor"><i class="fa-solid fa-user-shield"></i> ' . htmlspecialchars($h['realizado_por'] ?? 'Sistema') . '</div>';
+            if (!empty($h['id'])) {
+                $urlResponsivaHistorial = rtrim(BASE_URL, '/') . '/admin/lineas/responsiva.php?historial_id=' . (int) $h['id'];
+                echo '    <div class="mt-2"><a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" href="' . htmlspecialchars($urlResponsivaHistorial, ENT_QUOTES, 'UTF-8') . '"><i class="fa-solid fa-print me-1"></i>Imprimir responsiva</a></div>';
+            }
             echo '  </div>';
             echo '</div>';
         }
@@ -1927,6 +1931,9 @@ if ($kpi_otros > 0) {
             </div>
         </div>
         <div class="d-flex flex-wrap justify-content-end gap-2">
+            <a class="btn btn-warning fw-bold" href="<?= BASE_URL ?>admin/lineas/responsiva_manual.php">
+                <i class="fa-solid fa-file-signature me-1"></i> Responsiva desde cero
+            </a>
             <button type="button" class="btn btn-light fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaLinea">
                 <i class="fa-solid fa-plus me-1"></i> Nueva Línea
             </button>
