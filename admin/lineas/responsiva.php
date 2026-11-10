@@ -83,12 +83,16 @@ if ($fechaResponsiva !== '') {
 </head>
 <body>
 
-<div class="no-print" style="text-align: center; margin-bottom: 15px;">
-    <button onclick="window.print();" style="padding: 8px 20px; font-weight: bold; cursor: pointer;">🖨️ Imprimir Responsiva</button>
+<div class="no-print document-picker">
+    <button type="button" id="btnResponsivaTelefono" onclick="seleccionarResponsiva('telefono')">📱 Responsiva de teléfono</button>
+    <button type="button" id="btnResponsivaSim" onclick="seleccionarResponsiva('sim')">💳 Responsiva de SIM</button>
+    <button type="button" onclick="window.print();">🖨️ Imprimir seleccionada</button>
 </div>
 
 <!-- HOJA 1: EQUIPO CELULAR -->
-<div class="page">
+<div class="page responsiva-page" id="responsivaTelefono">
+  <img class="page-bg" src="<?= $e(BASE_URL . 'admin/lineas/img/fondo.png') ?>" alt="">
+  <div class="page-content">
     <h2>RESPONSIVA DE EQUIPO CELULAR CORPORATIVO</h2>
     <p style="text-align:right;">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
     <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> el siguiente equipo para uso laboral:</p>
@@ -129,10 +133,13 @@ if ($fechaResponsiva !== '') {
         <div class="linea-firma"></div>
         <strong><?= $e($data['usuario'] ?? '') ?></strong>
     </div>
+  </div>
 </div>
 
 <!-- HOJA 2: SIM CORPORATIVA -->
-<div class="page">
+<div class="page responsiva-page" id="responsivaSim" hidden>
+  <img class="page-bg" src="<?= $e(BASE_URL . 'admin/lineas/img/fondo.png') ?>" alt="">
+  <div class="page-content">
     <h2>RESPONSIVA DE SIM CORPORATIVA</h2>
     <p style="text-align:right;">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
     <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> una línea telefónica corporativa (SIM) para uso exclusivo en actividades laborales.</p>
@@ -174,7 +181,21 @@ if ($fechaResponsiva !== '') {
         <div class="linea-firma"></div>
         <strong><?= $e($data['usuario'] ?? '') ?></strong>
     </div>
+  </div>
 </div>
+
+<script>
+function seleccionarResponsiva(tipo) {
+    const telefono = document.getElementById('responsivaTelefono');
+    const sim = document.getElementById('responsivaSim');
+    const verTelefono = tipo === 'telefono';
+    telefono.hidden = !verTelefono;
+    sim.hidden = verTelefono;
+    document.getElementById('btnResponsivaTelefono').classList.toggle('active', verTelefono);
+    document.getElementById('btnResponsivaSim').classList.toggle('active', !verTelefono);
+}
+seleccionarResponsiva('telefono');
+</script>
 
 </body>
 </html>
