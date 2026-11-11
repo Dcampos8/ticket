@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Tickets · Transportes Valadez",
-  "short_name": "Tickets Valadez",
-  "description": "Sistema de atención y seguimiento de tickets de Transportes Valadez.",
+  "name": "Sistemas · Transportes Valadez",
+  "short_name": "Sistemas TV",
+  "description": "Sistemas internos de Transportes Valadez.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
