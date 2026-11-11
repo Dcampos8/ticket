@@ -312,7 +312,7 @@ function claseTipoTicket($tipo) {
                         <select id="f_estatus" name="estatus" class="form-select form-select-sm auto-submit">
                             <option value="">Todos</option>
                             <?php foreach ($estatusDisponibles as $e): ?>
-                                <option value="<?= htmlspecialchars($e) ?>" <?= $filtros['estatus'] === $e ? 'selected' : '' ?>><?= htmlspecialchars($e) ?></option>
+                                <option value="<?= htmlspecialchars($e) ?>" <?= $filtros['estatus'] === $e ? 'selected' : '' ?>><?= $e === 'Finalizado' ? 'Resuelto' : htmlspecialchars($e) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -484,12 +484,12 @@ function claseTipoTicket($tipo) {
                                 <td>
                                     <?php if (!empty($f['reabierto']) && in_array($f['estatus'], ['Pendiente','En proceso'], true)): ?><span class="reopened-tag">Reabierto</span><br><?php endif; ?>
                                     <?php if ($esFinalizado): ?>
-                                        <span class="status-badge <?= $f['estatus'] == 'Finalizado' ? 'status-finalizado' : 'status-cancelado' ?>"><?= $f['estatus'] ?></span>
+                                        <span class="status-badge <?= $f['estatus'] == 'Finalizado' ? 'status-finalizado' : 'status-cancelado' ?>"><?= $f['estatus'] === 'Finalizado' ? 'Resuelto' : htmlspecialchars($f['estatus']) ?></span>
                                     <?php else: ?>
                                         <select class="estatus form-select form-select-sm">
                                             <option value="Pendiente" <?= $f['estatus'] == 'Pendiente' ? 'selected' : '' ?>>Pendiente</option>
                                             <option value="En proceso" <?= $f['estatus'] == 'En proceso' ? 'selected' : '' ?>>En proceso</option>
-                                            <option value="Finalizado" <?= $f['estatus'] == 'Finalizado' ? 'selected' : '' ?>>Finalizado</option>
+                                            <option value="Finalizado" <?= $f['estatus'] == 'Finalizado' ? 'selected' : '' ?>>Resuelto</option>
                                             <option value="Cancelado" <?= $f['estatus'] == 'Cancelado' ? 'selected' : '' ?>>Cancelado</option>
                                         </select>
                                     <?php endif; ?>
@@ -642,14 +642,37 @@ function claseTipoTicket($tipo) {
     const lista = document.createElement('section');
     lista.className = 'ticket-card-list';
     lista.setAttribute('aria-label', 'Tickets de soporte');
+    const encabezadoListado = document.createElement('div');
+    encabezadoListado.className = 'ticket-list-column-head';
+    ['Folio','Solicitante','Área','Solicitud','Estado','Fecha',''].forEach(texto => { const celda = document.createElement('span'); celda.textContent = texto; encabezadoListado.appendChild(celda); });
+    lista.appendChild(encabezadoListado);
+    const estados = ['Todos', 'Pendiente', 'En proceso', 'Finalizado', 'Cancelado'];
+    const etiquetasEstado = {'Finalizado':'Resuelto', 'Cerrado':'Resuelto'};
+    const pestanas = document.createElement('div');
+    pestanas.className = 'ticket-status-tabs';
+    pestanas.setAttribute('role', 'tablist');
+    pestanas.setAttribute('aria-label', 'Filtrar tickets por estatus');
+    const contadores = {};
+    estados.forEach((estado, index) => {
+        const boton = document.createElement('button');
+        boton.type = 'button'; boton.className = 'ticket-status-tab'; boton.dataset.status = estado;
+        boton.setAttribute('role', 'tab'); boton.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+        const texto = document.createElement('span'); texto.textContent = etiquetasEstado[estado] || estado;
+        const cuenta = document.createElement('span'); cuenta.className = 'ticket-status-count'; cuenta.textContent = '0';
+        contadores[estado] = cuenta; boton.append(texto, cuenta); pestanas.appendChild(boton);
+    });
     cuerpo.querySelectorAll('tr.ticket-item').forEach(fila => {
         const tarjeta = document.createElement('article');
         tarjeta.className = 'ticket-summary';
         tarjeta.dataset.id = fila.dataset.id || '';
-        const status = fila.cells[8].querySelector('.estatus')?.value || fila.cells[8].textContent.trim();
+        const badge = fila.cells[8].querySelector('.status-badge');
+        const status = fila.cells[8].querySelector('.estatus')?.value || (badge?.classList.contains('status-finalizado') ? 'Finalizado' : badge?.classList.contains('status-cancelado') ? 'Cancelado' : fila.cells[8].textContent.trim());
+        tarjeta.dataset.status = status === 'Cerrado' ? 'Finalizado' : status;
         tarjeta.innerHTML = '<span class="summary-cell summary-id"></span><span class="summary-cell summary-person"></span><span class="summary-cell summary-area"></span><span class="summary-cell summary-request"></span><span class="summary-cell summary-status"></span><span class="summary-cell summary-date"></span><button type="button" class="ticket-summary-open">Abrir <i class="fas fa-arrow-right"></i></button>';
         const values = [fila.cells[0].textContent.trim(), fila.cells[2].textContent.trim(), fila.cells[1].textContent.trim(), (fila.cells[3].querySelector('textarea')?.value || fila.cells[3].textContent).trim().slice(0, 120), status, fila.cells[9].textContent.trim().slice(0, 16)];
-        tarjeta.querySelectorAll('.summary-cell').forEach((cell, index) => cell.textContent = values[index]);
+        tarjeta.querySelectorAll('.summary-cell').forEach((cell, index) => cell.textContent = index === 4 ? (etiquetasEstado[values[index]] || values[index]) : values[index]);
+        contadores.Todos.textContent = String(Number(contadores.Todos.textContent) + 1);
+        if (contadores[tarjeta.dataset.status]) contadores[tarjeta.dataset.status].textContent = String(Number(contadores[tarjeta.dataset.status].textContent) + 1);
         lista.appendChild(tarjeta);
     });
     const vacio = cuerpo.querySelector('tr.ticket-empty td');
@@ -659,7 +682,42 @@ function claseTipoTicket($tipo) {
         mensaje.textContent = vacio.textContent.trim();
         lista.appendChild(mensaje);
     }
-    tabla.before(lista);
+    tabla.before(pestanas, lista);
+    const cambiarPestana = estado => {
+        pestanas.querySelectorAll('.ticket-status-tab').forEach(boton => {
+            const activa = boton.dataset.status === estado;
+            boton.classList.toggle('active', activa); boton.setAttribute('aria-selected', activa ? 'true' : 'false');
+        });
+        lista.querySelectorAll('.ticket-summary').forEach(card => { card.hidden = estado !== 'Todos' && card.dataset.status !== estado; });
+        sessionStorage.setItem('ticketStatusTab', estado);
+    };
+    window.actualizarEstadoTicketEnPestanas = (id, estado) => {
+        const card = lista.querySelector('.ticket-summary[data-id="' + id + '"]');
+        if (!card) return 'Todos';
+        const anterior = card.dataset.status;
+        const nuevo = estado === 'Cerrado' ? 'Finalizado' : estado;
+        if (anterior !== nuevo) {
+            if (contadores[anterior]) contadores[anterior].textContent = String(Math.max(0, Number(contadores[anterior].textContent) - 1));
+            if (contadores[nuevo]) contadores[nuevo].textContent = String(Number(contadores[nuevo].textContent) + 1);
+        }
+        card.dataset.status = nuevo;
+        card.querySelector('.summary-status').textContent = etiquetasEstado[estado] || estado;
+        const filaOriginal = cuerpo.querySelector('tr.ticket-item[data-id="' + id + '"]');
+        const selectOriginal = filaOriginal?.cells[8].querySelector('.estatus');
+        if (selectOriginal && ['Pendiente','En proceso'].includes(nuevo)) selectOriginal.value = nuevo;
+        const pestanaActiva = pestanas.querySelector('.ticket-status-tab.active')?.dataset.status || 'Todos';
+        const destino = pestanaActiva !== 'Todos' && pestanaActiva !== nuevo ? nuevo : pestanaActiva;
+        cambiarPestana(destino);
+        return destino;
+    };
+    let estadoInicial = sessionStorage.getItem('ticketStatusTab') || 'Todos';
+    sessionStorage.removeItem('ticketStatusTab');
+    if (!estados.includes(estadoInicial)) estadoInicial = 'Todos';
+    pestanas.addEventListener('click', event => {
+        const boton = event.target.closest('.ticket-status-tab');
+        if (boton) cambiarPestana(boton.dataset.status);
+    });
+    cambiarPestana(estadoInicial);
     tabla.dataset.convertida = '1';
     tabla.hidden = true;
     lista.addEventListener('click', event => {
@@ -879,8 +937,10 @@ $(document).ready(function() {
                 if (response.success || response.status === 'ok') {
                     fila.addClass('updated-flash');
                     setTimeout(() => fila.removeClass('updated-flash'), 1500);
+                    const pestanaDestino = window.actualizarEstadoTicketEnPestanas?.(idTicket, nuevoEstatus) || 'Todos';
                     if (nuevoEstatus === 'Finalizado' || nuevoEstatus === 'Cancelado') {
-                        location.reload();
+                        sessionStorage.setItem('ticketStatusTab', pestanaDestino);
+                        window.setTimeout(() => location.reload(), 450);
                     }
                 } else {
                     alert("Error al actualizar estatus: " + (response.message || 'Desconocido'));

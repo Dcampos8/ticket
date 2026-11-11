@@ -307,19 +307,64 @@ try {
     $mail->addAddress($destinatarioTickets);
 
     $mail->isHTML(true);
-    $mail->Subject = "Nuevo Ticket - $tipo_ticket";
+    $mail->Subject = "Ticket #{$ticketId} · {$tipo_ticket}";
+    $urlTicket = $baseUrl . 'admin/tickets/chat_ticket.php?ticket_id=' . (int) $ticketId;
+    $colorPrioridad = match (mb_strtolower(trim($prioridad), 'UTF-8')) {
+        'urgente' => '#b42318',
+        'alta' => '#c2410c',
+        'baja' => '#475467',
+        default => '#175cd3',
+    };
+    $descripcionCorreo = nl2br($escapeHtml($descripcion), false);
+    $tipoCorreo = $escapeHtml($tipo_ticket);
+    $prioridadCorreo = $escapeHtml($prioridad);
+    $nombreCorreo = $escapeHtml($nombre);
+    $usuarioCorreo = $escapeHtml($usuario);
+    $areaCorreo = $escapeHtml($area);
+    $fechaCorreo = $escapeHtml($fecha_creacion);
+    $urlTicketCorreo = $escapeHtml($urlTicket);
+    $bloqueAdjunto = $nombre_imagen !== null
+        ? '<tr><td style="padding:0 28px 24px"><a href="' . $escapeHtml($urlImagen) . '" style="display:inline-block;padding:10px 15px;border:1px solid #d0d5dd;border-radius:8px;color:#344054;text-decoration:none;font-size:14px;font-weight:700">Ver imagen adjunta&nbsp; →</a></td></tr>'
+        : '';
 
-    $mail->Body = "<h3 style='background:#B72128;color:#fff;padding:15px'>📝 Nuevo Ticket</h3>"
-        . '<p><b>Usuario:</b> ' . $escapeHtml($usuario) . '</p>'
-        . '<p><b>Área:</b> ' . $escapeHtml($area) . '</p>'
-        . '<p><b>Nombre:</b> ' . $escapeHtml($nombre) . '</p>'
-        . '<p><b>Tipo:</b> ' . $escapeHtml($tipo_ticket) . '</p>'
-        . '<p><b>Prioridad sugerida por IA:</b> ' . $escapeHtml($prioridad) . '</p>'
-        . '<p><b>Descripción:</b><br>' . nl2br($escapeHtml($descripcion)) . '</p>'
-        . '<p><b>Fecha:</b> ' . $escapeHtml($fecha_creacion) . '</p>'
-        . ($nombre_imagen !== null
-            ? '<p><a href="' . $escapeHtml($urlImagen) . '" target="_blank" rel="noopener">📷 Ver imagen</a></p>'
-            : '');
+    $mail->Body = <<<HTML
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f2f4f7;font-family:Arial,Helvetica,sans-serif;color:#101828">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0">Nuevo ticket #{$ticketId}: {$tipoCorreo} · Prioridad {$prioridadCorreo}</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f2f4f7;padding:32px 12px">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #eaecf0;border-radius:14px;overflow:hidden">
+        <tr><td style="padding:22px 28px;background:#292b31;border-bottom:4px solid #ed1c24">
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#fda4a8;text-transform:uppercase">Transportes Valadez · Sistemas</div>
+          <div style="padding-top:8px;color:#ffffff;font-size:23px;font-weight:700">Nuevo ticket recibido</div>
+          <div style="padding-top:5px;color:#d0d5dd;font-size:14px">Folio #{$ticketId}</div>
+        </td></tr>
+        <tr><td style="padding:25px 28px 10px">
+          <div style="font-size:12px;font-weight:700;letter-spacing:.8px;color:#667085;text-transform:uppercase">Solicitud</div>
+          <div style="padding-top:8px;font-size:16px;line-height:1.5;color:#344054">{$descripcionCorreo}</div>
+        </td></tr>
+        <tr><td style="padding:12px 28px 24px">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse">
+            <tr><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#667085;font-size:13px;width:38%">Solicitante</td><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#344054;font-size:14px;font-weight:700">{$nombreCorreo}</td></tr>
+            <tr><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#667085;font-size:13px">Usuario</td><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#344054;font-size:14px">{$usuarioCorreo}</td></tr>
+            <tr><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#667085;font-size:13px">Área</td><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#344054;font-size:14px">{$areaCorreo}</td></tr>
+            <tr><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#667085;font-size:13px">Tipo</td><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#344054;font-size:14px">{$tipoCorreo}</td></tr>
+            <tr><td style="padding:11px 0;border-bottom:1px solid #eaecf0;color:#667085;font-size:13px">Prioridad sugerida</td><td style="padding:11px 0;border-bottom:1px solid #eaecf0"><span style="display:inline-block;padding:5px 10px;border-radius:99px;background:{$colorPrioridad};color:#ffffff;font-size:12px;font-weight:700">{$prioridadCorreo}</span></td></tr>
+            <tr><td style="padding:11px 0;color:#667085;font-size:13px">Fecha de creación</td><td style="padding:11px 0;color:#344054;font-size:14px">{$fechaCorreo}</td></tr>
+          </table>
+        </td></tr>
+        {$bloqueAdjunto}
+        <tr><td align="center" style="padding:0 28px 28px"><a href="{$urlTicketCorreo}" style="display:inline-block;padding:13px 22px;border-radius:8px;background:#ed1c24;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Abrir y atender ticket&nbsp; →</a></td></tr>
+        <tr><td style="padding:16px 28px;background:#f9fafb;border-top:1px solid #eaecf0;color:#98a2b3;font-size:11px;line-height:1.5;text-align:center">Notificación automática del sistema de tickets de Transportes Valadez.</td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+HTML;
+    $mail->AltBody = "Nuevo ticket #{$ticketId} · {$tipo_ticket}\n\nSolicitante: {$nombre}\nUsuario: {$usuario}\nÁrea: {$area}\nPrioridad sugerida: {$prioridad}\nFecha: {$fecha_creacion}\n\nDescripción:\n{$descripcion}\n\nAbrir ticket: {$urlTicket}";
 
     $mail->send();
 } catch (Exception $e) {
