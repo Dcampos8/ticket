@@ -352,8 +352,8 @@ function claseTipoTicket($tipo) {
 
         <div class="table-card">
             <div class="table-responsive p-3">
-                <div class="small text-muted px-2 pb-2 d-lg-none"><i class="fas fa-arrows-left-right me-1"></i>Desliza horizontalmente para ver todas las columnas.</div>
-                <table id="tablaTickets" class="table table-hover align-middle">
+                <div class="ticket-list-hint"><i class="fas fa-circle-info"></i> Cada ficha reúne la solicitud, su seguimiento y las acciones del ticket.</div>
+                <table id="tablaTickets" class="table table-hover align-middle" aria-label="Listado de tickets de soporte">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -388,7 +388,7 @@ function claseTipoTicket($tipo) {
                                 $tieneModificacion = !empty($f['fecha_modificacion'])
                                     && strtotime($f['fecha_modificacion']) > strtotime($f['fecha_creacion']);
                             ?>
-                            <tr data-id="<?= $f['id'] ?>">
+                            <tr class="ticket-item" data-id="<?= $f['id'] ?>">
                                 <td><span class="id-pill">#<?= $f['id'] ?></span></td>
                                 <td><span class="area-pill"><?= htmlspecialchars($f['usuario_area'] ?: ($f['area'] ?? 'N/A')) ?></span></td>
                                 <td><span class="nombre-usuario"><?= htmlspecialchars($f['usuario_nombre_completo'] ?: ($f['nombre_completo'] ?? 'N/A')) ?></span></td>
@@ -405,6 +405,7 @@ function claseTipoTicket($tipo) {
                                         <?php endif; ?>
                                     <?php else: ?>
                                         <textarea class="form-control form-control-sm desc-text" rows="2" data-id="<?= $f['id'] ?>"><?= htmlspecialchars(trim($descSegura)) ?></textarea>
+                                        <small class="inline-save-hint">Se guarda al salir del campo.</small>
                                     <?php endif; ?>
                                 </td>
 
@@ -520,6 +521,7 @@ function claseTipoTicket($tipo) {
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <textarea class="form-control form-control-sm comentario-text" rows="2" data-id="<?= $f['id'] ?>"><?= htmlspecialchars(trim($comSeguro)) ?></textarea>
+                                            <small class="inline-save-hint">Se guarda al salir del campo.</small>
                                             <span class="ms-1 text-success d-none check-icon">✅</span>
                                         <?php endif; ?>
                                         <span class="historial-link" title="Ver historial de comentarios" onclick="verHistorial(<?= $f['id'] ?>)">
@@ -535,22 +537,22 @@ function claseTipoTicket($tipo) {
                                             <i class="fas fa-comments"></i><span>Atender</span>
                                         </a>
                                         <button type="button" onclick="verActividad(<?= $f['id'] ?>)" class="btn btn-link text-secondary p-0" title="Ver quién atendió y qué cambios hizo">
-                                            <i class="fas fa-user-clock"></i>
+                                            <i class="fas fa-user-clock"></i><span class="action-label">Actividad</span>
                                         </button>
                                         <?php if (in_array(strtolower((string) ($_SESSION['rol'] ?? '')), ['admin', 'superadmin'], true)): ?>
                                             <button type="button" onclick="reabrirTicket(<?= (int) $f['id'] ?>)" class="btn btn-link text-primary p-0 ticket-action-reopen" title="Reabrir como Pendiente" aria-label="Reabrir ticket #<?= (int) $f['id'] ?>">
-                                                <i class="fas fa-rotate-left"></i>
+                                                <i class="fas fa-rotate-left"></i><span class="action-label">Reabrir</span>
                                             </button>
                                         <?php endif; ?>
                                         <button onclick="eliminarTicket(<?= $f['id'] ?>)" class="btn btn-link text-danger p-0" title="Eliminar Ticket">
-                                            <i class="fas fa-trash-alt"></i>
+                                            <i class="fas fa-trash-alt"></i><span class="action-label">Eliminar</span>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
-                            <tr><td colspan="12" class="text-center py-5 text-muted">
+                            <tr class="ticket-empty"><td colspan="12" class="text-center py-5 text-muted">
                                 <?= $hayFiltrosActivos ? 'No hay tickets que coincidan con los filtros aplicados.' : 'No hay tickets registrados.' ?>
                             </td></tr>
                         <?php endif; ?>
@@ -750,7 +752,7 @@ function verActividad(id) {
 }
 $(document).ready(function() {
     function guardarAsignacion(select) {
-        const fila = select.closest('tr');
+        const fila = select.closest('.ticket-item');
         const responsable = fila.find('.ticket-responsable').val();
         const prioridad = fila.find('.ticket-prioridad').val();
         $.ajax({
@@ -760,7 +762,7 @@ $(document).ready(function() {
         });
     }
     function guardarPrioridad(select) {
-        const fila = select.closest('tr');
+        const fila = select.closest('.ticket-item');
         const prioridadAnterior = select.data('prioridad-guardada') || select.val();
         fila.addClass('saving-row');
         $.ajax({
@@ -782,7 +784,7 @@ $(document).ready(function() {
     // 1. ACTUALIZAR ESTATUS
     $(document).on('change', '.estatus', function() {
         let select = $(this);
-        let fila = select.closest('tr');
+        let fila = select.closest('.ticket-item');
         let idTicket = fila.data('id');
         let nuevoEstatus = select.val();
         fila.addClass('saving-row');
@@ -813,7 +815,7 @@ $(document).ready(function() {
     // 2. ACTUALIZAR COMENTARIO ADMIN
     $(document).on('blur', '.comentario-text', function() {
         let textarea = $(this);
-        let fila = textarea.closest('tr');
+        let fila = textarea.closest('.ticket-item');
         let id = textarea.data('id');
         let texto = textarea.val().trim();
         let check = textarea.siblings('.check-icon');
@@ -861,7 +863,7 @@ $(document).ready(function() {
 // 4. ELIMINAR TICKET
 function eliminarTicket(id) {
     if (!confirm("¿Eliminar ticket #" + id + "?")) return;
-    let fila = $('tr[data-id="' + id + '"]');
+    let fila = $('.ticket-item[data-id="' + id + '"]');
     $.ajax({
         url: 'backend/eliminar_ticket.php',
         type: 'POST',

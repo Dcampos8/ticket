@@ -517,3 +517,67 @@ body { background:#f6f7f9; color:var(--ink); }
 .sla-resolution.is-late { color:#cf2028; font-weight:700; }
 @media(max-width:991px) { .sd-summary { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:640px) { .sd-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .sd-breakdown { grid-template-columns:1fr; } .saved-filter-tools { align-items:stretch; flex-direction:column; } .saved-filter-tools select { width:100%; } }
+
+/* El listado se presenta como fichas: la información queda agrupada y no requiere scroll horizontal. */
+.ticket-list-hint { display:flex; align-items:center; gap:8px; padding:0 4px 12px; color:#707074; font-size:.82rem; }
+.ticket-list-hint i { color:#ed1c24; }
+.table-card>.table-responsive { overflow:visible; }
+#tablaTickets { display:block; width:100%; min-width:0!important; margin:0; table-layout:auto; border-collapse:separate; }
+#tablaTickets thead { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+#tablaTickets tbody { display:grid; gap:12px; }
+#tablaTickets tbody tr.ticket-item { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr) minmax(0,1fr) minmax(190px,1.05fr); grid-template-areas:"id requester area status" "description description description description" "type assignment assignment assignment" "user-attachment admin-attachment date actions" "comment comment comment comment"; align-items:start; overflow:hidden; border:1px solid #e0e2e6; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
+#tablaTickets tbody tr.ticket-item:hover { border-color:#c9cbd0; box-shadow:0 4px 14px #18181b0d; background:#fff!important; }
+#tablaTickets tbody tr.ticket-item>td { display:block; min-width:0!important; padding:12px 14px!important; border:0; border-bottom:1px solid #f0f0f2; background:transparent; overflow-wrap:anywhere; }
+#tablaTickets tbody tr.ticket-item>td::before { display:block; margin-bottom:5px; color:#777980; font-size:.66rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(1) { grid-area:id; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(1)::before { content:"Folio"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(2) { grid-area:area; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(2)::before { content:"Área"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(3) { grid-area:requester; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(3)::before { content:"Solicitante"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(4) { grid-area:description; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(4)::before { content:"Solicitud"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(5) { grid-area:type; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(5)::before { content:"Tipo"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(6) { grid-area:assignment; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(6)::before { content:"Responsable, prioridad y tiempo objetivo"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(7) { grid-area:user-attachment; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(7)::before { content:"Adjunto del usuario"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(8) { grid-area:admin-attachment; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(8)::before { content:"Evidencia de soporte"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(9) { grid-area:status; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(9)::before { content:"Estado"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(10) { grid-area:date; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(10)::before { content:"Fechas"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(11) { grid-area:comment; border-bottom:0; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(11)::before { content:"Respuesta / notas de soporte"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(12) { grid-area:actions; align-self:stretch; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(12)::before { content:"Acciones"; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(1) .id-pill { min-width:58px; padding:6px 10px; border-radius:8px; background:#f1f2f4; color:#292b31; font-size:.9rem; font-weight:800; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(3) .nombre-usuario { font-weight:750; color:#30323a; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(4) .desc-text,#tablaTickets tbody tr.ticket-item>td:nth-child(11) .comentario-text { min-height:66px; max-height:180px; background:#fbfbfc; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(6) .ticket-responsable,#tablaTickets tbody tr.ticket-item>td:nth-child(6) .ticket-prioridad { max-width:280px; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(9) .estatus { max-width:220px; font-weight:700; }
+#tablaTickets tbody tr.ticket-empty { display:block; padding:26px; border:1px dashed #cfd2d8; border-radius:12px; background:#fff; }
+#tablaTickets tbody tr.ticket-empty td { display:block; border:0; }
+.ticket-action-buttons { gap:7px; }
+.ticket-action-buttons .sd-action-chat { min-height:34px; border-radius:8px; }
+.ticket-action-buttons>button { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:32px; padding:5px 7px!important; border:1px solid #e4e4e7!important; border-radius:7px; background:#fff; text-decoration:none; white-space:nowrap; }
+.ticket-action-buttons>button:hover { background:#f7f7f8; }
+.ticket-action-buttons .action-label { font-size:.68rem; font-weight:700; }
+.inline-save-hint { display:block; margin-top:4px; color:#85858a; font-size:.68rem; }
+@media(max-width:850px) {
+    #tablaTickets tbody tr.ticket-item { grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"id status" "requester area" "description description" "type type" "assignment assignment" "user-attachment admin-attachment" "date date" "comment comment" "actions actions"; }
+    #tablaTickets tbody tr.ticket-item>td { padding:11px 12px!important; }
+    #tablaTickets tbody tr.ticket-item>td:nth-child(12) { border-top:1px solid #f0f0f2; }
+    #tablaTickets tbody tr.ticket-item>td:nth-child(12) .ticket-action-buttons { display:flex; justify-content:flex-start; }
+}
+@media(max-width:480px) {
+    .ticket-list-hint { align-items:flex-start; font-size:.75rem; }
+    #tablaTickets tbody { gap:9px; }
+    #tablaTickets tbody tr.ticket-item { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    #tablaTickets tbody tr.ticket-item>td { padding:10px!important; }
+    #tablaTickets tbody tr.ticket-item>td:nth-child(3),#tablaTickets tbody tr.ticket-item>td:nth-child(2) { overflow-wrap:anywhere; }
+    #tablaTickets tbody tr.ticket-item>td:nth-child(11) .d-flex { align-items:flex-start!important; }
+    #tablaTickets tbody tr.ticket-item>td:nth-child(11) .historial-link { padding:6px; }
+}

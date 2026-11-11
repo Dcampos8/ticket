@@ -52,6 +52,15 @@ $abiertosResumen = (int) ($resumen['abiertos'] ?? 0);
 $cumplimientoSla = $cerradosResumen > 0 ? round(((int) ($resumen['dentro_sla'] ?? 0) / $cerradosResumen) * 100) : 0;
 $minutosPromedio = (int) round((float) ($resumen['minutos_promedio'] ?? 0));
 $tiempoPromedio = $minutosPromedio >= 60 ? floor($minutosPromedio / 60) . ' h ' . ($minutosPromedio % 60) . ' min' : $minutosPromedio . ' min';
+$consultarAgrupacion = static function (string $campo) use ($conexion, $aplicarFiltroFechas, $fecha_inicio, $fecha_fin): array {
+    $sql = "SELECT {$campo} AS etiqueta, COUNT(*) AS total FROM tickets" . ($aplicarFiltroFechas ? ' WHERE fecha_creacion >= ? AND fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)' : '') . " GROUP BY {$campo} ORDER BY total DESC, etiqueta ASC LIMIT 6";
+    $stmt = $conexion->prepare($sql);
+    if ($aplicarFiltroFechas) $stmt->bind_param('ss', $fecha_inicio, $fecha_fin);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+};
+$resumenEstados = $consultarAgrupacion('estatus');
+$resumenTipos = $consultarAgrupacion('tipo_ticket');
 ?>
 
 <!-- DataTables + estilos -->
@@ -68,6 +77,17 @@ $tiempoPromedio = $minutosPromedio >= 60 ? floor($minutosPromedio / 60) . ' h ' 
     <article><span class="kpi-icon kpi-open"><i class="fa-solid fa-inbox"></i></span><div><small>Abiertos actualmente</small><strong><?= $abiertosResumen ?></strong></div></article>
     <article><span class="kpi-icon kpi-time"><i class="fa-solid fa-stopwatch"></i></span><div><small>Tiempo promedio de resolución</small><strong><?= htmlspecialchars($tiempoPromedio) ?></strong></div></article>
     <article><span class="kpi-icon kpi-sla"><i class="fa-solid fa-bullseye"></i></span><div><small>Resoluciones dentro del SLA</small><strong><?= $cumplimientoSla ?>%</strong><em><?= $cerradosResumen ?> tickets cerrados</em></div></article>
+  </section>
+
+  <section class="report-breakdowns" aria-label="Distribución de tickets">
+    <?php foreach ([['Estados', $resumenEstados, 'estatus'], ['Tipos de solicitud', $resumenTipos, 'tipo']] as [$titulo, $items, $grupo]): ?>
+    <article class="report-breakdown"><h3><?= htmlspecialchars($titulo) ?></h3>
+      <?php if (!$items): ?><p class="text-muted mb-0">No hay datos para mostrar.</p><?php endif; ?>
+      <?php foreach ($items as $item): $cantidad = (int) $item['total']; $porcentaje = $totalResumen > 0 ? min(100, round($cantidad * 100 / $totalResumen)) : 0; ?>
+      <div class="report-bar-row"><div><span><?= htmlspecialchars($item['etiqueta'] ?: 'Sin clasificar') ?></span><strong><?= $cantidad ?></strong></div><div class="report-bar"><i class="bar-<?= $grupo ?>" style="--bar-width:<?= $porcentaje ?>%"></i></div></div>
+      <?php endforeach; ?>
+    </article>
+    <?php endforeach; ?>
   </section>
 
   <form method="GET" class="filter-form reports-filter">
