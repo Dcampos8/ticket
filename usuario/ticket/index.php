@@ -3,7 +3,7 @@ session_start();
 include '../menu.php';
 ?>
 <link rel="stylesheet" href="../css/ticket_form.css?v=3">
-<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg?v=2">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js?v=3"></script>
 <script>
 $(document).ready(function () {

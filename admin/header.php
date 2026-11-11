@@ -8,8 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- 1. ICONO -->
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>img/favicon.svg">
-    <link rel="manifest" href="<?= BASE_URL ?>manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>img/favicon.svg?v=2">
+    <link rel="manifest" href="<?= BASE_URL ?>manifest.webmanifest?v=2">
 
     <!-- 2. ESTILOS EXTERNOS (CDN) -->
     <!-- FontAwesome (Solo una vez) -->

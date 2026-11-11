@@ -30,8 +30,8 @@ if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
     <link rel="stylesheet" href="../css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/redesign.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
-    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
-    <link rel="manifest" href="../manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg?v=2">
+    <link rel="manifest" href="../manifest.webmanifest?v=2">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
