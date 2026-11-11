@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- 1. ICONO -->
-    <link rel="icon" href="<?= BASE_URL ?>img/icono.png">
+    <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>img/favicon.svg">
 
     <!-- 2. ESTILOS EXTERNOS (CDN) -->
     <!-- FontAwesome (Solo una vez) -->

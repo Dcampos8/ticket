@@ -17,7 +17,7 @@ $resultado = $conexion->query($sql);
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__usuarios__index.css?v=<?= filemtime(__DIR__ . '/../../css/pages/usuario__usuarios__index.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
-<link rel="icon" href="https://https://ticket.transportesvaladez.com/img/icono.png">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
 
 <div class="container-fluid py-4">
     <h2 class="mb-4 text-center fw-bold text-primary">

@@ -582,17 +582,17 @@ body { background:#f6f7f9; color:var(--ink); }
 }
 
 /* Resumen compacto: el contenido operativo vive dentro del modal de detalle. */
-.ticket-card-list { gap:8px; }
-.ticket-summary { display:flex; align-items:center; gap:20px; padding:16px 18px; border:1px solid var(--line); border-radius:11px; background:#fff; transition:border-color .15s,box-shadow .15s; }
-.ticket-summary:hover { border-color:#c9cbd0; box-shadow:0 4px 14px #18181b0d; }
-.ticket-summary-main { flex:1; min-width:0; }
-.ticket-summary-meta,.ticket-summary-bottom { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; }
-.ticket-summary-meta { margin-bottom:7px; }
-.ticket-summary h2 { margin:0 0 4px; color:#30323a; font-size:.96rem; font-weight:750; }
-.ticket-summary p { display:-webkit-box; margin:0; overflow:hidden; color:#626671; font-size:.83rem; line-height:1.4; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
-.ticket-summary-bottom { margin-top:10px; color:#737782; font-size:.73rem; }
-.ticket-summary-status { padding:4px 9px; border-radius:99px; background:#f1f2f4; color:#383a40; font-weight:750; }
-.ticket-summary-open { flex:0 0 auto; display:inline-flex; align-items:center; gap:9px; min-height:38px; padding:8px 13px; border:1px solid #e1e2e6; border-radius:8px; background:#fff; color:#33363d; font-size:.8rem; font-weight:750; }
+.ticket-card-list { display:block; overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:#fff; }
+.ticket-summary { display:grid; grid-template-columns:75px minmax(150px,1.2fr) minmax(110px,.8fr) minmax(220px,2fr) 125px 115px 95px; align-items:center; gap:12px; min-width:950px; padding:11px 15px; border-bottom:1px solid #eceef1; background:#fff; }
+.ticket-summary:last-child { border-bottom:0; }
+.ticket-summary:hover { background:#fafbfc; }
+.ticket-summary::before { color:#777980; font-size:.64rem; font-weight:800; letter-spacing:.04em; }
+.summary-id::before { content:"FOLIO"; }.summary-person::before { content:"SOLICITANTE"; }.summary-area::before { content:"ÁREA"; }.summary-request::before { content:"SOLICITUD"; }.summary-status::before { content:"ESTADO"; }.summary-date::before { content:"FECHA"; }
+.summary-cell { display:flex; flex-direction:column; min-width:0; gap:4px; color:#3f424a; font-size:.78rem; font-weight:650; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.summary-request { color:#6b707b; font-size:.74rem; font-weight:450; }
+.summary-status { color:#5b606b; }
+.ticket-summary-open { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px; padding:6px 10px; border:1px solid #e1e2e6; border-radius:7px; background:#fff; color:#33363d; font-size:.75rem; font-weight:750; white-space:nowrap; }
+.ticket-summary-open:hover { border-color:#ed1c24; color:#c81019; background:#fff7f7; }
 .ticket-summary-open:hover { border-color:#ed1c24; color:#c81019; background:#fff7f7; }
 .ticket-detail-modal { border:0; border-radius:14px; box-shadow:0 20px 60px #11182733; }
 .ticket-modal-eyebrow { color:#8a8d95; font-size:.66rem; font-weight:800; letter-spacing:.08em; }
@@ -614,8 +614,30 @@ body { background:#f6f7f9; color:var(--ink); }
 #ticketDetailBody .ticket-modal-detail>td:nth-child(10){grid-area:date} #ticketDetailBody .ticket-modal-detail>td:nth-child(10)::before{content:"Fechas"}
 #ticketDetailBody .ticket-modal-detail>td:nth-child(11){grid-area:comment} #ticketDetailBody .ticket-modal-detail>td:nth-child(11)::before{content:"Respuesta de soporte"}
 #ticketDetailBody .ticket-modal-detail>td:nth-child(12){grid-area:actions} #ticketDetailBody .ticket-modal-detail>td:nth-child(12)::before{content:"Acciones"}
-@media(max-width:700px){.ticket-summary{align-items:flex-start;gap:12px;padding:13px}.ticket-summary-open{padding:7px 9px;font-size:.72rem}#ticketDetailBody .ticket-modal-detail{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"id status" "requester area" "description description" "type assignment" "user-attachment admin-attachment" "date date" "comment comment" "actions actions"}}
-@media(max-width:480px){.ticket-summary{display:block}.ticket-summary-open{margin-top:12px}#ticketDetailBody .ticket-modal-detail{grid-template-columns:minmax(0,1fr);grid-template-areas:"id" "status" "requester" "area" "description" "type" "assignment" "user-attachment" "admin-attachment" "date" "comment" "actions"}}
+@media(max-width:700px){#ticketDetailBody .ticket-modal-detail{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"id status" "requester area" "description description" "type assignment" "user-attachment admin-attachment" "date date" "comment comment" "actions actions"}}
+@media(max-width:480px){#ticketDetailBody .ticket-modal-detail{grid-template-columns:minmax(0,1fr);grid-template-areas:"id" "status" "requester" "area" "description" "type" "assignment" "user-attachment" "admin-attachment" "date" "comment" "actions"}}
+#ticketDetailBody .ticket-modal-detail { display:block; overflow:visible; border:0; background:transparent; }
+.ticket-detail-context { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:0 3px 14px; }
+.ticket-detail-requester { margin-right:auto; color:#30323a; font-size:.94rem; font-weight:800; }
+.ticket-detail-tag { padding:5px 9px; border-radius:99px; background:#f1f2f4; color:#555a64; font-size:.72rem; font-weight:700; }
+.ticket-detail-layout { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr); gap:12px; align-items:start; }
+.ticket-detail-section { min-width:0; padding:15px 16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+.ticket-detail-section h3 { margin:0 0 13px; color:#373a42; font-size:.84rem; font-weight:800; }
+.ticket-detail-conversation { grid-column:1; grid-row:span 2; }
+.ticket-detail-management { grid-column:2; }
+.ticket-detail-evidence { grid-column:2; }
+.ticket-detail-actions { grid-column:1 / -1; }
+.ticket-detail-field + .ticket-detail-field { margin-top:13px; padding-top:12px; border-top:1px solid #f0f1f3; }
+.ticket-detail-label { display:block; margin-bottom:6px; color:#787d87; font-size:.65rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.ticket-detail-value { min-width:0; color:#41454e; font-size:.82rem; overflow-wrap:anywhere; }
+.ticket-detail-value .desc-text,.ticket-detail-value .comentario-text { width:100%; min-height:100px; resize:vertical; background:#fbfbfc; }
+.ticket-detail-management .ticket-detail-value .ticket-responsable,.ticket-detail-management .ticket-detail-value .ticket-prioridad,.ticket-detail-management .ticket-detail-value .estatus { max-width:100%; }
+.ticket-detail-evidence .ticket-detail-field { display:inline-block; width:48%; vertical-align:top; }
+.ticket-detail-evidence .ticket-detail-field:last-child { width:100%; }
+.ticket-detail-actions .ticket-action-buttons { display:flex; flex-wrap:wrap; gap:8px; }
+.ticket-detail-actions .sd-action-chat { margin:0; }
+.ticket-detail-actions .ticket-action-buttons>button { display:inline-flex; align-items:center; gap:6px; padding:6px 9px!important; border:1px solid #e1e2e6!important; border-radius:7px; background:#fff; }
+@media(max-width:760px){.ticket-detail-layout{grid-template-columns:minmax(0,1fr)}.ticket-detail-conversation,.ticket-detail-management,.ticket-detail-evidence,.ticket-detail-actions{grid-column:1;grid-row:auto}.ticket-detail-evidence .ticket-detail-field{width:100%}}
 #tablaTickets[hidden] { display:none!important; }
 .ticket-card-list { display:grid; gap:12px; width:100%; }
 article.ticket-item { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas:"folio solicitante estado" "area tipo asignacion" "solicitud solicitud solicitud" "adjunto-usuario adjunto-soporte fechas" "notas notas acciones"; align-items:stretch; overflow:hidden; border:1px solid #dedfe3; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }

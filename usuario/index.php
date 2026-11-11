@@ -30,7 +30,7 @@ if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
     <link rel="stylesheet" href="../css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/redesign.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
-    <link rel="icon" href="https://ticket.transportesvaladez.com/img/icono.png">
+    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>

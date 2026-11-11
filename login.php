@@ -13,7 +13,7 @@ session_start();
   <link rel="stylesheet" href="css/theme.css?v=<?= time() ?>">
   <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/login.css?v=<?= filemtime(__DIR__ . '/css/pages/login.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/css/brand.css') ?>">
-  <link rel="icon" href="https://transportesvaladez.com/wp-content/uploads/2024/12/cropped-Recurso-10-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
 </head>
 <body class="login-page">
 

@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
 ?>
-<link rel="icon" href="<?= htmlspecialchars($userBaseUrl) ?>img/icono.png">
+<link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars($userBaseUrl) ?>img/favicon.svg">
 <link rel="stylesheet" href="<?= htmlspecialchars($userBaseUrl) ?>css/redesign.css?v=<?= time() ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">

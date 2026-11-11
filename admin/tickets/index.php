@@ -352,7 +352,7 @@ function claseTipoTicket($tipo) {
 
         <div class="table-card">
             <div class="table-responsive p-3">
-                <div class="ticket-list-hint"><i class="fas fa-circle-info"></i> Cada ficha reúne la solicitud, su seguimiento y las acciones del ticket.</div>
+                <div class="ticket-list-hint"><i class="fas fa-circle-info"></i> Selecciona una fila para consultar el detalle y gestionar el ticket.</div>
                 <table id="tablaTickets" class="table table-hover align-middle" aria-label="Listado de tickets de soporte">
                     <thead>
                         <tr>
@@ -647,17 +647,9 @@ function claseTipoTicket($tipo) {
         tarjeta.className = 'ticket-summary';
         tarjeta.dataset.id = fila.dataset.id || '';
         const status = fila.cells[8].querySelector('.estatus')?.value || fila.cells[8].textContent.trim();
-        const main = document.createElement('div'); main.className = 'ticket-summary-main';
-        const meta = document.createElement('div'); meta.className = 'ticket-summary-meta';
-        const folio = document.createElement('span'); folio.className = 'id-pill'; folio.textContent = fila.cells[0].textContent.trim();
-        const area = document.createElement('span'); area.className = 'area-pill'; area.textContent = fila.cells[1].textContent.trim(); meta.append(folio, area);
-        const nombre = document.createElement('h2'); nombre.textContent = fila.cells[2].textContent.trim();
-        const solicitud = document.createElement('p'); solicitud.textContent = (fila.cells[3].querySelector('textarea')?.value || fila.cells[3].textContent).trim().slice(0, 180);
-        const bottom = document.createElement('div'); bottom.className = 'ticket-summary-bottom';
-        [status, fila.cells[4].textContent.trim(), fila.cells[9].textContent.trim().slice(0, 16)].forEach((texto, i) => { const span = document.createElement('span'); span.textContent = texto; if (i === 0) span.className = 'ticket-summary-status'; bottom.appendChild(span); });
-        main.append(meta, nombre, solicitud, bottom);
-        const abrir = document.createElement('button'); abrir.type = 'button'; abrir.className = 'ticket-summary-open'; abrir.setAttribute('aria-label', 'Abrir detalle'); abrir.append('Ver detalle ', Object.assign(document.createElement('i'), {className:'fas fa-arrow-right'}));
-        tarjeta.append(main, abrir);
+        tarjeta.innerHTML = '<span class="summary-cell summary-id"></span><span class="summary-cell summary-person"></span><span class="summary-cell summary-area"></span><span class="summary-cell summary-request"></span><span class="summary-cell summary-status"></span><span class="summary-cell summary-date"></span><button type="button" class="ticket-summary-open">Abrir <i class="fas fa-arrow-right"></i></button>';
+        const values = [fila.cells[0].textContent.trim(), fila.cells[2].textContent.trim(), fila.cells[1].textContent.trim(), (fila.cells[3].querySelector('textarea')?.value || fila.cells[3].textContent).trim().slice(0, 120), status, fila.cells[9].textContent.trim().slice(0, 16)];
+        tarjeta.querySelectorAll('.summary-cell').forEach((cell, index) => cell.textContent = values[index]);
         lista.appendChild(tarjeta);
     });
     const vacio = cuerpo.querySelector('tr.ticket-empty td');
@@ -676,14 +668,39 @@ function claseTipoTicket($tipo) {
         const id = boton.closest('.ticket-summary').dataset.id;
         const original = cuerpo.querySelector('tr.ticket-item[data-id="' + id + '"]');
         if (!original) return;
-        const detalle = original.cloneNode(true);
-        detalle.querySelectorAll('[id]').forEach(el => {
+        const filaClonada = original.cloneNode(true);
+        filaClonada.querySelectorAll('[id]').forEach(el => {
             const oldId = el.id;
             const newId = oldId + '_modal';
             el.id = newId;
-            detalle.querySelectorAll('label[for="' + oldId + '"]').forEach(label => label.htmlFor = newId);
+            filaClonada.querySelectorAll('label[for="' + oldId + '"]').forEach(label => label.htmlFor = newId);
         });
-        detalle.classList.add('ticket-modal-detail');
+        const detalle = document.createElement('div');
+        detalle.className = 'ticket-item ticket-modal-detail';
+        detalle.dataset.id = id;
+        const encabezado = document.createElement('div'); encabezado.className = 'ticket-detail-context';
+        [filaClonada.cells[2].textContent.trim(), filaClonada.cells[1].textContent.trim(), filaClonada.cells[4].textContent.trim()].forEach((texto, index) => {
+            const dato = document.createElement('span'); dato.textContent = texto; dato.className = index === 0 ? 'ticket-detail-requester' : 'ticket-detail-tag'; encabezado.appendChild(dato);
+        });
+        detalle.appendChild(encabezado);
+        const contenido = document.createElement('div'); contenido.className = 'ticket-detail-layout';
+        const crearSeccion = (titulo, clase, indices) => {
+            const seccion = document.createElement('section'); seccion.className = 'ticket-detail-section ' + clase;
+            const h3 = document.createElement('h3'); h3.textContent = titulo; seccion.appendChild(h3);
+            indices.forEach(([indice, etiqueta]) => {
+                const campo = document.createElement('div'); campo.className = 'ticket-detail-field';
+                const label = document.createElement('span'); label.className = 'ticket-detail-label'; label.textContent = etiqueta;
+                const valor = document.createElement('div'); valor.className = 'ticket-detail-value';
+                while (filaClonada.cells[indice].firstChild) valor.appendChild(filaClonada.cells[indice].firstChild);
+                campo.append(label, valor); seccion.appendChild(campo);
+            });
+            contenido.appendChild(seccion);
+        };
+        crearSeccion('Solicitud y respuesta', 'ticket-detail-conversation', [[3,'Descripción del usuario'],[10,'Respuesta de soporte']]);
+        crearSeccion('Atención del ticket', 'ticket-detail-management', [[8,'Estado'],[5,'Responsable, prioridad y SLA']]);
+        crearSeccion('Adjuntos y fechas', 'ticket-detail-evidence', [[6,'Adjunto del usuario'],[7,'Adjunto de soporte'],[9,'Fechas']]);
+        crearSeccion('Acciones', 'ticket-detail-actions', [[11,'']]);
+        detalle.appendChild(contenido);
         document.getElementById('ticketDetailTitle').textContent = 'Ticket #' + id;
         document.getElementById('ticketDetailBody').replaceChildren(detalle);
         bootstrap.Modal.getOrCreateInstance(document.getElementById('ticketDetailModal')).show();

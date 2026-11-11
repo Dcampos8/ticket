@@ -40,7 +40,7 @@ $result = $stmt->get_result();
 <!-- ✅ Estilo Moderno y Minimalista -->
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__ticket__mis_tickets.css?v=<?= filemtime(__DIR__ . '/../../css/pages/usuario__ticket__mis_tickets.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
-<link rel="icon" href="https://ticket.transportesvaladez.com/img/icono.png">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
 <script>
 window.ticketActual = null;
 window.usuarioActual = <?= json_encode((string) ($_SESSION['usuario'] ?? ''), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;

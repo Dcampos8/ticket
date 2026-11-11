@@ -3,7 +3,7 @@ session_start();
 include '../menu.php';
 ?>
 <link rel="stylesheet" href="../css/ticket_form.css?v=3">
-<link rel="icon" href="https://ticket.transportesvaladez.com/img/icono.png">
+<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js?v=3"></script>
 <script>
 $(document).ready(function () {
