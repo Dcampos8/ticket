@@ -527,7 +527,7 @@ body { background:#f6f7f9; color:var(--ink); }
 #tablaTickets tbody { display:grid; gap:12px; }
 #tablaTickets tbody tr.ticket-item { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr) minmax(0,1fr) minmax(190px,1.05fr); grid-template-areas:"id requester area status" "description description description description" "type assignment assignment assignment" "user-attachment admin-attachment date actions" "comment comment comment comment"; align-items:start; overflow:hidden; border:1px solid #e0e2e6; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
 #tablaTickets tbody tr.ticket-item:hover { border-color:#c9cbd0; box-shadow:0 4px 14px #18181b0d; background:#fff!important; }
-#tablaTickets tbody tr.ticket-item>td { display:block; min-width:0!important; padding:12px 14px!important; border:0; border-bottom:1px solid #f0f0f2; background:transparent; overflow-wrap:anywhere; }
+#tablaTickets tbody tr.ticket-item>td { display:block; width:auto!important; min-width:0!important; max-width:none!important; padding:12px 14px!important; border:0; border-bottom:1px solid #f0f0f2; background:transparent; overflow-wrap:anywhere; }
 #tablaTickets tbody tr.ticket-item>td::before { display:block; margin-bottom:5px; color:#777980; font-size:.66rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(1) { grid-area:id; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(1)::before { content:"Folio"; }
