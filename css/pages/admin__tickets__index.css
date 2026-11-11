@@ -525,9 +525,9 @@ body { background:#f6f7f9; color:var(--ink); }
 #tablaTickets { display:block; width:100%; min-width:0!important; margin:0; table-layout:auto; border-collapse:separate; }
 #tablaTickets thead { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 #tablaTickets tbody { display:grid; gap:12px; }
-#tablaTickets tbody tr.ticket-item { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr) minmax(0,1fr) minmax(190px,1.05fr); grid-template-areas:"id requester area status" "description description description description" "type assignment assignment assignment" "user-attachment admin-attachment date actions" "comment comment comment comment"; align-items:start; overflow:hidden; border:1px solid #e0e2e6; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
+#tablaTickets tbody tr.ticket-item { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas:"id requester status" "area type assignment" "description description description" "user-attachment admin-attachment date" "comment comment actions"; align-items:stretch; overflow:hidden; border:1px solid #e0e2e6; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
 #tablaTickets tbody tr.ticket-item:hover { border-color:#c9cbd0; box-shadow:0 4px 14px #18181b0d; background:#fff!important; }
-#tablaTickets tbody tr.ticket-item>td { display:block; width:auto!important; min-width:0!important; max-width:none!important; padding:12px 14px!important; border:0; border-bottom:1px solid #f0f0f2; background:transparent; overflow-wrap:anywhere; }
+#tablaTickets tbody tr.ticket-item>td { display:block; width:auto!important; min-width:0!important; max-width:none!important; padding:13px 16px!important; border:0!important; background:#fff!important; box-shadow:none!important; overflow-wrap:anywhere; }
 #tablaTickets tbody tr.ticket-item>td::before { display:block; margin-bottom:5px; color:#777980; font-size:.66rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(1) { grid-area:id; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(1)::before { content:"Folio"; }
@@ -549,9 +549,9 @@ body { background:#f6f7f9; color:var(--ink); }
 #tablaTickets tbody tr.ticket-item>td:nth-child(9)::before { content:"Estado"; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(10) { grid-area:date; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(10)::before { content:"Fechas"; }
-#tablaTickets tbody tr.ticket-item>td:nth-child(11) { grid-area:comment; border-bottom:0; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(11) { grid-area:comment; border-top:1px solid #f0f0f2!important; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(11)::before { content:"Respuesta / notas de soporte"; }
-#tablaTickets tbody tr.ticket-item>td:nth-child(12) { grid-area:actions; align-self:stretch; }
+#tablaTickets tbody tr.ticket-item>td:nth-child(12) { grid-area:actions; align-self:stretch; background:#fafafa!important; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(12)::before { content:"Acciones"; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(1) .id-pill { min-width:58px; padding:6px 10px; border-radius:8px; background:#f1f2f4; color:#292b31; font-size:.9rem; font-weight:800; }
 #tablaTickets tbody tr.ticket-item>td:nth-child(3) .nombre-usuario { font-weight:750; color:#30323a; }
@@ -567,17 +567,49 @@ body { background:#f6f7f9; color:var(--ink); }
 .ticket-action-buttons .action-label { font-size:.68rem; font-weight:700; }
 .inline-save-hint { display:block; margin-top:4px; color:#85858a; font-size:.68rem; }
 @media(max-width:850px) {
-    #tablaTickets tbody tr.ticket-item { grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"id status" "requester area" "description description" "type type" "assignment assignment" "user-attachment admin-attachment" "date date" "comment comment" "actions actions"; }
+    #tablaTickets tbody tr.ticket-item { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"id status" "requester area" "description description" "type assignment" "user-attachment admin-attachment" "date actions" "comment comment"; }
     #tablaTickets tbody tr.ticket-item>td { padding:11px 12px!important; }
-    #tablaTickets tbody tr.ticket-item>td:nth-child(12) { border-top:1px solid #f0f0f2; }
     #tablaTickets tbody tr.ticket-item>td:nth-child(12) .ticket-action-buttons { display:flex; justify-content:flex-start; }
 }
 @media(max-width:480px) {
     .ticket-list-hint { align-items:flex-start; font-size:.75rem; }
     #tablaTickets tbody { gap:9px; }
-    #tablaTickets tbody tr.ticket-item { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    #tablaTickets tbody tr.ticket-item { grid-template-columns:minmax(0,1fr); grid-template-areas:"id" "status" "requester" "area" "description" "type" "assignment" "user-attachment" "admin-attachment" "date" "comment" "actions"; }
     #tablaTickets tbody tr.ticket-item>td { padding:10px!important; }
     #tablaTickets tbody tr.ticket-item>td:nth-child(3),#tablaTickets tbody tr.ticket-item>td:nth-child(2) { overflow-wrap:anywhere; }
     #tablaTickets tbody tr.ticket-item>td:nth-child(11) .d-flex { align-items:flex-start!important; }
     #tablaTickets tbody tr.ticket-item>td:nth-child(11) .historial-link { padding:6px; }
+}
+#tablaTickets[hidden] { display:none!important; }
+.ticket-card-list { display:grid; gap:12px; width:100%; }
+article.ticket-item { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas:"folio solicitante estado" "area tipo asignacion" "solicitud solicitud solicitud" "adjunto-usuario adjunto-soporte fechas" "notas notas acciones"; align-items:stretch; overflow:hidden; border:1px solid #dedfe3; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
+article.ticket-item:hover { border-color:#c5c7cd; box-shadow:0 4px 14px #18181b0d; }
+.ticket-field { min-width:0; padding:13px 16px; }
+.ticket-field-label { display:block; margin-bottom:6px; color:#777980; font-size:.68rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
+.ticket-field-value { min-width:0; color:#3e4148; font-size:.85rem; overflow-wrap:anywhere; }
+.ticket-field--folio { grid-area:folio; }.ticket-field--solicitante { grid-area:solicitante; }.ticket-field--estado { grid-area:estado; }
+.ticket-field--area { grid-area:area; }.ticket-field--tipo { grid-area:tipo; }.ticket-field--asignacion { grid-area:asignacion; }
+.ticket-field--solicitud { grid-area:solicitud; border-top:1px solid #f0f1f3; border-bottom:1px solid #f0f1f3; }
+.ticket-field--adjunto-usuario { grid-area:adjunto-usuario; }.ticket-field--adjunto-soporte { grid-area:adjunto-soporte; }.ticket-field--fechas { grid-area:fechas; }
+.ticket-field--notas { grid-area:notas; }.ticket-field--acciones { grid-area:acciones; background:#fafafa; }
+.ticket-field--folio .id-pill { min-width:0; padding:6px 10px; border-radius:8px; background:#f1f2f4; color:#292b31; font-size:.9rem; font-weight:800; }
+.ticket-field--solicitante .nombre-usuario { color:#30323a; font-size:.9rem; font-weight:750; }
+.ticket-field--solicitud .desc-text,.ticket-field--notas .comentario-text { width:100%; min-height:66px; max-height:180px; background:#fbfbfc; }
+.ticket-field--asignacion .ticket-responsable,.ticket-field--asignacion .ticket-prioridad { max-width:100%; }
+.ticket-field--estado .estatus { max-width:100%; font-weight:700; }
+.ticket-field--acciones .ticket-action-buttons { display:flex; flex-wrap:wrap; gap:7px; }
+.ticket-field--acciones .ticket-action-buttons .sd-action-chat { flex:1 0 100%; min-height:36px; border-radius:8px; }
+.ticket-field--acciones .ticket-action-buttons>button { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:32px; padding:5px 7px!important; border:1px solid #e4e4e7!important; border-radius:7px; background:#fff; text-decoration:none; white-space:nowrap; }
+.ticket-field--acciones .ticket-action-buttons>button:hover { background:#f2f3f5; }
+.ticket-field--acciones .action-label { font-size:.68rem; font-weight:700; }
+.ticket-field--solicitud .inline-save-hint,.ticket-field--notas .inline-save-hint { display:block; margin-top:4px; color:#85858a; font-size:.68rem; }
+.ticket-empty-card { padding:28px; border:1px dashed #cfd2d8; border-radius:12px; background:#fff; color:#707074; text-align:center; }
+@media(max-width:850px) {
+    article.ticket-item { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"folio estado" "solicitante area" "solicitud solicitud" "tipo asignacion" "adjunto-usuario adjunto-soporte" "fechas acciones" "notas notas"; }
+}
+@media(max-width:480px) {
+    .ticket-card-list { gap:9px; }
+    article.ticket-item { grid-template-columns:minmax(0,1fr); grid-template-areas:"folio" "estado" "solicitante" "area" "solicitud" "tipo" "asignacion" "adjunto-usuario" "adjunto-soporte" "fechas" "notas" "acciones"; }
+    .ticket-field { padding:11px 13px; }
+    .ticket-field--acciones { border-top:1px solid #f0f1f3; }
 }

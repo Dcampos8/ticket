@@ -626,6 +626,61 @@ function claseTipoTicket($tipo) {
 </div>
 <!-- Scripts (Única inclusión limpia) -->
 <script>
+// Convierte las filas de origen a tarjetas HTML reales. Evita los límites de ancho y renderizado de <tr>/<td> en CSS Grid.
+(function convertirListadoATarjetas() {
+    const tabla = document.getElementById('tablaTickets');
+    const cuerpo = tabla?.tBodies?.[0];
+    if (!tabla || !cuerpo || tabla.dataset.convertida === '1') return;
+    const lista = document.createElement('section');
+    lista.className = 'ticket-card-list';
+    lista.setAttribute('aria-label', 'Tickets de soporte');
+    const campos = [
+        {indice:0, clase:'folio', etiqueta:'Folio'},
+        {indice:2, clase:'solicitante', etiqueta:'Solicitante'},
+        {indice:1, clase:'area', etiqueta:'Área'},
+        {indice:8, clase:'estado', etiqueta:'Estado'},
+        {indice:3, clase:'solicitud', etiqueta:'Solicitud'},
+        {indice:4, clase:'tipo', etiqueta:'Tipo'},
+        {indice:5, clase:'asignacion', etiqueta:'Responsable, prioridad y SLA'},
+        {indice:6, clase:'adjunto-usuario', etiqueta:'Adjunto del usuario'},
+        {indice:7, clase:'adjunto-soporte', etiqueta:'Evidencia de soporte'},
+        {indice:9, clase:'fechas', etiqueta:'Fechas'},
+        {indice:10, clase:'notas', etiqueta:'Respuesta y notas de soporte'},
+        {indice:11, clase:'acciones', etiqueta:'Acciones'}
+    ];
+    cuerpo.querySelectorAll('tr.ticket-item').forEach(fila => {
+        const tarjeta = document.createElement('article');
+        tarjeta.className = 'ticket-item';
+        tarjeta.dataset.id = fila.dataset.id || '';
+        campos.forEach(({indice, clase, etiqueta}) => {
+            const origen = fila.cells[indice];
+            if (!origen) return;
+            const campo = document.createElement('div');
+            campo.className = 'ticket-field ticket-field--' + clase;
+            const titulo = document.createElement('span');
+            titulo.className = 'ticket-field-label';
+            titulo.textContent = etiqueta;
+            const valor = document.createElement('div');
+            valor.className = 'ticket-field-value';
+            while (origen.firstChild) valor.appendChild(origen.firstChild);
+            campo.append(titulo, valor);
+            tarjeta.appendChild(campo);
+        });
+        lista.appendChild(tarjeta);
+        fila.remove();
+    });
+    const vacio = cuerpo.querySelector('tr.ticket-empty td');
+    if (!lista.children.length && vacio) {
+        const mensaje = document.createElement('div');
+        mensaje.className = 'ticket-empty-card';
+        mensaje.textContent = vacio.textContent.trim();
+        lista.appendChild(mensaje);
+    }
+    tabla.before(lista);
+    tabla.dataset.convertida = '1';
+    tabla.hidden = true;
+})();
+
 // Filtros: los selects y fechas se auto-envían al cambiar de valor
 document.querySelectorAll('#formFiltros .auto-submit').forEach(function (el) {
     el.addEventListener('change', function () {
