@@ -44,6 +44,7 @@ $submenusModulos = [
         ['ruta' => 'admin/tickets/', 'icon' => 'fa-stream', 'label' => 'Ver todos'],
         ['ruta' => 'admin/tickets/crear_ticket_admin.php', 'icon' => 'fa-plus-circle', 'label' => 'Crear nuevo'],
         ['ruta' => 'admin/tickets/conocimiento.php', 'icon' => 'fa-book-open', 'label' => 'Base de conocimiento'],
+        ['admin' => true, 'ruta' => 'admin/tickets/sla.php', 'icon' => 'fa-stopwatch', 'label' => 'Políticas SLA'],
         ['ruta' => 'admin/tickets/permisos_tickets.php', 'icon' => 'fa-user-lock', 'label' => 'Permisos']
     ],
     'usuarios' => [
@@ -142,6 +143,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
                 <?php endif; ?>
                 <?php foreach ($submenusModulos[$moduleKey] ?? [] as $item): ?>
                   <?php if (!empty($item['superadmin']) && !esSuperAdmin()) continue; ?>
+                  <?php if (!empty($item['admin']) && !esAdminOSuperior()) continue; ?>
                   <li><a class="dropdown-item" href="<?= BASE_URL . htmlspecialchars($item['ruta'], ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid <?= htmlspecialchars($item['icon'], ENT_QUOTES, 'UTF-8') ?> me-2"></i><?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8') ?></a></li>
                 <?php endforeach; ?>
                 <?php if ($moduleKey !== end($visibleKeys) && !empty($submenusModulos[$moduleKey])): ?><li><hr class="dropdown-divider"></li><?php endif; ?>

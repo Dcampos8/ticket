@@ -51,7 +51,8 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
         </div>
         <div class="campo">
             <label>Descripción del problema <span style="color:red">*</span></label>
-            <textarea name="descripcion" required rows="4" placeholder="Describe brevemente el problema..."></textarea>
+            <textarea id="descripcionTicket" name="descripcion" required rows="4" maxlength="5000" placeholder="Indica qué ocurre, desde cuándo y qué estabas intentando hacer..."></textarea>
+            <div id="sugerenciasAyuda" class="kb-suggestions" aria-live="polite" hidden></div>
         </div>
         <div class="campo">
             <label>Tipo de solicitud</label>
@@ -77,6 +78,41 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 $(document).ready(function() {
     // Variable bandera para evitar múltiples envíos
     let enviando = false;
+
+    // Sugiere artículos publicados según el texto del problema, sin bloquear el formulario.
+    let timerSugerencias;
+    let consultaSugerencias = 0;
+    const descripcion = document.getElementById('descripcionTicket');
+    const contenedorSugerencias = document.getElementById('sugerenciasAyuda');
+    descripcion?.addEventListener('input', function() {
+        window.clearTimeout(timerSugerencias);
+        const texto = this.value.trim();
+        if (texto.length < 12) { contenedorSugerencias.hidden = true; contenedorSugerencias.replaceChildren(); return; }
+        timerSugerencias = window.setTimeout(async () => {
+            const consulta = ++consultaSugerencias;
+            try {
+                const url = new URL('ticket/sugerir_articulos.php', window.location.href);
+                url.searchParams.set('q', texto);
+                const response = await fetch(url, {credentials:'same-origin', headers:{'Accept':'application/json'}});
+                const data = await response.json();
+                if (consulta !== consultaSugerencias) return;
+                const articulos = Array.isArray(data.articulos) ? data.articulos : [];
+                contenedorSugerencias.replaceChildren();
+                if (!articulos.length) { contenedorSugerencias.hidden = true; return; }
+                const titulo = document.createElement('strong');
+                titulo.textContent = 'Quizá esto te ayude';
+                contenedorSugerencias.append(titulo);
+                articulos.forEach(articulo => {
+                    const elemento = document.createElement('article');
+                    const nombre = document.createElement('b'); nombre.textContent = articulo.titulo || 'Guía';
+                    const resumen = document.createElement('span'); resumen.textContent = articulo.resumen || 'Consulta esta guía en el Centro de ayuda.';
+                    const categoria = document.createElement('small'); categoria.textContent = articulo.categoria || 'General';
+                    elemento.append(nombre, resumen, categoria); contenedorSugerencias.append(elemento);
+                });
+                contenedorSugerencias.hidden = false;
+            } catch (_) { contenedorSugerencias.hidden = true; }
+        }, 350);
+    });
 
     $(document).off('submit', '#formCrearTicket').on('submit', '#formCrearTicket', function(e) {
         e.preventDefault();

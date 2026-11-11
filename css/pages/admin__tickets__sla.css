@@ -1,0 +1,20 @@
+.sla-page { width: min(1100px, calc(100% - 32px)); margin: 26px auto 56px; color: #292a2e; }
+.sla-heading { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:24px 26px; margin-bottom:20px; border:1px solid #dedee0; border-left:4px solid #ed1c24; border-radius:12px; background:#fff; box-shadow:0 2px 9px #18181b0a; }
+.sla-eyebrow { color:#8b8b90; font-size:.72rem; font-weight:800; letter-spacing:.09em; }
+.sla-heading h1 { display:flex; align-items:center; gap:12px; margin:5px 0; font-size:1.55rem; font-weight:800; }
+.sla-heading h1 i { color:#ed1c24; }
+.sla-heading p { margin:0; color:#707074; }
+.sla-note { display:flex; align-items:flex-start; gap:13px; padding:16px 18px; margin-bottom:16px; border:1px solid #f1d38c; border-radius:10px; background:#fff9e8; color:#614c16; }
+.sla-note>i { margin-top:3px; }
+.sla-note strong,.sla-note span { display:block; }
+.sla-note span { margin-top:3px; font-size:.9rem; }
+.sla-card { overflow:hidden; border:1px solid #dedee0; border-radius:12px; background:#fff; box-shadow:0 2px 9px #18181b0a; }
+.sla-card th,.sla-card td { padding:14px 18px; }
+.sla-card thead th { color:#626269; background:#f7f7f8; font-size:.76rem; letter-spacing:.04em; text-transform:uppercase; }
+.sla-card tbody tr:last-child>* { border-bottom:0; }
+.sla-card .form-control { max-width:250px; }
+.sla-card footer { display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px 18px; border-top:1px solid #eee; }
+.sla-card footer small { color:#707074; }
+.sla-priority { display:inline-flex; padding:5px 10px; border-radius:20px; font-size:.82rem; font-weight:750; }
+.sla-baja { color:#344054; background:#eaecf0; }.sla-normal { color:#175cd3; background:#eff8ff; }.sla-alta { color:#b54708; background:#fffaeb; }.sla-urgente { color:#b42318; background:#fef3f2; }
+@media(max-width:650px) { .sla-page { width:calc(100% - 20px); margin-top:12px; }.sla-heading { align-items:flex-start; flex-direction:column; padding:18px; }.sla-heading h1 { font-size:1.3rem; }.sla-card th,.sla-card td { padding:10px; }.sla-card footer { align-items:stretch; flex-direction:column; }.sla-card footer .btn { width:100%; } }

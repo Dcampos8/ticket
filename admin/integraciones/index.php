@@ -13,6 +13,7 @@ $campos = [
     'MAIL_MENSAJERIA_PASS' => ['Correo de mensajería', 'Contraseña', true, 'password'],
     'MAIL_TICKETS_TO' => ['Correo de mensajería', 'Destinatario de avisos de tickets', false, 'email'],
     'REPORTES_DIARIOS_TO' => ['Reportes de tickets', 'Destinatarios del resumen diario (separa varios con coma)', false, 'text'],
+    'SLA_ALERTAS_TO' => ['Alertas del Service Desk', 'Destinatarios de alertas SLA (separa varios con coma)', false, 'text'],
     'MAIL_SISTEMAS_HOST' => ['Correo de sistemas', 'Servidor IMAP', false, 'text'],
     'MAIL_SISTEMAS_USER' => ['Correo de sistemas', 'Usuario', false, 'text'],
     'MAIL_SISTEMAS_PASS' => ['Correo de sistemas', 'Contraseña', true, 'password'],
@@ -39,9 +40,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $valor = trim((string) ($_POST[$clave] ?? ''));
             if ($secreto && $valor === '') continue;
             if ($secreto && !$keyCifradoConfigurado) { $ok = false; $error = 'Configura APP_SETTINGS_ENCRYPTION_KEY en el .env antes de guardar claves.'; break; }
-            if ($clave === 'REPORTES_DIARIOS_TO' && $valor !== '') {
+            if (in_array($clave, ['REPORTES_DIARIOS_TO', 'SLA_ALERTAS_TO'], true) && $valor !== '') {
                 $correos = array_filter(array_map('trim', explode(',', $valor)), static fn($correo) => $correo !== '');
-                foreach ($correos as $correo) if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) { $ok = false; $error = 'Revisa los correos del resumen diario; sepáralos con coma.'; break 2; }
+                foreach ($correos as $correo) if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) { $ok = false; $error = 'Revisa los correos configurados; sepáralos con coma.'; break 2; }
             }
             if ($tipo === 'email' && $valor !== '' && !filter_var($valor, FILTER_VALIDATE_EMAIL)) { $ok = false; $error = 'El correo destinatario no tiene un formato válido.'; break; }
             if ($tipo === 'url' && !filter_var($valor, FILTER_VALIDATE_URL)) { $ok = false; $error = 'La URL base debe ser válida e incluir https://'; break; }

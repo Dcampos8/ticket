@@ -44,8 +44,17 @@ La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una f
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.
 - La migración conserva los tickets existentes, añade responsables, prioridades, tiempos medibles y las tablas para artículos de ayuda.
-- El SLA inicial se mide en minutos corridos (24/7); los objetivos por prioridad se pueden ajustar en `ticket_sla_politicas`.
+- El SLA inicial se mide en minutos corridos (24/7); admin y superadmin pueden ajustar respuesta y resolución desde **Tickets → Políticas SLA**.
+- Las políticas actualizadas aplican a tickets nuevos y cuando se cambia la prioridad de un ticket abierto; no reescriben los objetivos ya guardados en tickets existentes.
 - La base de conocimiento se administra en el menú Tickets del panel; los artículos publicados aparecen en Centro de ayuda para usuarios.
+- Para alertas por correo de respuestas próximas/vencidas y resoluciones próximas/vencidas, aplica `sql/migrations/20261110_alertas_sla.sql`, configura `SLA_ALERTAS_TO` en **Conexiones e integraciones** y programa `admin/tickets/procesar_alertas_sla.php` cada 15 minutos. Una misma alerta por ticket se envía como máximo una vez al día. Requiere SMTP configurado.
+- Ejemplo cron Linux para alertas SLA (ajusta la ruta al PHP y a la instalación):
+
+```cron
+*/15 * * * * /usr/bin/php /ruta/a/ticket/admin/tickets/procesar_alertas_sla.php
+```
+
+- En Windows, crea una tarea en el Programador de tareas que ejecute `php.exe` con el script anterior como argumento y repítela cada 15 minutos.
 - No publiques ni agregues al repositorio el volcado completo de la base: contiene información personal y hashes de contraseñas.
 
 ## Despliegue en Hostinger

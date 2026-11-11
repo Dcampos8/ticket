@@ -141,3 +141,9 @@
     border:1px solid #e9ecef;
     margin-bottom:25px;
 }
+.kb-suggestions { display:grid; gap:8px; margin-top:10px; padding:12px; border:1px solid #cfe2ff; border-radius:10px; background:#f5f9ff; }
+.kb-suggestions>strong { color:#174ea6; font-size:.85rem; }
+.kb-suggestions article { display:grid; grid-template-columns:1fr auto; gap:3px 12px; padding:9px 10px; border:1px solid #e4edfa; border-radius:8px; background:#fff; }
+.kb-suggestions article b { color:#292a2e; font-size:.87rem; }
+.kb-suggestions article span { grid-column:1; color:#626269; font-size:.8rem; }
+.kb-suggestions article small { grid-column:2; grid-row:1 / span 2; align-self:center; color:#707074; font-size:.72rem; }

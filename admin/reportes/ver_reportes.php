@@ -35,7 +35,24 @@ $sql = "SELECT t.id, t.nombre, t.estatus, t.descripcion, t.fecha_creacion, u.are
 $stmtReporte = $conexion->prepare($sql);
 if ($aplicarFiltroFechas) $stmtReporte->bind_param('ss', $fecha_inicio, $fecha_fin);
 $stmtReporte->execute();
-$resultado = $stmtReporte->get_result();?>
+$resultado = $stmtReporte->get_result();
+$sqlResumen = "SELECT COUNT(*) AS total,
+    SUM(estatus IN ('Finalizado','Cerrado')) AS cerrados,
+    SUM(estatus IN ('Pendiente','En proceso')) AS abiertos,
+    AVG(CASE WHEN estatus IN ('Finalizado','Cerrado') THEN TIMESTAMPDIFF(MINUTE, fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion)) END) AS minutos_promedio,
+    SUM(estatus IN ('Finalizado','Cerrado') AND TIMESTAMPDIFF(MINUTE, fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion)) <= objetivo_resolucion_minutos) AS dentro_sla
+    FROM tickets" . ($aplicarFiltroFechas ? " WHERE fecha_creacion >= ? AND fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)" : '');
+$stmtResumen = $conexion->prepare($sqlResumen);
+if ($aplicarFiltroFechas) $stmtResumen->bind_param('ss', $fecha_inicio, $fecha_fin);
+$stmtResumen->execute();
+$resumen = $stmtResumen->get_result()->fetch_assoc() ?: [];
+$totalResumen = (int) ($resumen['total'] ?? 0);
+$cerradosResumen = (int) ($resumen['cerrados'] ?? 0);
+$abiertosResumen = (int) ($resumen['abiertos'] ?? 0);
+$cumplimientoSla = $cerradosResumen > 0 ? round(((int) ($resumen['dentro_sla'] ?? 0) / $cerradosResumen) * 100) : 0;
+$minutosPromedio = (int) round((float) ($resumen['minutos_promedio'] ?? 0));
+$tiempoPromedio = $minutosPromedio >= 60 ? floor($minutosPromedio / 60) . ' h ' . ($minutosPromedio % 60) . ' min' : $minutosPromedio . ' min';
+?>
 
 <!-- DataTables + estilos -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
@@ -43,16 +60,21 @@ $resultado = $stmtReporte->get_result();?>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__reportes__ver_reportes.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__reportes__ver_reportes.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
-<div class="content-area">
-  <h2>📄 Reportes Generales</h2>
+<div class="content-area reportes-page">
+  <header class="reports-heading"><div><span>ANÁLISIS DE OPERACIÓN</span><h2><i class="fa-solid fa-chart-column"></i> Reportes de tickets</h2><p>Actividad, tiempos de atención y cumplimiento del Service Desk.</p></div><span class="reports-period"><?= $aplicarFiltroFechas ? htmlspecialchars(date('d/m/Y', strtotime($fecha_inicio)) . ' — ' . date('d/m/Y', strtotime($fecha_fin))) : 'Todo el periodo' ?></span></header>
 
-  <form method="GET" class="filter-form" style="display: inline-flex;">
-    <label class="m-2">Desde:</label>
-    <input type="date" class="form-control m-3" name="fecha_inicio" value="<?= htmlspecialchars($fecha_inicio) ?>">
-    <label class="m-2">Hasta:</label>
-    <input type="date" class="form-control m-3" name="fecha_fin" value="<?= htmlspecialchars($fecha_fin) ?>">
-    <button type="submit" class="btn btn-primary btn-sm m-3">Filtrar</button>
-    <a href="ver_reportes.php" class="btn btn-outline-secondary btn-sm m-3">Limpiar</a>
+  <section class="report-kpis" aria-label="Indicadores del reporte">
+    <article><span class="kpi-icon kpi-total"><i class="fa-solid fa-ticket"></i></span><div><small>Tickets creados</small><strong><?= $totalResumen ?></strong></div></article>
+    <article><span class="kpi-icon kpi-open"><i class="fa-solid fa-inbox"></i></span><div><small>Abiertos actualmente</small><strong><?= $abiertosResumen ?></strong></div></article>
+    <article><span class="kpi-icon kpi-time"><i class="fa-solid fa-stopwatch"></i></span><div><small>Tiempo promedio de resolución</small><strong><?= htmlspecialchars($tiempoPromedio) ?></strong></div></article>
+    <article><span class="kpi-icon kpi-sla"><i class="fa-solid fa-bullseye"></i></span><div><small>Resoluciones dentro del SLA</small><strong><?= $cumplimientoSla ?>%</strong><em><?= $cerradosResumen ?> tickets cerrados</em></div></article>
+  </section>
+
+  <form method="GET" class="filter-form reports-filter">
+    <div><label for="fecha_inicio">Desde</label><input id="fecha_inicio" type="date" class="form-control" name="fecha_inicio" value="<?= htmlspecialchars($fecha_inicio) ?>"></div>
+    <div><label for="fecha_fin">Hasta</label><input id="fecha_fin" type="date" class="form-control" name="fecha_fin" value="<?= htmlspecialchars($fecha_fin) ?>"></div>
+    <button type="submit" class="btn btn-danger"><i class="fa-solid fa-filter me-2"></i>Aplicar fechas</button>
+    <a href="ver_reportes.php" class="btn btn-outline-secondary">Limpiar</a>
   </form>
 
   <div class="table-responsive">
@@ -107,7 +129,7 @@ $resultado = $stmtReporte->get_result();?>
       language: {
         url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
       },
-      pageLength: 10,
+      pageLength: 25,
       responsive: true,
       dom: 'Bfrtip', // Mostrar botones arriba
       buttons: [

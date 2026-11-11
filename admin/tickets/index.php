@@ -246,7 +246,10 @@ function claseTipoTicket($tipo) {
                     <?php endif; ?>
                 </span>
             </div>
-            <a class="service-desk-new" href="crear_ticket_admin.php"><i class="fas fa-plus"></i> Crear ticket</a>
+            <div class="sd-header-actions">
+                <?php if (esAdminOSuperior()): ?><a class="service-desk-settings" href="sla.php"><i class="fas fa-stopwatch"></i> Políticas SLA</a><?php endif; ?>
+                <a class="service-desk-new" href="crear_ticket_admin.php"><i class="fas fa-plus"></i> Crear ticket</a>
+            </div>
         </div>
 
         <section class="sd-summary" aria-label="Resumen de operación">
