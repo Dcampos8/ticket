@@ -585,6 +585,14 @@ function claseTipoTicket($tipo) {
             </nav>
         </div>
     </div>
+    <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content ticket-detail-modal">
+                <div class="modal-header"><div><span class="ticket-modal-eyebrow">SERVICE DESK · DETALLE</span><h2 class="modal-title" id="ticketDetailTitle">Ticket</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                <div class="modal-body" id="ticketDetailBody"></div>
+            </div>
+        </div>
+    </div>
     <!-- Modal Visor de Imagen -->
     <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
@@ -626,7 +634,7 @@ function claseTipoTicket($tipo) {
 </div>
 <!-- Scripts (Única inclusión limpia) -->
 <script>
-// Convierte las filas de origen a tarjetas HTML reales. Evita los límites de ancho y renderizado de <tr>/<td> en CSS Grid.
+// El listado muestra solo un resumen; el detalle y sus controles se abren en un modal.
 (function convertirListadoATarjetas() {
     const tabla = document.getElementById('tablaTickets');
     const cuerpo = tabla?.tBodies?.[0];
@@ -634,40 +642,23 @@ function claseTipoTicket($tipo) {
     const lista = document.createElement('section');
     lista.className = 'ticket-card-list';
     lista.setAttribute('aria-label', 'Tickets de soporte');
-    const campos = [
-        {indice:0, clase:'folio', etiqueta:'Folio'},
-        {indice:2, clase:'solicitante', etiqueta:'Solicitante'},
-        {indice:1, clase:'area', etiqueta:'Área'},
-        {indice:8, clase:'estado', etiqueta:'Estado'},
-        {indice:3, clase:'solicitud', etiqueta:'Solicitud'},
-        {indice:4, clase:'tipo', etiqueta:'Tipo'},
-        {indice:5, clase:'asignacion', etiqueta:'Responsable, prioridad y SLA'},
-        {indice:6, clase:'adjunto-usuario', etiqueta:'Adjunto del usuario'},
-        {indice:7, clase:'adjunto-soporte', etiqueta:'Evidencia de soporte'},
-        {indice:9, clase:'fechas', etiqueta:'Fechas'},
-        {indice:10, clase:'notas', etiqueta:'Respuesta y notas de soporte'},
-        {indice:11, clase:'acciones', etiqueta:'Acciones'}
-    ];
     cuerpo.querySelectorAll('tr.ticket-item').forEach(fila => {
         const tarjeta = document.createElement('article');
-        tarjeta.className = 'ticket-item';
+        tarjeta.className = 'ticket-summary';
         tarjeta.dataset.id = fila.dataset.id || '';
-        campos.forEach(({indice, clase, etiqueta}) => {
-            const origen = fila.cells[indice];
-            if (!origen) return;
-            const campo = document.createElement('div');
-            campo.className = 'ticket-field ticket-field--' + clase;
-            const titulo = document.createElement('span');
-            titulo.className = 'ticket-field-label';
-            titulo.textContent = etiqueta;
-            const valor = document.createElement('div');
-            valor.className = 'ticket-field-value';
-            while (origen.firstChild) valor.appendChild(origen.firstChild);
-            campo.append(titulo, valor);
-            tarjeta.appendChild(campo);
-        });
+        const status = fila.cells[8].querySelector('.estatus')?.value || fila.cells[8].textContent.trim();
+        const main = document.createElement('div'); main.className = 'ticket-summary-main';
+        const meta = document.createElement('div'); meta.className = 'ticket-summary-meta';
+        const folio = document.createElement('span'); folio.className = 'id-pill'; folio.textContent = fila.cells[0].textContent.trim();
+        const area = document.createElement('span'); area.className = 'area-pill'; area.textContent = fila.cells[1].textContent.trim(); meta.append(folio, area);
+        const nombre = document.createElement('h2'); nombre.textContent = fila.cells[2].textContent.trim();
+        const solicitud = document.createElement('p'); solicitud.textContent = (fila.cells[3].querySelector('textarea')?.value || fila.cells[3].textContent).trim().slice(0, 180);
+        const bottom = document.createElement('div'); bottom.className = 'ticket-summary-bottom';
+        [status, fila.cells[4].textContent.trim(), fila.cells[9].textContent.trim().slice(0, 16)].forEach((texto, i) => { const span = document.createElement('span'); span.textContent = texto; if (i === 0) span.className = 'ticket-summary-status'; bottom.appendChild(span); });
+        main.append(meta, nombre, solicitud, bottom);
+        const abrir = document.createElement('button'); abrir.type = 'button'; abrir.className = 'ticket-summary-open'; abrir.setAttribute('aria-label', 'Abrir detalle'); abrir.append('Ver detalle ', Object.assign(document.createElement('i'), {className:'fas fa-arrow-right'}));
+        tarjeta.append(main, abrir);
         lista.appendChild(tarjeta);
-        fila.remove();
     });
     const vacio = cuerpo.querySelector('tr.ticket-empty td');
     if (!lista.children.length && vacio) {
@@ -679,6 +670,24 @@ function claseTipoTicket($tipo) {
     tabla.before(lista);
     tabla.dataset.convertida = '1';
     tabla.hidden = true;
+    lista.addEventListener('click', event => {
+        const boton = event.target.closest('.ticket-summary-open');
+        if (!boton) return;
+        const id = boton.closest('.ticket-summary').dataset.id;
+        const original = cuerpo.querySelector('tr.ticket-item[data-id="' + id + '"]');
+        if (!original) return;
+        const detalle = original.cloneNode(true);
+        detalle.querySelectorAll('[id]').forEach(el => {
+            const oldId = el.id;
+            const newId = oldId + '_modal';
+            el.id = newId;
+            detalle.querySelectorAll('label[for="' + oldId + '"]').forEach(label => label.htmlFor = newId);
+        });
+        detalle.classList.add('ticket-modal-detail');
+        document.getElementById('ticketDetailTitle').textContent = 'Ticket #' + id;
+        document.getElementById('ticketDetailBody').replaceChildren(detalle);
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('ticketDetailModal')).show();
+    });
 })();
 
 // Filtros: los selects y fechas se auto-envían al cambiar de valor

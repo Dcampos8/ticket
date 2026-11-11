@@ -580,6 +580,42 @@ body { background:#f6f7f9; color:var(--ink); }
     #tablaTickets tbody tr.ticket-item>td:nth-child(11) .d-flex { align-items:flex-start!important; }
     #tablaTickets tbody tr.ticket-item>td:nth-child(11) .historial-link { padding:6px; }
 }
+
+/* Resumen compacto: el contenido operativo vive dentro del modal de detalle. */
+.ticket-card-list { gap:8px; }
+.ticket-summary { display:flex; align-items:center; gap:20px; padding:16px 18px; border:1px solid var(--line); border-radius:11px; background:#fff; transition:border-color .15s,box-shadow .15s; }
+.ticket-summary:hover { border-color:#c9cbd0; box-shadow:0 4px 14px #18181b0d; }
+.ticket-summary-main { flex:1; min-width:0; }
+.ticket-summary-meta,.ticket-summary-bottom { display:flex; align-items:center; flex-wrap:wrap; gap:8px 12px; }
+.ticket-summary-meta { margin-bottom:7px; }
+.ticket-summary h2 { margin:0 0 4px; color:#30323a; font-size:.96rem; font-weight:750; }
+.ticket-summary p { display:-webkit-box; margin:0; overflow:hidden; color:#626671; font-size:.83rem; line-height:1.4; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.ticket-summary-bottom { margin-top:10px; color:#737782; font-size:.73rem; }
+.ticket-summary-status { padding:4px 9px; border-radius:99px; background:#f1f2f4; color:#383a40; font-weight:750; }
+.ticket-summary-open { flex:0 0 auto; display:inline-flex; align-items:center; gap:9px; min-height:38px; padding:8px 13px; border:1px solid #e1e2e6; border-radius:8px; background:#fff; color:#33363d; font-size:.8rem; font-weight:750; }
+.ticket-summary-open:hover { border-color:#ed1c24; color:#c81019; background:#fff7f7; }
+.ticket-detail-modal { border:0; border-radius:14px; box-shadow:0 20px 60px #11182733; }
+.ticket-modal-eyebrow { color:#8a8d95; font-size:.66rem; font-weight:800; letter-spacing:.08em; }
+.ticket-detail-modal .modal-header { padding:18px 22px; border-bottom:1px solid #eceef1; }
+.ticket-detail-modal .modal-title { margin-top:3px; font-size:1.2rem; font-weight:800; }
+.ticket-detail-modal .modal-body { padding:14px; }
+#ticketDetailBody .ticket-modal-detail { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas:"id requester status" "area type assignment" "description description description" "user-attachment admin-attachment date" "comment comment actions"; align-items:stretch; overflow:hidden; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+#ticketDetailBody .ticket-modal-detail>td { display:block; min-width:0; padding:13px 15px!important; border:0!important; background:#fff!important; overflow-wrap:anywhere; }
+#ticketDetailBody .ticket-modal-detail>td::before { display:block; margin-bottom:5px; color:#777980; font-size:.66rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
+#ticketDetailBody .ticket-modal-detail>td:nth-child(1){grid-area:id} #ticketDetailBody .ticket-modal-detail>td:nth-child(1)::before{content:"Folio"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(2){grid-area:area} #ticketDetailBody .ticket-modal-detail>td:nth-child(2)::before{content:"Área"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(3){grid-area:requester} #ticketDetailBody .ticket-modal-detail>td:nth-child(3)::before{content:"Solicitante"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(4){grid-area:description} #ticketDetailBody .ticket-modal-detail>td:nth-child(4)::before{content:"Solicitud"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(5){grid-area:type} #ticketDetailBody .ticket-modal-detail>td:nth-child(5)::before{content:"Tipo"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(6){grid-area:assignment} #ticketDetailBody .ticket-modal-detail>td:nth-child(6)::before{content:"Responsable, prioridad y SLA"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(7){grid-area:user-attachment} #ticketDetailBody .ticket-modal-detail>td:nth-child(7)::before{content:"Adjunto del usuario"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(8){grid-area:admin-attachment} #ticketDetailBody .ticket-modal-detail>td:nth-child(8)::before{content:"Adjunto de soporte"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(9){grid-area:status} #ticketDetailBody .ticket-modal-detail>td:nth-child(9)::before{content:"Estatus"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(10){grid-area:date} #ticketDetailBody .ticket-modal-detail>td:nth-child(10)::before{content:"Fechas"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(11){grid-area:comment} #ticketDetailBody .ticket-modal-detail>td:nth-child(11)::before{content:"Respuesta de soporte"}
+#ticketDetailBody .ticket-modal-detail>td:nth-child(12){grid-area:actions} #ticketDetailBody .ticket-modal-detail>td:nth-child(12)::before{content:"Acciones"}
+@media(max-width:700px){.ticket-summary{align-items:flex-start;gap:12px;padding:13px}.ticket-summary-open{padding:7px 9px;font-size:.72rem}#ticketDetailBody .ticket-modal-detail{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"id status" "requester area" "description description" "type assignment" "user-attachment admin-attachment" "date date" "comment comment" "actions actions"}}
+@media(max-width:480px){.ticket-summary{display:block}.ticket-summary-open{margin-top:12px}#ticketDetailBody .ticket-modal-detail{grid-template-columns:minmax(0,1fr);grid-template-areas:"id" "status" "requester" "area" "description" "type" "assignment" "user-attachment" "admin-attachment" "date" "comment" "actions"}}
 #tablaTickets[hidden] { display:none!important; }
 .ticket-card-list { display:grid; gap:12px; width:100%; }
 article.ticket-item { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-areas:"folio solicitante estado" "area tipo asignacion" "solicitud solicitud solicitud" "adjunto-usuario adjunto-soporte fechas" "notas notas acciones"; align-items:stretch; overflow:hidden; border:1px solid #dedfe3; border-radius:12px; background:#fff; box-shadow:0 2px 7px #18181b08; transition:border-color .15s,box-shadow .15s; }
