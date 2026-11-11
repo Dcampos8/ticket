@@ -11,6 +11,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/crear_ticket.css?v=<?= filemtime(__DIR__ . '/css/pages/crear_ticket.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/css/brand.css') ?>">
 <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
 <div class="form-header">
     <h2>
         <i class="fas fa-ticket-alt text-primary"></i>

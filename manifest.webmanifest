@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Tickets · Transportes Valadez",
+  "short_name": "Tickets Valadez",
+  "description": "Sistema de atención y seguimiento de tickets de Transportes Valadez.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#292b31",
+  "icons": [
+    {
+      "src": "/img/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

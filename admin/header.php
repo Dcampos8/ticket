@@ -9,6 +9,7 @@
 
     <!-- 1. ICONO -->
     <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>img/favicon.svg">
+    <link rel="manifest" href="<?= BASE_URL ?>manifest.webmanifest">
 
     <!-- 2. ESTILOS EXTERNOS (CDN) -->
     <!-- FontAwesome (Solo una vez) -->
