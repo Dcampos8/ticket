@@ -687,3 +687,18 @@ article.ticket-item:hover { border-color:#c5c7cd; box-shadow:0 4px 14px #18181b0
 .ticket-summary:last-child { border-bottom:0; }
 .ticket-summary[hidden] { display:none!important; }
 .ticket-summary-open { justify-self:end; }
+.summary-status { align-items:center; justify-self:start; padding:5px 9px; border-radius:999px; font-size:.69rem; font-weight:800; }
+.summary-status.is-pending { background:#fff4d6; color:#8a5700; }
+.summary-status.is-progress { background:#e8f1ff; color:#175cd3; }
+.summary-status.is-resolved { background:#dcfce7; color:#16703c; }
+.summary-status.is-cancelled { background:#fee4e2; color:#b42318; }
+.ticket-status-tab:not([data-status="Todos"])::before { width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:#98a2b3; content:""; }
+.ticket-status-tab.is-pending::before { background:#d99a00; }
+.ticket-status-tab.is-progress::before { background:#2e90fa; }
+.ticket-status-tab.is-resolved::before { background:#12b76a; }
+.ticket-status-tab.is-cancelled::before { background:#f04438; }
+.ticket-status-tab.active.is-pending { background:#fff4d6; color:#704800; }
+.ticket-status-tab.active.is-progress { background:#e8f1ff; color:#1849a9; }
+.ticket-status-tab.active.is-resolved { background:#dcfce7; color:#126637; }
+.ticket-status-tab.active.is-cancelled { background:#fee4e2; color:#912018; }
+.ticket-status-tab.active.is-pending .ticket-status-count,.ticket-status-tab.active.is-progress .ticket-status-count,.ticket-status-tab.active.is-resolved .ticket-status-count,.ticket-status-tab.active.is-cancelled .ticket-status-count { background:#ffffffcc; color:inherit; }

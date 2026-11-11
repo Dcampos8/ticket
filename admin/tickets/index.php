@@ -653,9 +653,11 @@ function claseTipoTicket($tipo) {
     pestanas.setAttribute('role', 'tablist');
     pestanas.setAttribute('aria-label', 'Filtrar tickets por estatus');
     const contadores = {};
+    const claseEstado = {'Pendiente':'is-pending', 'En proceso':'is-progress', 'Finalizado':'is-resolved', 'Cerrado':'is-resolved', 'Cancelado':'is-cancelled'};
     estados.forEach((estado, index) => {
         const boton = document.createElement('button');
         boton.type = 'button'; boton.className = 'ticket-status-tab'; boton.dataset.status = estado;
+        if (claseEstado[estado]) boton.classList.add(claseEstado[estado]);
         boton.setAttribute('role', 'tab'); boton.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
         const texto = document.createElement('span'); texto.textContent = etiquetasEstado[estado] || estado;
         const cuenta = document.createElement('span'); cuenta.className = 'ticket-status-count'; cuenta.textContent = '0';
@@ -671,6 +673,8 @@ function claseTipoTicket($tipo) {
         tarjeta.innerHTML = '<span class="summary-cell summary-id"></span><span class="summary-cell summary-person"></span><span class="summary-cell summary-area"></span><span class="summary-cell summary-request"></span><span class="summary-cell summary-status"></span><span class="summary-cell summary-date"></span><button type="button" class="ticket-summary-open">Abrir <i class="fas fa-arrow-right"></i></button>';
         const values = [fila.cells[0].textContent.trim(), fila.cells[2].textContent.trim(), fila.cells[1].textContent.trim(), (fila.cells[3].querySelector('textarea')?.value || fila.cells[3].textContent).trim().slice(0, 120), status, fila.cells[9].textContent.trim().slice(0, 16)];
         tarjeta.querySelectorAll('.summary-cell').forEach((cell, index) => cell.textContent = index === 4 ? (etiquetasEstado[values[index]] || values[index]) : values[index]);
+        const estadoResumen = tarjeta.querySelector('.summary-status');
+        if (claseEstado[status]) estadoResumen.classList.add(claseEstado[status]);
         contadores.Todos.textContent = String(Number(contadores.Todos.textContent) + 1);
         if (contadores[tarjeta.dataset.status]) contadores[tarjeta.dataset.status].textContent = String(Number(contadores[tarjeta.dataset.status].textContent) + 1);
         lista.appendChild(tarjeta);
@@ -701,7 +705,10 @@ function claseTipoTicket($tipo) {
             if (contadores[nuevo]) contadores[nuevo].textContent = String(Number(contadores[nuevo].textContent) + 1);
         }
         card.dataset.status = nuevo;
-        card.querySelector('.summary-status').textContent = etiquetasEstado[estado] || estado;
+        const estadoResumen = card.querySelector('.summary-status');
+        estadoResumen.textContent = etiquetasEstado[estado] || estado;
+        estadoResumen.classList.remove('is-pending','is-progress','is-resolved','is-cancelled');
+        if (claseEstado[estado]) estadoResumen.classList.add(claseEstado[estado]);
         const filaOriginal = cuerpo.querySelector('tr.ticket-item[data-id="' + id + '"]');
         const selectOriginal = filaOriginal?.cells[8].querySelector('.estatus');
         if (selectOriginal && ['Pendiente','En proceso'].includes(nuevo)) selectOriginal.value = nuevo;
