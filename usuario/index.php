@@ -16,6 +16,13 @@ $resultado_aviso = $conexion->query($query_aviso);
 if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
     $aviso = $resultado_aviso->fetch_assoc();
 }
+$tituloAviso = trim((string) ($aviso['titulo'] ?? ''));
+$lineasAviso = preg_split('/\R/u', trim((string) ($aviso['mensaje'] ?? ''))) ?: [];
+if ($tituloAviso !== '' && isset($lineasAviso[0]) && mb_strtolower(trim($lineasAviso[0]), 'UTF-8') === mb_strtolower($tituloAviso, 'UTF-8')) {
+    array_shift($lineasAviso);
+    while (isset($lineasAviso[0]) && trim($lineasAviso[0]) === '') array_shift($lineasAviso);
+}
+$mensajeAviso = trim(implode("\n", $lineasAviso));
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +54,7 @@ if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
 
     <?php if ($aviso): ?>
         <?php $coloresPermitidos = ['primary', 'success', 'warning', 'danger', 'info']; $colorAviso = in_array($aviso['color_alerta'], $coloresPermitidos, true) ? $aviso['color_alerta'] : 'primary'; ?>
-        <section class="user-announcement announcement-<?= htmlspecialchars($colorAviso) ?>" role="status"><span class="announcement-icon"><i class="fa-solid fa-bullhorn"></i></span><div><span class="user-eyebrow">AVISO DEL SISTEMA</span><h2><?= htmlspecialchars($aviso['titulo']) ?></h2><p><?= nl2br(htmlspecialchars($aviso['mensaje'])) ?></p></div></section>
+        <section class="user-announcement announcement-<?= htmlspecialchars($colorAviso) ?>" role="status"><span class="announcement-icon"><i class="fa-solid fa-bullhorn"></i></span><div><span class="user-eyebrow">AVISO DEL SISTEMA</span><h2><?= htmlspecialchars($tituloAviso) ?></h2><p><?= nl2br(htmlspecialchars($mensajeAviso)) ?></p></div></section>
     <?php endif; ?>
 
     <section class="user-actions-section">
