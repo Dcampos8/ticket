@@ -23,8 +23,9 @@
 .user-action-primary .user-action-icon{background:#ffffff24;color:#fff}
 .user-action-primary>span:nth-child(2),.user-action-link>span:nth-child(2){display:grid;gap:4px;min-width:0}
 .user-action-primary strong,.user-action-link strong{font-size:13px;font-weight:750}
+.user-action-primary strong{color:#fff!important}
 .user-action-primary small,.user-action-link small{color:#787880;font-size:11px;line-height:1.4}
-.user-action-primary small{color:#ffe1e2}
+.user-action-primary small{color:#fff!important}
 .user-action-arrow{margin-left:auto;color:#a2a2a8;font-size:12px}
 .user-action-primary .user-action-arrow{color:#fff}
 .user-no-announcements{display:flex;align-items:center;gap:8px;margin:20px 0;padding:13px 15px;border:1px solid #e4e8e5;border-radius:10px;background:#fff;color:#696970;font-size:12px}

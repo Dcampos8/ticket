@@ -37,6 +37,7 @@ $mensajeAviso = trim(implode("\n", $lineasAviso));
     <link rel="stylesheet" href="../css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/redesign.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
+    <link rel="stylesheet" href="../css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">
     <link rel="stylesheet" href="../css/pages/usuario__index.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__index.css') ?>">
     <link rel="icon" type="image/svg+xml" href="../img/favicon.svg?v=2">
     <link rel="manifest" href="../manifest.webmanifest?v=2">
