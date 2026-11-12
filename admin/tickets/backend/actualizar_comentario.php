@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../../../backend/conexion.php';
+date_default_timezone_set('America/Mexico_City');
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
 require_once '../../../shared/ticket_activity.php';
@@ -49,17 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comentarioAnterior = trim((string)($actual['comentario_admin'] ?? ''));
     $esPrimeraRespuesta = ($comentario !== '' && $comentario !== $comentarioAnterior) ? 1 : 0;
 
+    $fechaActualizacion = (new DateTimeImmutable('now', new DateTimeZone('America/Mexico_City')))->format('Y-m-d H:i:s');
     $stmt = $conexion->prepare("
         UPDATE tickets
         SET comentario_admin = ?,
-            fecha_modificacion = NOW(),
+            fecha_modificacion = ?,
             fecha_primera_respuesta = CASE
-                WHEN ? = 1 AND fecha_primera_respuesta IS NULL THEN NOW()
+                WHEN ? = 1 AND fecha_primera_respuesta IS NULL THEN ?
                 ELSE fecha_primera_respuesta
             END
         WHERE id = ?
     ");
-    $stmt->bind_param("sii", $comentario, $esPrimeraRespuesta, $ticket_id);
+    $stmt->bind_param("ssisi", $comentario, $fechaActualizacion, $esPrimeraRespuesta, $fechaActualizacion, $ticket_id);
 
     if ($stmt->execute()) {
 

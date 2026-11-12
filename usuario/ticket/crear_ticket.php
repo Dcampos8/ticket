@@ -15,11 +15,9 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <link rel="icon" type="image/svg+xml" href="../../img/favicon.svg?v=2">
 <div class="form-header">
-    <h2>
-        <i class="fas fa-ticket-alt text-primary"></i>
-        Crear Nuevo Ticket
-    </h2>
-    <p>Describe tu solicitud para que el equipo pueda atenderla rápidamente.</p>
+    <span class="form-eyebrow">SOPORTE TÉCNICO</span>
+    <h2><i class="fas fa-ticket-alt"></i> Crear un ticket</h2>
+    <p>Cuéntanos qué sucede y el equipo de soporte le dará seguimiento.</p>
 </div>
 
 <div class="ticket-page">
@@ -30,6 +28,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
         <input type="hidden" name="nombre" value="<?= htmlspecialchars($_SESSION['nombre_completo']) ?>">
 
         <div class="ticket-card">
+            <div class="ticket-requester-heading"><i class="fa-solid fa-circle-user"></i><span>Solicitud a nombre de</span></div>
             <div class="user-grid">
         
                 <div class="campo">
@@ -50,19 +49,20 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
             </div>
         </div>
         <div class="campo">
-            <label>Descripción del problema <span style="color:red">*</span></label>
-            <textarea id="descripcionTicket" name="descripcion" required rows="4" maxlength="5000" placeholder="Indica qué ocurre, desde cuándo y qué estabas intentando hacer..."></textarea>
+            <label for="descripcionTicket">¿En qué podemos ayudarte? <span class="required-mark">*</span></label>
+            <p class="field-help">Incluye qué intentabas hacer, qué ocurrió y desde cuándo sucede.</p>
+            <textarea id="descripcionTicket" name="descripcion" required rows="5" maxlength="5000" placeholder="Ejemplo: al abrir el sistema de facturación aparece un mensaje de error desde esta mañana..."></textarea>
+            <div class="field-counter"><span>Entre más detalles compartas, más rápido podremos ayudarte.</span><span id="descripcionConteo">0 / 5000</span></div>
             <div id="sugerenciasAyuda" class="kb-suggestions" aria-live="polite" hidden></div>
         </div>
         <div class="campo">
-            <label>Tipo de solicitud</label>
-            <p class="text-muted mb-0">La IA analizará la descripción y asignará la categoría más adecuada.</p>
+            <div class="category-note"><i class="fa-solid fa-wand-magic-sparkles"></i><span><strong>Categorización automática</strong><small>Analizaremos la descripción para dirigir tu solicitud al equipo adecuado.</small></span></div>
         </div>
         <div class="campo">
-            <label>Imagen (opcional)</label>
+            <label for="imagen">Adjunta una captura (opcional)</label>
             <div id="dropArea">
-                <div id="uploadIcon">⬆️</div>
-                <p id="dropText">Haz clic o arrastra una imagen<br><small>Pega con Ctrl + V</small></p>
+                <div id="uploadIcon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <p id="dropText">Haz clic o arrastra una imagen aquí<br><small>También puedes pegarla con Ctrl + V · máximo 5 MB</small></p>
                 <input type="file" id="imagen" name="imagen" accept="image/*" hidden>
                 <img id="preview" style="display:none;max-width:100%;margin-top:10px;">
             </div>
@@ -85,6 +85,7 @@ $(document).ready(function() {
     const descripcion = document.getElementById('descripcionTicket');
     const contenedorSugerencias = document.getElementById('sugerenciasAyuda');
     descripcion?.addEventListener('input', function() {
+        document.getElementById('descripcionConteo').textContent = this.value.length.toLocaleString('es-MX') + ' / 5000';
         window.clearTimeout(timerSugerencias);
         const texto = this.value.trim();
         if (texto.length < 12) { contenedorSugerencias.hidden = true; contenedorSugerencias.replaceChildren(); return; }

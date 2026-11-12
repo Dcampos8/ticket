@@ -49,6 +49,7 @@ La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una f
 - La base de conocimiento se administra en el menú Tickets del panel; los artículos publicados aparecen en Centro de ayuda para usuarios.
 - Para alertas por correo de respuestas próximas/vencidas y resoluciones próximas/vencidas, aplica `sql/migrations/20261110_alertas_sla.sql`, configura `SLA_ALERTAS_TO` en **Conexiones e integraciones** y programa `admin/tickets/procesar_alertas_sla.php` cada 15 minutos. Una misma alerta por ticket se envía como máximo una vez al día. Requiere SMTP configurado.
 - Para configurar el horario de atención de los tickets, aplica una sola vez `sql/migrations/20261112_ticket_horarios_atencion.sql`. Después, admin y superadmin pueden editar el horario base y el de cada responsable en **Tickets → Horarios de atención**. El horario base inicia de lunes a viernes, de 09:00 a 19:00, y se usa mientras el ticket no tenga responsable. El listado, indicadores, reportes y alertas SLA excluyen horas y días inactivos.
+- Para normalizar primeras respuestas que quedaron guardadas en UTC mientras el cierre ya estaba en hora de Ciudad de México, aplica una sola vez `sql/migrations/20261113_corregir_primera_respuesta_utc.sql`.
 - Ejemplo cron Linux para alertas SLA (ajusta la ruta al PHP y a la instalación):
 
 ```cron

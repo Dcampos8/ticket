@@ -1,5 +1,6 @@
 <?php
 session_start();
+date_default_timezone_set('America/Mexico_City');
 include '../../../backend/conexion.php';
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
@@ -41,7 +42,8 @@ $result = $stmt->get_result();
 
 $historial = [];
 while ($row = $result->fetch_assoc()) {
-    $row['fecha_fmt'] = date("d/m/Y H:i", strtotime($row['fecha']));
+    $fechaComentario = new DateTimeImmutable((string) $row['fecha'], new DateTimeZone('UTC'));
+    $row['fecha_fmt'] = $fechaComentario->setTimezone(new DateTimeZone('America/Mexico_City'))->format('d/m/Y H:i');
     $historial[] = $row;
 }
 

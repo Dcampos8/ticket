@@ -34,11 +34,12 @@ $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
 </nav>
 
 <script>
-$(document).on('click', '.nav-link[data-page]', function (e) {
+$(document).on('click', '.nav-link[data-page], #pageContent a[data-page]', function (e) {
     e.preventDefault();
     let page = $(this).data('page');
+    if (window.ticketStatusPoll) { window.clearInterval(window.ticketStatusPoll); window.ticketStatusPoll = null; }
     $('.nav-link').removeClass('active');
-    $(this).addClass('active');
+    if ($(this).hasClass('nav-link')) $(this).addClass('active');
     $('#pageContent').fadeOut(100).load(page, function(){ $(this).fadeIn(100); });
 });
 

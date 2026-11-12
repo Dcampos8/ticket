@@ -1,5 +1,6 @@
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+date_default_timezone_set('America/Mexico_City');
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../../../shared/permisos.php';
 
@@ -28,7 +29,8 @@ $stmt->execute();
 $resultado = $stmt->get_result();
 $actividad = [];
 while ($fila = $resultado->fetch_assoc()) {
-    $fila['fecha_fmt'] = date('d/m/Y H:i', strtotime($fila['fecha']));
+    $fechaActividad = new DateTimeImmutable((string) $fila['fecha'], new DateTimeZone('UTC'));
+    $fila['fecha_fmt'] = $fechaActividad->setTimezone(new DateTimeZone('America/Mexico_City'))->format('d/m/Y H:i');
     $actividad[] = $fila;
 }
 $stmt->close();

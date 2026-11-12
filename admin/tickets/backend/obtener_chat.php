@@ -1,5 +1,6 @@
 <?php
 session_start();
+date_default_timezone_set('America/Mexico_City');
 header('Content-Type: application/json; charset=utf-8');
 
 require '../../../backend/conexion.php';
@@ -31,6 +32,8 @@ $result = $stmt->get_result();
 
 $mensajes = [];
 while ($fila = $result->fetch_assoc()) {
+    $fechaMensaje = new DateTimeImmutable((string) $fila['fecha'], new DateTimeZone('UTC'));
+    $fila['fecha'] = $fechaMensaje->setTimezone(new DateTimeZone('America/Mexico_City'))->format('d/m/Y H:i');
     $mensajes[] = $fila;
 }
 

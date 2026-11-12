@@ -30,6 +30,7 @@ if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
     <link rel="stylesheet" href="../css/theme.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/redesign.css?v=<?= time() ?>">
     <link rel="stylesheet" href="../css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
+    <link rel="stylesheet" href="../css/pages/usuario__index.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__index.css') ?>">
     <link rel="icon" type="image/svg+xml" href="../img/favicon.svg?v=2">
     <link rel="manifest" href="../manifest.webmanifest?v=2">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -39,108 +40,29 @@ if ($resultado_aviso && $resultado_aviso->num_rows > 0) {
         <?php include('menu.php'); ?>
         
        <main class="flex-grow-1 p-4" id="pageContent" style="min-height: 100vh;">
-    <div class="mb-4">
-        <h2>Bienvenido, <?= htmlspecialchars($_SESSION['nombre_completo']) ?></h2>
-        <p class="text-muted">Selecciona una opción del menú lateral para comenzar.</p>
-    </div>
-    
-    <!-- Contenedor Grid de Bootstrap -->
-    <div class="row g-4">
-        
-        <!-- Columna 1: Políticas de la Empresa -->
-        <div class="col-12 col-md-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0"><i class="fa-solid fa-gavel me-2"></i>Política General de Sistemas</h5>
-                </div>
-                <div class="card-body">
-                    <ul><h4>Lineamientos Generales</h4>
-                        <li><h5>Uso de Equipos y Sistemas</h5>
-                            <ul>
-                                <li>Los equipos, cuentas y sistemas proporcionados por la empresa son para fines laborales.</li>
-                                <li>Está prohibido instalar software sin autorización del área de Sistemas.</li>
-                            </ul>
-                        </li>
-                        <li><h5>Seguridad de la Información</h5>
-                            <ul>
-                                <li>Cada usuario es responsable de la confidencialidad de sus contraseñas.</li>
-                                <li>No se deben compartir credenciales de acceso con terceros.</li>
-                                <li>Toda información de la empresa deberá manejarse de forma segura y únicamente para actividades autorizadas.</li>
-                            </ul>
-                        </li>
-                        <li><h5>Soporte Técnico</h5>
-                            <ul>
-                                <li>Cualquier falla, incidente o requerimiento tecnológico deberá reportarse mediante los canales oficiales de soporte o sistema de tickets.</li>
-                                <li>Los usuarios no deberán realizar modificaciones técnicas en equipos o configuraciones sin autorización.</li>
-                                <!--<li></li>
-                                <li></li>
-                                <li></li>-->
-                            </ul>
-                        </li>
-                        <li><h5>Uso de Internet y Correo Electrónico</h5>
-                            <ul>
-                                <li>El acceso a internet y correo corporativo deberá utilizarse de manera responsable y profesional.</li>
-                                <li>Está prohibido acceder, descargar o distribuir contenido que represente un riesgo para la seguridad de la empresa.</li>
-                                <!--<li></li>
-                                <li></li>
-                                <li></li>-->
-                            </ul>
-                        </li>
-                        <li><h5>Resguardo de Equipos</h5>
-                            <ul>
-                                <li>Los usuarios son responsables del cuidado de los equipos asignados.</li>
-                                <li>Cualquier daño, pérdida o robo deberá reportarse inmediatamente al área de Sistemas y al responsable correspondiente.</li>
-                                <!--<li></li>
-                                <li></li>
-                                <li></li>-->
-                            </ul>
-                        </li>
-                        <li><h5>Incumplimiento</h5>
-                            <ul>
-                                <li>El incumplimiento de esta política podrá derivar en la suspensión de accesos, restricciones de uso de recursos tecnológicos o las medidas administrativas que la empresa considere pertinentes.</li>
-                                <!--<li></li>
-                                <li></li>
-                                <li></li>
-                                <li></li>-->
-                            </ul>
-                        </li>
-                        <li><h5>Vigencia</h5>
-                            <ul>
-                                <li>La presente política entra en vigor a partir de su publicación y podrá ser actualizada cuando las necesidades operativas o de seguridad de la empresa lo requieran.</li>
-                                <!--<li></li>
-                                <li></li>
-                                <li></li>
-                                <li></li>-->
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <section class="user-welcome">
+        <div><span class="user-eyebrow">PORTAL DE SISTEMAS</span><h1>Hola, <?= htmlspecialchars(explode(' ', trim((string) ($_SESSION['nombre_completo'] ?? 'Usuario')))[0] ?: 'usuario') ?></h1><p>¿Qué necesitas resolver hoy?</p></div>
+        <div class="welcome-mark" aria-hidden="true"><i class="fa-solid fa-headset"></i></div>
+    </section>
 
-        <!-- Columna 2: Avisos del Sistema -->
-        <div class="col-12 col-md-6">
-            <?php if ($aviso): ?>
-                <div class="card h-100 border-<?= htmlspecialchars($aviso['color_alerta']) ?> shadow-sm">
-                    <div class="card-header bg-<?= htmlspecialchars($aviso['color_alerta']) ?> text-white">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-circle-exclamation me-2"></i><?= htmlspecialchars($aviso['titulo']) ?></h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text" style="white-space: pre-line;"><?= htmlspecialchars($aviso['mensaje']) ?></p>
-                    </div>
-                </div>
-            <?php else: ?>
-                <!-- Estado cuando no hay avisos activos -->
-                <div class="card h-100 border-light bg-light shadow-sm d-flex align-items-center justify-content-center text-center p-4">
-                    <div class="text-muted">
-                        <i class="fa-regular fa-bell-slash fa-2x mb-2"></i>
-                        <p class="mb-0">No hay avisos pendientes en este momento.</p>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
+    <?php if ($aviso): ?>
+        <?php $coloresPermitidos = ['primary', 'success', 'warning', 'danger', 'info']; $colorAviso = in_array($aviso['color_alerta'], $coloresPermitidos, true) ? $aviso['color_alerta'] : 'primary'; ?>
+        <section class="user-announcement announcement-<?= htmlspecialchars($colorAviso) ?>" role="status"><span class="announcement-icon"><i class="fa-solid fa-bullhorn"></i></span><div><span class="user-eyebrow">AVISO DEL SISTEMA</span><h2><?= htmlspecialchars($aviso['titulo']) ?></h2><p><?= nl2br(htmlspecialchars($aviso['mensaje'])) ?></p></div></section>
+    <?php endif; ?>
 
-    </div>
+    <section class="user-actions-section">
+        <div class="user-section-heading"><div><span class="user-eyebrow">ACCESOS RÁPIDOS</span><h2>¿Qué quieres hacer?</h2></div></div>
+        <div class="user-action-grid">
+            <a class="user-action-primary" href="#" data-page="ticket/crear_ticket.php"><span class="user-action-icon"><i class="fa-solid fa-plus"></i></span><span><strong>Crear un ticket</strong><small>Reporta un problema o solicita ayuda</small></span><i class="fa-solid fa-arrow-right user-action-arrow"></i></a>
+            <a class="user-action-link" href="#" data-page="ticket/mis_tickets.php"><span class="user-action-icon"><i class="fa-solid fa-ticket"></i></span><span><strong>Seguir mis tickets</strong><small>Consulta respuestas y avances</small></span><i class="fa-solid fa-arrow-right user-action-arrow"></i></a>
+            <a class="user-action-link" href="#" data-page="ticket/ayuda.php"><span class="user-action-icon"><i class="fa-solid fa-book-open"></i></span><span><strong>Centro de ayuda</strong><small>Encuentra guías y soluciones rápidas</small></span><i class="fa-solid fa-arrow-right user-action-arrow"></i></a>
+        </div>
+    </section>
+
+    <?php if (!$aviso): ?><p class="user-no-announcements"><i class="fa-regular fa-circle-check"></i> No hay avisos nuevos del sistema.</p><?php endif; ?>
+    <details class="user-policy"><summary><i class="fa-solid fa-shield-halved"></i><span><strong>Política de uso de Sistemas</strong><small>Consulta los lineamientos de seguridad y soporte</small></span><i class="fa-solid fa-chevron-down policy-chevron"></i></summary>
+        <div class="policy-content"><p><strong>Equipos y sistemas.</strong> Utiliza los recursos de la empresa para fines laborales. No instales software sin autorización.</p><p><strong>Seguridad.</strong> Mantén tus contraseñas confidenciales y no compartas credenciales. Maneja la información de forma segura.</p><p><strong>Soporte.</strong> Reporta fallas y solicitudes por los canales oficiales. No realices cambios técnicos sin autorización.</p><p><strong>Correo e internet.</strong> Utiliza estos servicios de forma responsable y evita contenido que pueda poner en riesgo la seguridad de la empresa.</p><p><strong>Resguardo.</strong> Cuida tus equipos y reporta de inmediato cualquier daño, pérdida o robo.</p><p><strong>Incumplimiento.</strong> El uso inadecuado puede ocasionar restricciones de acceso o las medidas administrativas que correspondan.</p><p><strong>Vigencia.</strong> Estos lineamientos pueden actualizarse cuando cambien las necesidades de seguridad u operación.</p></div>
+    </details>
 </main>
     </div>
 

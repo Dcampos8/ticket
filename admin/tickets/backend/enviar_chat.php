@@ -49,8 +49,9 @@ $stmt->bind_param("iss", $ticket_id, $usuario, $mensaje);
 
 if ($stmt->execute()) {
     if (esAdminOSuperior()) {
-        $respuesta = $conexion->prepare('UPDATE tickets SET fecha_primera_respuesta = COALESCE(fecha_primera_respuesta, NOW()) WHERE id = ?');
-        $respuesta->bind_param('i', $ticket_id);
+        $fechaRespuesta = (new DateTimeImmutable('now', new DateTimeZone('America/Mexico_City')))->format('Y-m-d H:i:s');
+        $respuesta = $conexion->prepare('UPDATE tickets SET fecha_primera_respuesta = COALESCE(fecha_primera_respuesta, ?) WHERE id = ?');
+        $respuesta->bind_param('si', $fechaRespuesta, $ticket_id);
         $respuesta->execute();
         $respuesta->close();
         registrarActividadTicket($conexion, $ticket_id, 'chat', 'Respondió en el chat del ticket.');

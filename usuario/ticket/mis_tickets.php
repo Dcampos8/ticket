@@ -35,6 +35,9 @@ if (!empty($_SESSION['puede_ver_todos_tickets']) && $_SESSION['puede_ver_todos_t
 
 $stmt->execute();
 $result = $stmt->get_result();
+$tickets = $result->fetch_all(MYSQLI_ASSOC);
+$totalTickets = count($tickets);
+$ticketsAbiertos = count(array_filter($tickets, static fn($ticket) => in_array($ticket['estatus'], ['Pendiente', 'En proceso'], true)));
 ?>
 
 <!-- ✅ Estilo Moderno y Minimalista -->
@@ -81,7 +84,7 @@ function guardarDatoChat(id, dato, valor) {
 }
 
 function mostrarIndicadorChat(id, nuevo) {
-    const boton = document.querySelector('.btn-chat-ticket[data-ticket-id="' + String(id) + '"]');
+    const boton = document.querySelector('.ticket-row [data-ticket-id="' + String(id) + '"][data-chat-status]');
     if (!boton) return;
     const punto = boton.querySelector('.chat-unread-dot');
     if (punto) punto.hidden = !nuevo;
@@ -248,7 +251,7 @@ async function cargarChat() {
 function conectarFormularioChat() {
     const formulario = document.getElementById('chatForm');
     if (!formulario) return;
-    const botonesTicket = Array.from(document.querySelectorAll('.btn-chat-ticket[data-ticket-id]'));
+    const botonesTicket = Array.from(document.querySelectorAll('.ticket-row [data-ticket-id][data-chat-status]'));
     const idsAbiertos = botonesTicket.filter(boton => ['Pendiente', 'En proceso'].includes(boton.dataset.chatStatus)).map(boton => String(boton.dataset.ticketId));
     const idsRecientes = botonesTicket.slice(0, 10).map(boton => String(boton.dataset.ticketId));
     window.ticketChatVigilados = Array.from(new Set(idsAbiertos.concat(idsRecientes)));
@@ -280,153 +283,71 @@ document.addEventListener('visibilitychange', () => {
 });
 </script>
 
-<div class="tickets-header">
-    <h3>
-        <i class="fas fa-ticket-alt text-primary"></i>
-        Mis Tickets
-    </h3>
+<?php $estatusClase = static function (string $estatus): string {
+    return match ($estatus) {
+        'Pendiente' => 'badge-pendiente', 'En proceso' => 'badge-proceso',
+        'Finalizado', 'Resuelto', 'Cerrado' => 'badge-finalizado', 'Cancelado' => 'badge-cancelado',
+        default => 'badge-proceso',
+    };
+}; ?>
+<section class="mis-tickets-shell" id="misTicketsShell" data-total="<?= $totalTickets ?>">
+    <header class="tickets-header">
+        <div><span class="tickets-kicker">SOPORTE · SEGUIMIENTO</span><h3><i class="fas fa-ticket-alt"></i> Mis tickets</h3><p>Consulta el avance y continúa la conversación con soporte.</p></div>
+        <div class="tickets-summary"><strong><?= $totalTickets ?></strong><span>tickets en total</span><strong><?= $ticketsAbiertos ?></strong><span>en atención</span></div>
+    </header>
+    <div class="tickets-toolbar">
+        <div class="ticket-tabs" role="tablist" aria-label="Filtrar tickets por estatus">
+            <button class="ticket-tab active" type="button" role="tab" aria-selected="true" data-ticket-filter="todos">Todos <span><?= $totalTickets ?></span></button>
+            <?php foreach (['Pendiente' => 'Pendientes', 'En proceso' => 'En proceso', 'Resuelto' => 'Resueltos', 'Cancelado' => 'Cancelados'] as $statusKey => $statusLabel): ?>
+                <button class="ticket-tab" type="button" role="tab" aria-selected="false" data-ticket-filter="<?= htmlspecialchars($statusKey, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($statusLabel) ?> <span><?= count(array_filter($tickets, static fn($ticket) => $statusKey === 'Resuelto' ? in_array($ticket['estatus'], ['Resuelto', 'Finalizado', 'Cerrado'], true) : $ticket['estatus'] === $statusKey)) ?></span></button>
+            <?php endforeach; ?>
+        </div>
+        <label class="ticket-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" id="buscarMisTickets" placeholder="Buscar por folio o solicitud" aria-label="Buscar tickets"></label>
+    </div>
+    <div class="tickets-table-wrap">
+        <table class="tickets-table">
+            <thead><tr><th>Folio</th><th>Solicitud</th><th>Fecha</th><th>Última actualización</th><th>Estado</th><th><span class="visually-hidden">Acción</span></th></tr></thead>
+            <tbody id="misTicketsRows">
+            <?php foreach ($tickets as $row): $resuelto = in_array($row['estatus'], ['Resuelto', 'Finalizado', 'Cerrado'], true); $tabStatus = $resuelto ? 'Resuelto' : $row['estatus']; ?>
+                <tr class="ticket-row" data-ticket-id="<?= (int) $row['id'] ?>" data-status="<?= htmlspecialchars($tabStatus, ENT_QUOTES, 'UTF-8') ?>" data-search="<?= htmlspecialchars(mb_strtolower('#' . $row['id'] . ' ' . $row['descripcion'], 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>">
+                    <td class="ticket-folio">#<?= (int) $row['id'] ?></td>
+                    <td class="ticket-request"><span><?= htmlspecialchars(trim((string) $row['descripcion']) ?: 'Sin descripción', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></span></td>
+                    <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($row['fecha_creacion']))) ?></td>
+                    <td><?= !empty($row['fecha_modificacion']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($row['fecha_modificacion']))) : '—' ?></td>
+                    <td><span class="badge-ticket <?= $estatusClase((string) $row['estatus']) ?>"><?= htmlspecialchars($resuelto ? 'Resuelto' : (string) $row['estatus']) ?></span></td>
+                    <td><button type="button" class="ticket-open" data-open-ticket="<?= (int) $row['id'] ?>" data-ticket-id="<?= (int) $row['id'] ?>" data-chat-status="<?= htmlspecialchars((string) $row['estatus'], ENT_QUOTES, 'UTF-8') ?>">Ver detalle <i class="fa-solid fa-arrow-right"></i><span class="chat-unread-dot" hidden aria-hidden="true"></span></button></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <div class="tickets-empty" id="ticketsEmpty" <?= $totalTickets ? 'hidden' : '' ?>><span><i class="fa-regular fa-folder-open"></i></span><strong>No hay tickets en esta vista</strong><p>Cuando haya tickets con este estatus aparecerán aquí.</p></div>
+    </div>
+</section>
+
+<div class="modal fade ticket-detail-modal" id="ticketDetailModal" tabindex="-1" aria-labelledby="ticketDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"><div class="modal-content">
+        <div class="modal-header"><div><span class="tickets-kicker">DETALLE DE SOLICITUD</span><h2 class="modal-title" id="ticketDetailTitle">Ticket</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+        <div class="modal-body" id="ticketDetailBody"></div>
+        <div class="modal-footer" id="ticketDetailActions"></div>
+    </div></div>
 </div>
 
-<div class="ticket-grid">
-
-<?php if($result->num_rows > 0): ?>
-
-<?php while($row = $result->fetch_assoc()): ?>
-<?php
-$descripcionUsuario = trim((string) ($row['descripcion'] ?? ''));
-$descripcionUsuarioLarga = mb_strlen($descripcionUsuario, 'UTF-8') > 140 || count(preg_split('/\R/u', $descripcionUsuario)) > 3;
-?>
-
-<div class="ticket-card">
-
-    <div class="ticket-top">
-
-        <div class="ticket-id">
-            Ticket #<?= $row['id'] ?>
+<div class="ticket-templates" hidden>
+<?php foreach ($tickets as $row): $resuelto = in_array($row['estatus'], ['Resuelto', 'Finalizado', 'Cerrado'], true); $archivoAdmin = $row['imagen_admin'] ?: $row['archivo_admin'] ?: ''; ?>
+    <template id="ticket-template-<?= (int) $row['id'] ?>">
+        <div class="ticket-detail-grid">
+            <section class="ticket-detail-section ticket-detail-request"><span class="detail-label">SOLICITUD</span><p><?= nl2br(htmlspecialchars(trim((string) $row['descripcion']) ?: 'Sin descripción', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) ?></p></section>
+            <section class="ticket-detail-section"><span class="detail-label">ESTADO</span><span class="badge-ticket <?= $estatusClase((string) $row['estatus']) ?>"><?= htmlspecialchars($resuelto ? 'Resuelto' : (string) $row['estatus']) ?></span><div class="detail-date"><span class="detail-label">CREADO</span><?= htmlspecialchars(date('d/m/Y H:i', strtotime($row['fecha_creacion']))) ?></div><div class="detail-date"><span class="detail-label">ACTUALIZADO</span><?= !empty($row['fecha_modificacion']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($row['fecha_modificacion']))) : 'Sin cambios' ?></div></section>
+            <section class="ticket-detail-section"><span class="detail-label">RESPUESTA DE SOPORTE</span><p><?= !empty($row['comentario_admin']) ? nl2br(htmlspecialchars($row['comentario_admin'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')) : 'Aún no hay respuesta de soporte.' ?></p></section>
+            <section class="ticket-detail-section"><span class="detail-label">ARCHIVOS</span><div class="archivos">
+                <?php if (!empty($row['imagen'])): ?><a class="archivo-btn" href="../../uploads/<?= rawurlencode(basename($row['imagen'])) ?>" target="_blank" rel="noopener"><i class="fas fa-paperclip"></i> Archivo enviado</a><?php endif; ?>
+                <?php if ($archivoAdmin !== ''): ?><a class="archivo-btn" href="../../uploads/<?= rawurlencode(basename($archivoAdmin)) ?>" target="_blank" rel="noopener"><i class="fas fa-file-download"></i> Archivo de soporte</a><?php endif; ?>
+                <?php if (empty($row['imagen']) && $archivoAdmin === ''): ?><span class="text-muted">Sin archivos adjuntos</span><?php endif; ?>
+            </div></section>
         </div>
-
-        <div>
-            <span class="badge-ticket
-                <?= $row['estatus']=='Pendiente' ? 'badge-pendiente':'' ?>
-                <?= $row['estatus']=='En proceso' ? 'badge-proceso':'' ?>
-                <?= $row['estatus']=='Finalizado' ? 'badge-finalizado':'' ?>
-                <?= $row['estatus']=='Cancelado' ? 'badge-cancelado':'' ?>">
-                <?= htmlspecialchars($row['estatus']) ?>
-            </span>
-        </div>
-
-    </div>
-
-    <div id="ticket-desc-<?= (int) $row['id'] ?>" class="ticket-desc<?= $descripcionUsuarioLarga ? ' is-collapsed' : '' ?>">
-        <?= nl2br(htmlspecialchars($descripcionUsuario !== '' ? $descripcionUsuario : 'Sin descripción')) ?>
-    </div>
-    <?php if ($descripcionUsuarioLarga): ?>
-        <button type="button" class="ticket-desc-toggle" aria-expanded="false" aria-controls="ticket-desc-<?= (int) $row['id'] ?>" onclick="toggleDescripcionTicket(<?= (int) $row['id'] ?>, this)">Ver más</button>
-    <?php endif; ?>
-
-    <div class="ticket-meta">
-
-        <div class="meta-box">
-            <div class="meta-title">Fecha creación</div>
-            <div class="meta-value">
-                <?= date('d/m/Y H:i', strtotime($row['fecha_creacion'])) ?>
-            </div>
-        </div>
-
-        <div class="meta-box">
-            <div class="meta-title">Última actualización</div>
-            <div class="meta-value">
-                <?= $row['fecha_modificacion']
-                    ? date('d/m/Y H:i', strtotime($row['fecha_modificacion']))
-                    : 'Sin cambios' ?>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="ticket-meta">
-
-        <div class="meta-box">
-            <div class="meta-title">Comentario del administrador</div>
-            <div class="meta-value">
-                <?= !empty($row['comentario_admin'])
-                    ? htmlspecialchars($row['comentario_admin'])
-                    : 'Sin comentarios' ?>
-            </div>
-        </div>
-
-    </div>
-
-    <div style="margin-top:15px;">
-        <div class="meta-title">Archivos</div>
-
-        <div class="archivos">
-
-            <?php if(!empty($row['imagen'])): ?>
-                <a class="archivo-btn"
-                   href="../../uploads/<?= htmlspecialchars($row['imagen']) ?>"
-                   target="_blank">
-                    <i class="fas fa-paperclip"></i>
-                    Archivo Usuario
-                </a>
-            <?php endif; ?>
-
-            <?php
-            $archivoAdmin = $row['imagen_admin'] ?: $row['archivo_admin'] ?: '';
-            if(!empty($archivoAdmin)):
-            ?>
-                <a class="archivo-btn"
-                   href="../../uploads/<?= htmlspecialchars($archivoAdmin) ?>"
-                   target="_blank">
-                    <i class="fas fa-file-download"></i>
-                    Archivo Admin
-                </a>
-            <?php endif; ?>
-
-        </div>
-    </div>
-
-    <div class="ticket-actions">
-
-        <button type="button" class="btn-chat-ticket" data-ticket-id="<?= (int) $row['id'] ?>" data-chat-status="<?= htmlspecialchars($row['estatus'], ENT_QUOTES, 'UTF-8') ?>" aria-label="Abrir chat del ticket <?= (int) $row['id'] ?>" title="Abrir conversación con soporte" onclick="abrirChat(<?= (int) $row['id'] ?>)">
-            <i class="fas fa-comments" aria-hidden="true"></i> Abrir chat <span class="chat-unread-dot" hidden aria-hidden="true"></span>
-        </button>
-
-        <?php if($row['estatus']=='Pendiente'): ?>
-
-            <button
-                class="btn-cancelar"
-                onclick="cancelarTicket(<?= $row['id'] ?>)">
-                Cancelar Ticket
-            </button>
-
-        <?php endif; ?>
-
-        <?php if(in_array($row['estatus'], ['Finalizado','Cerrado']) && !$row['ya_calificado']): ?>
-
-            <button
-                class="btn btn-warning fw-bold"
-                onclick='abrirEncuestaManual("ticket", <?= (int)$row['id'] ?>, "Ticket #<?= (int)$row['id'] ?>", <?= json_encode(mb_strimwidth($row['descripcion'], 0, 120, "...")) ?>, "¿Se resolvió tu problema?")'>
-                <i class="fa-solid fa-star"></i> Calificar
-            </button>
-
-        <?php endif; ?>
-
-    </div>
-
-</div>
-
-<?php endwhile; ?>
-
-<?php else: ?>
-
-<div class="sin-tickets">
-    <i class="fas fa-inbox fa-4x mb-3"></i>
-    <h4>No tienes tickets registrados</h4>
-</div>
-
-<?php endif; ?>
-
+        <span class="ticket-detail-survey" data-rated="<?= !empty($row['ya_calificado']) ? '1' : '0' ?>" data-closed="<?= $resuelto ? '1' : '0' ?>" data-description="<?= htmlspecialchars(mb_strimwidth((string) $row['descripcion'], 0, 120, '...'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"></span>
+    </template>
+<?php endforeach; ?>
 </div>
 
 <section id="chatFlotante" class="ticket-chat-panel" role="dialog" aria-labelledby="chatTitulo" hidden>
@@ -444,6 +365,135 @@ $descripcionUsuarioLarga = mb_strlen($descripcionUsuario, 'UTF-8') > 140 || coun
 
 <script>
 conectarFormularioChat();
+
+(() => {
+let filtroTicketsActual = 'todos';
+const ticketDetailModalEl = document.getElementById('ticketDetailModal');
+const ticketDetailModal = bootstrap.Modal.getOrCreateInstance(ticketDetailModalEl);
+
+function actualizarVistaTickets() {
+    const buscar = (document.getElementById('buscarMisTickets')?.value || '').trim().toLocaleLowerCase('es');
+    let visibles = 0;
+    document.querySelectorAll('#misTicketsRows .ticket-row').forEach(row => {
+        const coincideEstado = filtroTicketsActual === 'todos' || row.dataset.status === filtroTicketsActual;
+        const coincideTexto = !buscar || (row.dataset.search || '').includes(buscar);
+        row.hidden = !(coincideEstado && coincideTexto);
+        if (!row.hidden) visibles++;
+    });
+    document.getElementById('ticketsEmpty').hidden = visibles > 0;
+}
+
+document.querySelectorAll('[data-ticket-filter]').forEach(tab => tab.addEventListener('click', () => {
+    filtroTicketsActual = tab.dataset.ticketFilter;
+    document.querySelectorAll('[data-ticket-filter]').forEach(item => {
+        const activo = item === tab;
+        item.classList.toggle('active', activo);
+        item.setAttribute('aria-selected', activo ? 'true' : 'false');
+    });
+    actualizarVistaTickets();
+}));
+document.getElementById('buscarMisTickets')?.addEventListener('input', actualizarVistaTickets);
+
+function abrirDetalleTicket(id) {
+    const template = document.getElementById('ticket-template-' + id);
+    const fila = document.querySelector('.ticket-row[data-ticket-id="' + id + '"]');
+    if (!template || !fila) return;
+    document.getElementById('ticketDetailTitle').textContent = 'Ticket #' + id;
+    const contenido = template.content.cloneNode(true);
+    const meta = contenido.querySelector('.ticket-detail-survey');
+    const puedeCalificar = meta?.dataset.closed === '1' && meta.dataset.rated !== '1';
+    const descripcion = meta?.dataset.description || '';
+    meta?.remove();
+    const body = document.getElementById('ticketDetailBody');
+    body.replaceChildren(contenido);
+    const actions = document.getElementById('ticketDetailActions');
+    actions.replaceChildren();
+    const chat = document.createElement('button');
+    chat.type = 'button'; chat.className = 'btn-chat-ticket';
+    chat.dataset.ticketId = String(id); chat.dataset.chatStatus = fila.dataset.status;
+    chat.innerHTML = '<i class="fa-solid fa-comments" aria-hidden="true"></i> Abrir conversación';
+    chat.addEventListener('click', () => { ticketDetailModal.hide(); abrirChat(id); });
+    actions.append(chat);
+    if (fila.dataset.status === 'Pendiente') {
+        const cancelar = document.createElement('button');
+        cancelar.type = 'button'; cancelar.className = 'btn-cancelar'; cancelar.textContent = 'Cancelar ticket';
+        cancelar.addEventListener('click', () => cancelarTicket(id)); actions.append(cancelar);
+    }
+    if (puedeCalificar) {
+        const calificar = document.createElement('button');
+        calificar.type = 'button'; calificar.className = 'btn btn-warning fw-bold';
+        calificar.innerHTML = '<i class="fa-solid fa-star"></i> Calificar servicio';
+        calificar.addEventListener('click', () => {
+            ticketDetailModal.hide();
+            abrirEncuestaManual('ticket', Number(id), 'Ticket #' + id, descripcion, '¿Se resolvió tu problema?');
+        }); actions.append(calificar);
+    }
+    ticketDetailModal.show();
+}
+
+document.querySelectorAll('[data-open-ticket]').forEach(button => button.addEventListener('click', () => abrirDetalleTicket(button.dataset.openTicket)));
+
+if (window.ticketStatusPoll) window.clearInterval(window.ticketStatusPoll);
+let sincronizandoEstados = false;
+async function sincronizarEstadosTickets() {
+    if (document.hidden || !document.getElementById('misTicketsShell') || sincronizandoEstados) return;
+    sincronizandoEstados = true;
+    try {
+        const response = await fetch('ticket/estados_tickets.php?_=' + Date.now(), {credentials: 'same-origin', cache: 'no-store'});
+        if (!response.ok) return;
+        const data = await response.json();
+        const estados = new Map((data.tickets || []).map(ticket => [String(ticket.id), ticket.estatus]));
+        let cambiaron = false;
+        const conteos = {todos: 0, Pendiente: 0, 'En proceso': 0, Resuelto: 0, Cancelado: 0};
+        document.querySelectorAll('#misTicketsRows .ticket-row').forEach(row => {
+            const estado = estados.get(row.dataset.ticketId);
+            if (!estado) return;
+            const normalizado = ['Resuelto', 'Finalizado', 'Cerrado'].includes(estado) ? 'Resuelto' : estado;
+            if (row.dataset.status !== normalizado) cambiaron = true;
+            row.dataset.status = normalizado;
+            const abrir = row.querySelector('[data-chat-status]');
+            if (abrir) abrir.dataset.chatStatus = estado;
+            const badge = row.querySelector('.badge-ticket');
+            if (badge) {
+                badge.className = 'badge-ticket ' + (estado === 'Pendiente' ? 'badge-pendiente' : estado === 'En proceso' ? 'badge-proceso' : normalizado === 'Resuelto' ? 'badge-finalizado' : estado === 'Cancelado' ? 'badge-cancelado' : 'badge-proceso');
+                badge.textContent = normalizado;
+            }
+            conteos.todos++;
+            if (Object.prototype.hasOwnProperty.call(conteos, normalizado)) conteos[normalizado]++;
+            const template = document.getElementById('ticket-template-' + row.dataset.ticketId);
+            const detailBadge = template?.content.querySelector('.ticket-detail-section .badge-ticket');
+            if (detailBadge) {
+                detailBadge.className = badge?.className || 'badge-ticket';
+                detailBadge.textContent = normalizado;
+            }
+            const meta = template?.content.querySelector('.ticket-detail-survey');
+            if (meta) meta.dataset.closed = normalizado === 'Resuelto' ? '1' : '0';
+        });
+        document.querySelectorAll('[data-ticket-filter]').forEach(tab => {
+            const key = tab.dataset.ticketFilter;
+            const count = key === 'todos' ? conteos.todos : conteos[key] || 0;
+            const badge = tab.querySelector('span'); if (badge) badge.textContent = count;
+        });
+        const resumen = document.querySelectorAll('.tickets-summary strong');
+        if (resumen[0]) resumen[0].textContent = conteos.todos;
+        if (resumen[1]) resumen[1].textContent = conteos.Pendiente + conteos['En proceso'];
+        if (cambiaron) {
+            actualizarVistaTickets();
+            conectarFormularioChat();
+            if (ticketDetailModalEl.classList.contains('show')) {
+                const abierto = document.getElementById('ticketDetailTitle').textContent.match(/#(\d+)/);
+                if (abierto) abrirDetalleTicket(abierto[1]);
+            }
+        }
+    } catch (_) {} finally { sincronizandoEstados = false; }
+}
+window.sincronizarEstadosTickets = sincronizarEstadosTickets;
+if (window.ticketVisibilityHandler) document.removeEventListener('visibilitychange', window.ticketVisibilityHandler);
+window.ticketVisibilityHandler = () => { if (!document.hidden) sincronizarEstadosTickets(); };
+document.addEventListener('visibilitychange', window.ticketVisibilityHandler);
+sincronizarEstadosTickets();
+window.ticketStatusPoll = window.setInterval(sincronizarEstadosTickets, 300000);
+})();
 
 function toggleDescripcionTicket(id, button) {
     const descripcion = document.getElementById('ticket-desc-' + id);
@@ -468,7 +518,8 @@ function cancelarTicket(id){
     .then(res => {
         if(res.success){
             alert("Ticket cancelado correctamente");
-            location.reload();
+            bootstrap.Modal.getInstance(document.getElementById('ticketDetailModal'))?.hide();
+            window.sincronizarEstadosTickets?.();
         }else{
             alert(res.error || "No se pudo cancelar el ticket");
         }
