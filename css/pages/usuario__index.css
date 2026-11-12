@@ -1,4 +1,4 @@
-#pageContent:has(>.user-welcome){width:auto;max-width:none;min-width:0;margin-inline:0;background:#f5f5f6}
+#pageContent:has(>.user-welcome){width:auto;max-width:none;min-width:0;margin-left:250px;margin-right:0;background:#f5f5f6}
 .user-welcome{display:flex;align-items:center;justify-content:space-between;min-height:188px;margin-bottom:22px;padding:30px 36px;border:1px solid #e9e9eb;border-radius:18px;background:linear-gradient(110deg,#fff 0%,#fff 58%,#fff3f3 100%);box-shadow:0 6px 22px #22222608}
 .user-eyebrow{display:block;color:#bd151c;font-size:10px;font-weight:800;letter-spacing:1.1px}
 .user-welcome h1{margin:8px 0 4px;color:#29292d;font-size:clamp(27px,4vw,38px);font-weight:780;letter-spacing:-.7px}
@@ -39,3 +39,4 @@
 .policy-content p{margin:10px 0 0;color:#66666d;font-size:12px;line-height:1.55}.policy-content strong{color:#38383d}
 @media(max-width:900px){.user-action-grid{grid-template-columns:1fr}.user-action-primary,.user-action-link{min-height:76px}.welcome-mark{width:84px;height:84px;font-size:34px}}
 @media(max-width:600px){#pageContent:has(>.user-welcome){padding:16px!important}.user-welcome{min-height:148px;padding:21px 19px;border-radius:14px}.user-welcome h1{font-size:27px}.user-welcome p{max-width:220px;font-size:13px}.welcome-mark{width:62px;height:62px;border-radius:19px;font-size:26px}.user-actions-section{margin-top:24px}.user-section-heading h2{font-size:18px}.policy-content{grid-template-columns:1fr;padding-left:18px}.user-action-grid{gap:9px}}
+@media(max-width:768px){#pageContent:has(>.user-welcome){margin-left:0;margin-right:0}}
