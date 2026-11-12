@@ -10,6 +10,7 @@ require_once(__DIR__ . '/../../config.php');
 date_default_timezone_set('America/Mexico_City');
 $hoyLocal = date('Y-m-d');
 $ahoraLocal = date('Y-m-d H:i:s');
+require_once ROOT_PATH . 'shared/ticket_horarios.php';
 $checkHistorial = $conexion->query("SHOW TABLES LIKE 'ticket_actividad_historial'");
 $historialTicketsDisponible = $checkHistorial && $checkHistorial->num_rows > 0;
 if (session_status() === PHP_SESSION_NONE) {
@@ -24,6 +25,28 @@ if (!esAdminOSuperior()) {
 }
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+$horariosTicket = cargarHorariosTicket($conexion);
+$instanteAhora = new DateTimeImmutable($ahoraLocal);
+$slaPorTicket = [];
+$ticketsActivosSla = $conexion->query("SELECT id, asignado_a, fecha_creacion, fecha_primera_respuesta, objetivo_respuesta_minutos, objetivo_resolucion_minutos FROM tickets WHERE estatus IN ('Pendiente','En proceso')");
+if ($ticketsActivosSla) while ($ticketSla = $ticketsActivosSla->fetch_assoc()) {
+    $horarioSla = horarioParaTicket($horariosTicket, $ticketSla['asignado_a'] !== null ? (string) $ticketSla['asignado_a'] : null);
+    $inicioSla = new DateTimeImmutable((string) $ticketSla['fecha_creacion']);
+    $slaPorTicket[(int) $ticketSla['id']] = [
+        'horario' => $horarioSla,
+        'respuesta' => calcularVencimientoTicketLaborable($inicioSla, (int) $ticketSla['objetivo_respuesta_minutos'], $horarioSla),
+        'resolucion' => calcularVencimientoTicketLaborable($inicioSla, (int) $ticketSla['objetivo_resolucion_minutos'], $horarioSla),
+        'respondido' => !empty($ticketSla['fecha_primera_respuesta']),
+    ];
+}
+$idsRespuestaVencida = [];
+$resolucionesVencidas = 0;
+$resolucionesProximas = 0;
+foreach ($slaPorTicket as $ticketIdSla => $datosSla) {
+    if (!$datosSla['respondido'] && $datosSla['respuesta'] <= $instanteAhora) $idsRespuestaVencida[] = $ticketIdSla;
+    if ($datosSla['resolucion'] <= $instanteAhora) $resolucionesVencidas++;
+    elseif (minutosLaborablesEntre($instanteAhora, $datosSla['resolucion'], $datosSla['horario']) <= 240) $resolucionesProximas++;
 }
 
 // -----------------------------------------------------------------
@@ -113,11 +136,15 @@ if ($filtros['vista'] === 'abiertos') {
 } elseif ($filtros['vista'] === 'sin_asignar') {
     $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND (t.asignado_a IS NULL OR t.asignado_a = '')";
 } elseif ($filtros['vista'] === 'sla_vencido') {
-    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND t.fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, t.fecha_creacion, '$ahoraLocal') > t.objetivo_respuesta_minutos";
+    $condiciones[] = $idsRespuestaVencida ? 't.id IN (' . implode(',', array_map('intval', $idsRespuestaVencida)) . ')' : '1 = 0';
 } elseif ($filtros['vista'] === 'resolucion_vencida') {
-    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)";
+    $idsResolucionVencida = [];
+    foreach ($slaPorTicket as $ticketIdSla => $datosSla) if ($datosSla['resolucion'] <= $instanteAhora) $idsResolucionVencida[] = $ticketIdSla;
+    $condiciones[] = $idsResolucionVencida ? 't.id IN (' . implode(',', array_map('intval', $idsResolucionVencida)) . ')' : '1 = 0';
 } elseif ($filtros['vista'] === 'resolucion_proxima') {
-    $condiciones[] = "t.estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(t.fecha_creacion, INTERVAL t.objetivo_resolucion_minutos MINUTE)) <= 240";
+    $idsResolucionProxima = [];
+    foreach ($slaPorTicket as $ticketIdSla => $datosSla) if ($datosSla['resolucion'] > $instanteAhora && minutosLaborablesEntre($instanteAhora, $datosSla['resolucion'], $datosSla['horario']) <= 240) $idsResolucionProxima[] = $ticketIdSla;
+    $condiciones[] = $idsResolucionProxima ? 't.id IN (' . implode(',', array_map('intval', $idsResolucionProxima)) . ')' : '1 = 0';
 } elseif ($filtros['vista'] === 'resueltos_hoy') {
     $condiciones[] = "t.estatus = 'Finalizado' AND DATE(COALESCE(t.fecha_resolucion, t.fecha_modificacion)) = '$hoyLocal'";
 } elseif ($filtros['vista'] === 'reabiertos') {
@@ -148,14 +175,17 @@ $resumenResult = $conexion->query("SELECT
     SUM(estatus = 'Pendiente') AS pendientes,
     SUM(estatus = 'En proceso') AS en_proceso,
     SUM(estatus IN ('Pendiente','En proceso') AND (asignado_a IS NULL OR asignado_a = '')) AS sin_asignar,
-    SUM(estatus IN ('Pendiente','En proceso') AND fecha_primera_respuesta IS NULL AND TIMESTAMPDIFF(MINUTE, fecha_creacion, '$ahoraLocal') > objetivo_respuesta_minutos) AS sla_vencido,
+    0 AS sla_vencido,
     SUM(estatus = 'Finalizado' AND DATE(COALESCE(fecha_resolucion, fecha_modificacion)) = '$hoyLocal') AS resueltos_hoy,
-    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' > DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) AS resolucion_vencida,
-    SUM(estatus IN ('Pendiente','En proceso') AND '$ahoraLocal' <= DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE) AND TIMESTAMPDIFF(MINUTE, '$ahoraLocal', DATE_ADD(fecha_creacion, INTERVAL objetivo_resolucion_minutos MINUTE)) <= 240) AS resolucion_proxima
+    0 AS resolucion_vencida,
+    0 AS resolucion_proxima
     FROM tickets");
 if ($resumenResult && ($resumen = $resumenResult->fetch_assoc())) {
     foreach ($resumenTickets as $clave => $_) $resumenTickets[$clave] = (int) ($resumen[$clave] ?? 0);
 }
+$resumenTickets['sla_vencido'] = count($idsRespuestaVencida);
+$resumenTickets['resolucion_vencida'] = $resolucionesVencidas;
+$resumenTickets['resolucion_proxima'] = $resolucionesProximas;
 if ($historialTicketsDisponible) {
     $resultadoReabiertos = $conexion->query("SELECT COUNT(DISTINCT t.id) AS total FROM tickets t INNER JOIN ticket_actividad_historial tah ON tah.ticket_id = t.id AND tah.accion = 'estatus' AND (tah.detalle LIKE '%de Finalizado a Pendiente%' OR tah.detalle LIKE '%de Finalizado a En proceso%' OR tah.detalle LIKE '%de Cerrado a Pendiente%' OR tah.detalle LIKE '%de Cerrado a En proceso%' OR tah.detalle LIKE '%de Cancelado a Pendiente%') WHERE t.estatus IN ('Pendiente','En proceso')");
     if ($resultadoReabiertos) $resumenTickets['reabiertos'] = (int) ($resultadoReabiertos->fetch_assoc()['total'] ?? 0);
@@ -247,7 +277,7 @@ function claseTipoTicket($tipo) {
                 </span>
             </div>
             <div class="sd-header-actions">
-                <?php if (esAdminOSuperior()): ?><a class="service-desk-settings" href="sla.php"><i class="fas fa-stopwatch"></i> Políticas SLA</a><?php endif; ?>
+                <?php if (esAdminOSuperior()): ?><a class="service-desk-settings" href="sla.php"><i class="fas fa-stopwatch"></i> Políticas SLA</a><a class="service-desk-settings" href="horarios.php"><i class="fas fa-calendar-days"></i> Horarios</a><?php endif; ?>
                 <a class="service-desk-new" href="crear_ticket_admin.php"><i class="fas fa-plus"></i> Crear ticket</a>
             </div>
         </div>
@@ -379,6 +409,16 @@ function claseTipoTicket($tipo) {
                                 $textoHTML = nl2br(htmlspecialchars(trim($descSegura)));
                                 $comentarioHTML = nl2br(htmlspecialchars(trim($comSeguro)));
                                 $esFinalizado = in_array($f['estatus'], ['Finalizado', 'Cerrado', 'Cancelado'], true);
+                                $datosSlaTicket = $slaPorTicket[(int) $f['id']] ?? null;
+                                if (!$datosSlaTicket && !$esFinalizado) {
+                                    $horarioFallbackTicket = horarioParaTicket($horariosTicket, !empty($f['asignado_a']) ? (string) $f['asignado_a'] : null);
+                                    $fechaInicioFallback = new DateTimeImmutable((string) $f['fecha_creacion']);
+                                    $datosSlaTicket = [
+                                        'horario' => $horarioFallbackTicket,
+                                        'respuesta' => calcularVencimientoTicketLaborable($fechaInicioFallback, (int) ($f['objetivo_respuesta_minutos'] ?? 480), $horarioFallbackTicket),
+                                        'resolucion' => calcularVencimientoTicketLaborable($fechaInicioFallback, (int) ($f['objetivo_resolucion_minutos'] ?? 2880), $horarioFallbackTicket),
+                                    ];
+                                }
                                 // Umbrales para decidir si mostramos "Ver más" (texto largo o con varias líneas/lista)
                                 $descLineas = substr_count(trim($descSegura), "\n") + 1;
                                 $descLarga = (mb_strlen(trim($descSegura)) > 120) || ($descLineas > 3);
@@ -429,17 +469,18 @@ function claseTipoTicket($tipo) {
                                         <?php elseif (!empty($f['fecha_primera_respuesta'])): ?>
                                             <small class="text-muted">1a respuesta: <?= date('d/m/y H:i', strtotime($f['fecha_primera_respuesta'])) ?></small>
                                         <?php else: ?>
-                                            <?php $limiteRespuesta = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_respuesta_minutos'] ?? 480) * 60); ?>
+                                            <?php $limiteRespuesta = $datosSlaTicket['respuesta']->getTimestamp(); ?>
                                             <small class="<?= time() > $limiteRespuesta ? 'text-danger fw-semibold' : 'text-muted' ?>">
                                                 <?= time() > $limiteRespuesta ? 'Respuesta vencida' : 'Responder antes de ' . date('d/m H:i', $limiteRespuesta) ?>
                                             </small>
                                         <?php endif; ?>
                                         <?php if (in_array($f['estatus'], ['Pendiente','En proceso'], true)):
-                                            $limiteResolucion = strtotime($f['fecha_creacion']) + ((int) ($f['objetivo_resolucion_minutos'] ?? 2880) * 60);
-                                            $minutosResolucion = (int) floor(($limiteResolucion - time()) / 60);
+                                            $limiteResolucion = $datosSlaTicket['resolucion']->getTimestamp();
+                                            $estaVencidaResolucion = $limiteResolucion <= time();
+                                            $minutosResolucion = $estaVencidaResolucion ? -1 : minutosLaborablesEntre($instanteAhora, $datosSlaTicket['resolucion'], $datosSlaTicket['horario']);
                                         ?>
                                             <small class="sla-resolution <?= $minutosResolucion < 0 ? 'is-late' : ($minutosResolucion <= 240 ? 'is-soon' : '') ?>">
-                                                <?= $minutosResolucion < 0 ? 'Resolución vencida' : ($minutosResolucion <= 240 ? 'Vence en ' . max(0, $minutosResolucion) . ' min' : 'Resolver antes de ' . date('d/m H:i', $limiteResolucion)) ?>
+                                                <?= $minutosResolucion < 0 ? 'Resolución vencida' : ($minutosResolucion <= 240 ? ($minutosResolucion > 0 ? 'Vence en ' . $minutosResolucion . ' min de atención' : 'Vence el siguiente turno · ' . date('d/m H:i', $limiteResolucion)) : 'Resolver antes de ' . date('d/m H:i', $limiteResolucion)) ?>
                                             </small>
                                         <?php endif; ?>
                                     <?php else: ?>

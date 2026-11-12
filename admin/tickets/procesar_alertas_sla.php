@@ -6,6 +6,7 @@ if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 date_default_timezone_set('America/Mexico_City');
 require_once __DIR__ . '/../../config/env.php';
 require_once __DIR__ . '/../../shared/integration_settings.php';
+require_once __DIR__ . '/../../shared/ticket_horarios.php';
 require_once __DIR__ . '/../../backend/conexion.php';
 require_once __DIR__ . '/../../backend/PHPMailer/src/Exception.php';
 require_once __DIR__ . '/../../backend/PHPMailer/src/PHPMailer.php';
@@ -22,6 +23,7 @@ if ($smtpUser === '' || $smtpPass === '') { fwrite(STDERR, "Configura el SMTP de
 
 $hoy = date('Y-m-d');
 $ahora = new DateTimeImmutable('now');
+$horariosTicket = cargarHorariosTicket($conexion);
 $abiertos = $conexion->query("SELECT id, nombre_completo, nombre, area, tipo_ticket, prioridad, asignado_a, descripcion, fecha_creacion, fecha_primera_respuesta, objetivo_respuesta_minutos, objetivo_resolucion_minutos FROM tickets WHERE estatus IN ('Pendiente','En proceso') ORDER BY fecha_creacion ASC");
 if (!$abiertos) { fwrite(STDERR, "No se pudieron consultar tickets activos.\n"); exit(1); }
 $stmtAvisos = $conexion->prepare('SELECT 1 FROM ticket_alertas_sla_enviadas WHERE ticket_id = ? AND tipo_alerta = ? AND fecha_alerta = ? LIMIT 1');
@@ -29,15 +31,16 @@ if (!$stmtAvisos) { fwrite(STDERR, "Aplica la migración 20261110_alertas_sla.sq
 $pendientes = [];
 while ($ticket = $abiertos->fetch_assoc()) {
     $creado = new DateTimeImmutable((string) $ticket['fecha_creacion']);
+    $horario = horarioParaTicket($horariosTicket, !empty($ticket['asignado_a']) ? (string) $ticket['asignado_a'] : null);
     $tipos = [];
     if (empty($ticket['fecha_primera_respuesta'])) {
-        $limite = $creado->modify('+' . (int) $ticket['objetivo_respuesta_minutos'] . ' minutes');
+        $limite = calcularVencimientoTicketLaborable($creado, (int) $ticket['objetivo_respuesta_minutos'], $horario);
         if ($limite <= $ahora) $tipos[] = ['respuesta_vencida', 'Primera respuesta vencida', $limite];
-        elseif ($limite <= $ahora->modify('+60 minutes')) $tipos[] = ['respuesta_proxima', 'Primera respuesta vence pronto', $limite];
+        elseif (minutosLaborablesEntre($ahora, $limite, $horario) <= 60) $tipos[] = ['respuesta_proxima', 'Primera respuesta vence pronto', $limite];
     }
-    $limiteResolucion = $creado->modify('+' . (int) $ticket['objetivo_resolucion_minutos'] . ' minutes');
+    $limiteResolucion = calcularVencimientoTicketLaborable($creado, (int) $ticket['objetivo_resolucion_minutos'], $horario);
     if ($limiteResolucion <= $ahora) $tipos[] = ['resolucion_vencida', 'Resolución vencida', $limiteResolucion];
-    elseif ($limiteResolucion <= $ahora->modify('+240 minutes')) $tipos[] = ['resolucion_proxima', 'Resolución vence en menos de 4 horas', $limiteResolucion];
+    elseif (minutosLaborablesEntre($ahora, $limiteResolucion, $horario) <= 240) $tipos[] = ['resolucion_proxima', 'Resolución vence en menos de 4 horas de atención', $limiteResolucion];
     foreach ($tipos as [$tipo, $etiqueta, $limite]) {
         $id = (int) $ticket['id'];
         $stmtAvisos->bind_param('iss', $id, $tipo, $hoy);

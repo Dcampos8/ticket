@@ -5,6 +5,7 @@ require_once(__DIR__ . '/../../config.php');
 
 // 2. Conexión a la base de datos (Usando ROOT_PATH definido en config.php)
 require_once(ROOT_PATH . 'backend/conexion.php');
+require_once(ROOT_PATH . 'shared/ticket_horarios.php');
 
 // 3. Control de Sesión
 if (session_status() === PHP_SESSION_NONE) {
@@ -38,9 +39,7 @@ $stmtReporte->execute();
 $resultado = $stmtReporte->get_result();
 $sqlResumen = "SELECT COUNT(*) AS total,
     SUM(estatus IN ('Finalizado','Cerrado')) AS cerrados,
-    SUM(estatus IN ('Pendiente','En proceso')) AS abiertos,
-    AVG(CASE WHEN estatus IN ('Finalizado','Cerrado') THEN TIMESTAMPDIFF(MINUTE, fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion)) END) AS minutos_promedio,
-    SUM(estatus IN ('Finalizado','Cerrado') AND TIMESTAMPDIFF(MINUTE, fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion)) <= objetivo_resolucion_minutos) AS dentro_sla
+    SUM(estatus IN ('Pendiente','En proceso')) AS abiertos
     FROM tickets" . ($aplicarFiltroFechas ? " WHERE fecha_creacion >= ? AND fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)" : '');
 $stmtResumen = $conexion->prepare($sqlResumen);
 if ($aplicarFiltroFechas) $stmtResumen->bind_param('ss', $fecha_inicio, $fecha_fin);
@@ -49,8 +48,25 @@ $resumen = $stmtResumen->get_result()->fetch_assoc() ?: [];
 $totalResumen = (int) ($resumen['total'] ?? 0);
 $cerradosResumen = (int) ($resumen['cerrados'] ?? 0);
 $abiertosResumen = (int) ($resumen['abiertos'] ?? 0);
-$cumplimientoSla = $cerradosResumen > 0 ? round(((int) ($resumen['dentro_sla'] ?? 0) / $cerradosResumen) * 100) : 0;
-$minutosPromedio = (int) round((float) ($resumen['minutos_promedio'] ?? 0));
+$horariosTicket = cargarHorariosTicket($conexion);
+$sqlMetricasSla = "SELECT fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion) AS fecha_cierre, asignado_a, objetivo_resolucion_minutos FROM tickets WHERE estatus IN ('Finalizado','Cerrado')" . ($aplicarFiltroFechas ? ' AND fecha_creacion >= ? AND fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)' : '');
+$stmtMetricasSla = $conexion->prepare($sqlMetricasSla);
+if ($aplicarFiltroFechas) $stmtMetricasSla->bind_param('ss', $fecha_inicio, $fecha_fin);
+$stmtMetricasSla->execute();
+$minutosTotalesSla = 0;
+$ticketsMedidosSla = 0;
+$ticketsDentroSla = 0;
+foreach ($stmtMetricasSla->get_result() as $ticketMetrica) {
+    if (empty($ticketMetrica['fecha_cierre'])) continue;
+    $horarioTicket = horarioParaTicket($horariosTicket, !empty($ticketMetrica['asignado_a']) ? (string) $ticketMetrica['asignado_a'] : null);
+    $minutosResolucion = minutosLaborablesEntre(new DateTimeImmutable($ticketMetrica['fecha_creacion']), new DateTimeImmutable($ticketMetrica['fecha_cierre']), $horarioTicket);
+    $minutosTotalesSla += $minutosResolucion;
+    $ticketsMedidosSla++;
+    if ($minutosResolucion <= (int) $ticketMetrica['objetivo_resolucion_minutos']) $ticketsDentroSla++;
+}
+$stmtMetricasSla->close();
+$cumplimientoSla = $cerradosResumen > 0 ? round(($ticketsDentroSla / $cerradosResumen) * 100) : 0;
+$minutosPromedio = $ticketsMedidosSla > 0 ? (int) round($minutosTotalesSla / $ticketsMedidosSla) : 0;
 $tiempoPromedio = $minutosPromedio >= 60 ? floor($minutosPromedio / 60) . ' h ' . ($minutosPromedio % 60) . ' min' : $minutosPromedio . ' min';
 $consultarAgrupacion = static function (string $campo) use ($conexion, $aplicarFiltroFechas, $fecha_inicio, $fecha_fin): array {
     $sql = "SELECT {$campo} AS etiqueta, COUNT(*) AS total FROM tickets" . ($aplicarFiltroFechas ? ' WHERE fecha_creacion >= ? AND fecha_creacion < DATE_ADD(?, INTERVAL 1 DAY)' : '') . " GROUP BY {$campo} ORDER BY total DESC, etiqueta ASC LIMIT 6";
@@ -75,7 +91,7 @@ $resumenTipos = $consultarAgrupacion('tipo_ticket');
   <section class="report-kpis" aria-label="Indicadores del reporte">
     <article><span class="kpi-icon kpi-total"><i class="fa-solid fa-ticket"></i></span><div><small>Tickets creados</small><strong><?= $totalResumen ?></strong></div></article>
     <article><span class="kpi-icon kpi-open"><i class="fa-solid fa-inbox"></i></span><div><small>Abiertos actualmente</small><strong><?= $abiertosResumen ?></strong></div></article>
-    <article><span class="kpi-icon kpi-time"><i class="fa-solid fa-stopwatch"></i></span><div><small>Tiempo promedio de resolución</small><strong><?= htmlspecialchars($tiempoPromedio) ?></strong></div></article>
+    <article><span class="kpi-icon kpi-time"><i class="fa-solid fa-stopwatch"></i></span><div><small>Tiempo promedio de resolución en horario</small><strong><?= htmlspecialchars($tiempoPromedio) ?></strong></div></article>
     <article><span class="kpi-icon kpi-sla"><i class="fa-solid fa-bullseye"></i></span><div><small>Resoluciones dentro del SLA</small><strong><?= $cumplimientoSla ?>%</strong><em><?= $cerradosResumen ?> tickets cerrados</em></div></article>
   </section>
 

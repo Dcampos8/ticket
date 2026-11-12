@@ -1,0 +1,27 @@
+.ticket-hours-page { max-width:1080px; margin:28px auto 50px; padding:0 22px; color:#292b31; }
+.ticket-hours-heading { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:18px; padding:22px 24px; border:1px solid #e4e6eb; border-left:4px solid #ed1c24; border-radius:12px; background:#fff; }
+.hours-eyebrow { color:#858a94; font-size:.67rem; font-weight:800; letter-spacing:.09em; }
+.ticket-hours-heading h1 { display:flex; align-items:center; gap:10px; margin:5px 0; font-size:1.35rem; font-weight:800; }
+.ticket-hours-heading h1 i { color:#ed1c24; }
+.ticket-hours-heading p { margin:0; color:#727782; font-size:.86rem; }
+.hours-note { display:flex; gap:12px; margin-bottom:16px; padding:15px 17px; border:1px solid #d8e7fb; border-radius:10px; background:#f4f8ff; color:#31547e; }
+.hours-note>i { margin-top:2px; color:#2871c7; }
+.hours-note strong,.hours-note span { display:block; }
+.hours-note strong { margin-bottom:3px; font-size:.82rem; }
+.hours-note span { color:#5b6b7f; font-size:.78rem; line-height:1.5; }
+.hours-select-form { display:flex; align-items:center; gap:14px; margin-bottom:14px; padding:16px 18px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; }
+.hours-select-form label { flex:0 0 auto; color:#555b65; font-size:.78rem; font-weight:750; }
+.hours-select-form select { max-width:520px; }
+.hours-card { overflow:hidden; border:1px solid #e5e7eb; border-radius:11px; background:#fff; }
+.hours-table-wrap { overflow-x:auto; }
+.hours-table { width:100%; border-collapse:collapse; }
+.hours-table th,.hours-table td { padding:12px 17px; border-bottom:1px solid #eef0f3; text-align:left; }
+.hours-table thead th { background:#f8f9fb; color:#757b86; font-size:.66rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.hours-table tbody th { width:30%; color:#393d45; font-size:.83rem; font-weight:700; }
+.hours-table td .form-control { max-width:190px; min-height:38px; border-color:#dfe2e7; }
+.hours-toggle { display:inline-flex; align-items:center; gap:8px; color:#656b75; font-size:.78rem; cursor:pointer; }
+.hours-toggle input { width:17px; height:17px; accent-color:#ed1c24; }
+.hours-card footer { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 18px; }
+.hours-card footer span { color:#858a94; font-size:.74rem; }
+.hours-card footer .btn { white-space:nowrap; }
+@media(max-width:640px) { .ticket-hours-page { margin:16px auto 35px; padding:0 12px; }.ticket-hours-heading { align-items:flex-start; flex-direction:column; padding:17px; }.hours-select-form { align-items:stretch; flex-direction:column; gap:8px; }.hours-select-form select { max-width:none; }.hours-table th,.hours-table td { padding:10px; }.hours-card footer { align-items:stretch; flex-direction:column; } }

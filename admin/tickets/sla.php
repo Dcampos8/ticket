@@ -55,7 +55,7 @@ include ROOT_PATH . 'admin/menu.php';
   <?php if ($guardado): ?><div class="alert alert-success"><i class="fa-solid fa-circle-check me-2"></i>Políticas guardadas. Se aplican a los tickets nuevos y al cambiar prioridad en un ticket abierto.</div><?php endif; ?>
   <?php foreach ($errores as $error): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endforeach; ?>
   <?php if (count($politicas) !== count($prioridades)): ?><div class="alert alert-warning">No se encontró la tabla de políticas SLA. Aplica la migración <code>20261007_ticket_operacion_y_base_conocimiento.sql</code>.</div><?php endif; ?>
-  <section class="sla-note"><i class="fa-solid fa-circle-info"></i><div><strong>El reloj corre 24/7</strong><span>Los tiempos se cuentan en minutos naturales, incluidos fines de semana y días festivos. Los cambios no modifican los objetivos ya guardados en tickets existentes.</span></div></section>
+  <section class="sla-note"><i class="fa-solid fa-circle-info"></i><div><strong>Los objetivos se cuentan en minutos laborables</strong><span>El reloj solo avanza dentro del horario semanal del responsable asignado. Los tickets sin asignar usan el horario base de Sistemas. Si cambia el horario, los vencimientos abiertos se recalculan; los objetivos en minutos se conservan.</span></div></section>
   <form method="post" class="sla-card">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
     <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Prioridad</th><th>Primera respuesta (minutos)</th><th>Resolución (minutos)</th></tr></thead><tbody>
@@ -63,6 +63,6 @@ include ROOT_PATH . 'admin/menu.php';
       <tr><th><span class="sla-priority sla-<?= strtolower($prioridad) ?>"><?= htmlspecialchars($prioridad) ?></span></th><td><label class="visually-hidden" for="respuesta-<?= strtolower($prioridad) ?>">Minutos para primera respuesta, prioridad <?= htmlspecialchars($prioridad) ?></label><input id="respuesta-<?= strtolower($prioridad) ?>" class="form-control" type="number" min="1" max="525600" required name="respuesta[<?= htmlspecialchars($prioridad) ?>]" value="<?= htmlspecialchars((string) $respuesta, ENT_QUOTES, 'UTF-8') ?>"></td><td><label class="visually-hidden" for="resolucion-<?= strtolower($prioridad) ?>">Minutos para resolución, prioridad <?= htmlspecialchars($prioridad) ?></label><input id="resolucion-<?= strtolower($prioridad) ?>" class="form-control" type="number" min="1" max="525600" required name="resolucion[<?= htmlspecialchars($prioridad) ?>]" value="<?= htmlspecialchars((string) $resolucion, ENT_QUOTES, 'UTF-8') ?>"></td></tr>
     <?php endforeach; ?>
     </tbody></table></div>
-    <footer><small>Equivalencias aproximadas: 60 min = 1 h · 1,440 min = 1 día.</small><button class="btn btn-danger" type="submit" <?= count($politicas) !== count($prioridades) ? 'disabled' : '' ?>><i class="fa-solid fa-floppy-disk me-2"></i>Guardar políticas</button></footer>
+    <footer><small>60 minutos laborables equivalen a 1 hora de atención.</small><button class="btn btn-danger" type="submit" <?= count($politicas) !== count($prioridades) ? 'disabled' : '' ?>><i class="fa-solid fa-floppy-disk me-2"></i>Guardar políticas</button></footer>
   </form>
 </main>

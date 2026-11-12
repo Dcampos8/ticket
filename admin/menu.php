@@ -45,6 +45,7 @@ $submenusModulos = [
         ['ruta' => 'admin/tickets/crear_ticket_admin.php', 'icon' => 'fa-plus-circle', 'label' => 'Crear nuevo'],
         ['ruta' => 'admin/tickets/conocimiento.php', 'icon' => 'fa-book-open', 'label' => 'Base de conocimiento'],
         ['admin' => true, 'ruta' => 'admin/tickets/sla.php', 'icon' => 'fa-stopwatch', 'label' => 'Políticas SLA'],
+        ['admin' => true, 'ruta' => 'admin/tickets/horarios.php', 'icon' => 'fa-calendar-days', 'label' => 'Horarios de atención'],
         ['ruta' => 'admin/tickets/permisos_tickets.php', 'icon' => 'fa-user-lock', 'label' => 'Permisos']
     ],
     'usuarios' => [

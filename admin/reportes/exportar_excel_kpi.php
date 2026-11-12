@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 requerirAdmin();
 require_once ROOT_PATH . 'backend/conexion.php';
+require_once ROOT_PATH . 'shared/ticket_horarios.php';
 
 $validarFecha = static function ($valor, $predeterminada): string {
     if (!is_string($valor) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $valor)) return $predeterminada;
@@ -34,13 +35,25 @@ header("Expires: 0");
 
 $ticketsMes = $conexion->query("SELECT COUNT(*) total FROM tickets WHERE DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'")->fetch_assoc()['total'] ?? 0;
 
-$ticketsCerrados = $conexion->query("SELECT COUNT(*) total FROM tickets WHERE estatus='Finalizado' AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'")->fetch_assoc()['total'] ?? 0;
+$ticketsCerrados = $conexion->query("SELECT COUNT(*) total FROM tickets WHERE estatus IN ('Finalizado','Cerrado') AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'")->fetch_assoc()['total'] ?? 0;
 
-$promedioMin = $conexion->query("SELECT ROUND(AVG(TIMESTAMPDIFF(MINUTE,fecha_creacion,fecha_modificacion)),2) promedio FROM tickets WHERE estatus='Finalizado' AND fecha_modificacion IS NOT NULL AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'")->fetch_assoc()['promedio'] ?? 0;
+$horariosTicket = cargarHorariosTicket($conexion);
+$ticketsMetricas = $conexion->query("SELECT fecha_creacion, COALESCE(fecha_resolucion, fecha_modificacion) AS fecha_cierre, asignado_a, objetivo_resolucion_minutos FROM tickets WHERE estatus IN ('Finalizado','Cerrado') AND COALESCE(fecha_resolucion, fecha_modificacion) IS NOT NULL AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'");
+$minutosResolucionTotal = 0;
+$ticketsResolucionMedida = 0;
+$ticketsDentroSla = 0;
+if ($ticketsMetricas) while ($ticketMetrica = $ticketsMetricas->fetch_assoc()) {
+    $horarioTicket = horarioParaTicket($horariosTicket, !empty($ticketMetrica['asignado_a']) ? (string) $ticketMetrica['asignado_a'] : null);
+    $minutosResolucion = minutosLaborablesEntre(new DateTimeImmutable($ticketMetrica['fecha_creacion']), new DateTimeImmutable($ticketMetrica['fecha_cierre']), $horarioTicket);
+    $minutosResolucionTotal += $minutosResolucion;
+    $ticketsResolucionMedida++;
+    if ($minutosResolucion <= (int) $ticketMetrica['objetivo_resolucion_minutos']) $ticketsDentroSla++;
+}
+$promedioMin = $ticketsResolucionMedida > 0 ? $minutosResolucionTotal / $ticketsResolucionMedida : 0;
 
 $promedioHoras = round($promedioMin / 60, 2);
 
-$sla = $conexion->query("SELECT COUNT(*) total FROM tickets WHERE estatus='Finalizado' AND TIMESTAMPDIFF(HOUR,fecha_creacion,fecha_modificacion) <= 24 AND DATE(fecha_creacion) BETWEEN '$fecha_inicio' AND '$fecha_fin'")->fetch_assoc()['total'] ?? 0;
+$sla = $ticketsDentroSla;
 
 $slaPorcentaje = ($ticketsCerrados > 0) ? round(($sla / $ticketsCerrados) * 100, 2) : 0;
 
@@ -61,7 +74,7 @@ echo "<tr style='background:#ddd;'>
         <th>Cerrados</th>
         <th>% Eficiencia</th>
         <th>Prom. Atención</th>
-        <th>SLA 24h</th>
+        <th>SLA de resolución</th>
         <th colspan='2'></th>
       </tr>";
 
