@@ -40,6 +40,13 @@ while ($u = $usuarios_result->fetch_assoc()) {
 }
 
 $fecha_actual_local = date('Y-m-d\TH:i');
+$soporte_result = $conexion->query("SELECT usuario, nombre_completo, rol, modulos_permitidos FROM usuarios WHERE rol IN ('admin','superadmin') ORDER BY nombre_completo");
+$usuarios_soporte = [];
+if ($soporte_result) {
+    while ($soporte = $soporte_result->fetch_assoc()) {
+        if ($soporte['rol'] === 'superadmin' || in_array('tickets', parsearModulos($soporte['modulos_permitidos'] ?? ''), true)) $usuarios_soporte[] = $soporte;
+    }
+}
 ?>
 
 <!-- Uso de BASE_URL para el CSS -->
@@ -112,8 +119,41 @@ $fecha_actual_local = date('Y-m-d\TH:i');
                 </div>
 
                 <div class="campo">
-                    <label>Fecha</label>
+                    <label>Fecha de creación</label>
                     <input type="datetime-local" name="fecha_creacion" class="form-control" value="<?= $fecha_actual_local ?>">
+                </div>
+
+                <div class="campo">
+                    <label>Prioridad</label>
+                    <select name="prioridad" class="form-select">
+                        <option value="Baja">Baja</option><option value="Normal" selected>Normal</option>
+                        <option value="Alta">Alta</option><option value="Urgente">Urgente</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Asignar a soporte</label>
+                    <select name="asignado_a" class="form-select">
+                        <option value="">Sin asignar</option>
+                        <?php foreach ($usuarios_soporte as $soporte): ?>
+                            <option value="<?= htmlspecialchars($soporte['usuario'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($soporte['nombre_completo'] ?: $soporte['usuario']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Primera respuesta <small>(opcional)</small></label>
+                    <input type="datetime-local" name="fecha_primera_respuesta" class="form-control">
+                </div>
+
+                <div class="campo">
+                    <label>Resolución / cierre <small>(opcional)</small></label>
+                    <input type="datetime-local" name="fecha_resolucion" class="form-control">
+                </div>
+
+                <div class="campo">
+                    <label>Última modificación <small>(opcional)</small></label>
+                    <input type="datetime-local" name="fecha_modificacion" class="form-control">
                 </div>
 
                 <div class="campo full-width">

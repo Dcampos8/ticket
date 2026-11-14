@@ -76,7 +76,24 @@ $descripcion = trim((string) ($_POST['descripcion'] ?? ''));
 $tipoTicket = trim((string) ($_POST['tipo_ticket'] ?? 'Soporte técnico'));
 $estatus = trim((string) ($_POST['estatus'] ?? 'En proceso'));
 $fechaCreacion = trim((string) ($_POST['fecha_creacion'] ?? date('Y-m-d H:i:s')));
+$fechaPrimeraRespuesta = trim((string) ($_POST['fecha_primera_respuesta'] ?? ''));
+$fechaResolucion = trim((string) ($_POST['fecha_resolucion'] ?? ''));
+$fechaModificacion = trim((string) ($_POST['fecha_modificacion'] ?? ''));
+$prioridad = trim((string) ($_POST['prioridad'] ?? 'Normal'));
+$asignadoA = trim((string) ($_POST['asignado_a'] ?? ''));
 $comentarioAdmin = trim((string) ($_POST['comentario_admin'] ?? ''));
+$prioridadesPermitidas = ['Baja', 'Normal', 'Alta', 'Urgente'];
+$normalizarFecha = static function (string $valor): ?string {
+    if ($valor === '') return null;
+    $fecha = DateTimeImmutable::createFromFormat('!Y-m-d\\TH:i', $valor);
+    $errores = DateTimeImmutable::getLastErrors();
+    if (!$fecha || ($errores !== false && ($errores['warning_count'] > 0 || $errores['error_count'] > 0)) || $fecha->format('Y-m-d\\TH:i') !== $valor) return null;
+    return $fecha->format('Y-m-d H:i:s');
+};
+$fechaCreacionNormalizada = $normalizarFecha($fechaCreacion);
+$fechaPrimeraRespuestaNormalizada = $normalizarFecha($fechaPrimeraRespuesta);
+$fechaResolucionNormalizada = $normalizarFecha($fechaResolucion);
+$fechaModificacionNormalizada = $normalizarFecha($fechaModificacion) ?? date('Y-m-d H:i:s');
 $estadosPermitidos = ['Pendiente', 'En proceso', 'Finalizado', 'Cancelado'];
 $tiposPermitidos = [
     'Soporte', 'Soporte técnico', 'Hardware', 'Software y sistemas', 'Red e internet',
@@ -92,11 +109,26 @@ if ($nombreUsuario === '' || $descripcion === ''
     || mb_strlen($descripcion, 'UTF-8') > 10000
     || mb_strlen($comentarioAdmin, 'UTF-8') > 10000
     || !in_array($estatus, $estadosPermitidos, true)
+    || !in_array($prioridad, $prioridadesPermitidas, true)
     || !in_array($tipoTicket, $tiposPermitidos, true)
-    || !DateTime::createFromFormat('Y-m-d\TH:i', $fechaCreacion)) {
+    || $fechaCreacionNormalizada === null
+    || ($fechaPrimeraRespuesta !== '' && $fechaPrimeraRespuestaNormalizada === null)
+    || ($fechaResolucion !== '' && $fechaResolucionNormalizada === null)
+    || ($fechaModificacion !== '' && $normalizarFecha($fechaModificacion) === null)
+    || mb_strlen($asignadoA, 'UTF-8') > 50) {
     responderCreacionAdmin(422, ['status' => 'error', 'message' => 'Revisa los datos del ticket.']);
 }
-$fechaCreacion = str_replace('T', ' ', $fechaCreacion) . ':00';
+$fechaCreacion = $fechaCreacionNormalizada;
+if ($asignadoA !== '') {
+    $stmtResponsable = $conexion->prepare("SELECT rol, modulos_permitidos FROM usuarios WHERE usuario = ? AND rol IN ('admin','superadmin') LIMIT 1");
+    $stmtResponsable->bind_param('s', $asignadoA);
+    $stmtResponsable->execute();
+    $responsable = $stmtResponsable->get_result()->fetch_assoc();
+    $stmtResponsable->close();
+    if (!$responsable || ($responsable['rol'] !== 'superadmin' && !in_array('tickets', parsearModulos($responsable['modulos_permitidos'] ?? ''), true))) {
+        responderCreacionAdmin(422, ['status' => 'error', 'message' => 'Selecciona un responsable válido del módulo de tickets.']);
+    }
+}
 
 $archivosGuardados = [];
 $imgUser = subirArchivoSeguro('imagen', 'ticket', true);
@@ -115,11 +147,11 @@ foreach ([$imgUser, $imgAdmin, $docAdmin] as $archivoGuardado) {
 }
 
 $stmt = $conexion->prepare(
-    "INSERT INTO tickets (nombre, nombre_completo, area, puesto, descripcion, tipo_ticket, estatus, prioridad, objetivo_respuesta_minutos, objetivo_resolucion_minutos, fecha_creacion, comentario_admin, imagen, imagen_admin, archivo_admin)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'Normal',
-        COALESCE((SELECT respuesta_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 480),
-        COALESCE((SELECT resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = 'Normal'), 2880),
-        ?, ?, ?, ?, ?)"
+    "INSERT INTO tickets (nombre, nombre_completo, area, puesto, descripcion, tipo_ticket, estatus, prioridad, asignado_a, objetivo_respuesta_minutos, objetivo_resolucion_minutos, fecha_creacion, fecha_modificacion, fecha_primera_respuesta, fecha_resolucion, comentario_admin, imagen, imagen_admin, archivo_admin)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''),
+        COALESCE((SELECT respuesta_minutos FROM ticket_sla_politicas WHERE prioridad = ?), 480),
+        COALESCE((SELECT resolucion_minutos FROM ticket_sla_politicas WHERE prioridad = ?), 2880),
+        ?, ?, ?, ?, ?, ?, ?, ?)"
 );
 if (!$stmt) {
     foreach ($archivosGuardados as $ruta) {
@@ -129,7 +161,7 @@ if (!$stmt) {
     responderCreacionAdmin(500, ['status' => 'error', 'message' => 'No se pudo registrar el ticket.']);
 }
 $stmt->bind_param(
-    'ssssssssssss',
+    'sssssssssssssssssss',
     $nombreUsuario,
     $nombreCompleto,
     $area,
@@ -137,7 +169,14 @@ $stmt->bind_param(
     $descripcion,
     $tipoTicket,
     $estatus,
+    $prioridad,
+    $asignadoA,
+    $prioridad,
+    $prioridad,
     $fechaCreacion,
+    $fechaModificacionNormalizada,
+    $fechaPrimeraRespuestaNormalizada,
+    $fechaResolucionNormalizada,
     $comentarioAdmin,
     $imgUser,
     $imgAdmin,
