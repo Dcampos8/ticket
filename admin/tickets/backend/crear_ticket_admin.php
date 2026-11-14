@@ -5,6 +5,7 @@ require_once '../../../backend/conexion.php';
 require_once '../../../shared/permisos.php';
 require_once '../../../shared/security.php';
 require_once '../../../shared/ticket_activity.php';
+require_once '../../../shared/ticket_clasificacion.php';
 $conexion->set_charset('utf8mb4');
 date_default_timezone_set('America/Mexico_City');
 
@@ -73,7 +74,6 @@ $nombreCompleto = trim((string) ($_POST['nombre_completo'] ?? ''));
 $area = trim((string) ($_POST['area'] ?? ''));
 $puesto = trim((string) ($_POST['puesto'] ?? ''));
 $descripcion = trim((string) ($_POST['descripcion'] ?? ''));
-$tipoTicket = trim((string) ($_POST['tipo_ticket'] ?? 'Soporte técnico'));
 $estatus = trim((string) ($_POST['estatus'] ?? 'En proceso'));
 $fechaCreacion = trim((string) ($_POST['fecha_creacion'] ?? date('Y-m-d H:i:s')));
 $fechaPrimeraRespuesta = trim((string) ($_POST['fecha_primera_respuesta'] ?? ''));
@@ -104,7 +104,6 @@ if ($nombreUsuario === '' || $descripcion === ''
     || mb_strlen($comentarioAdmin, 'UTF-8') > 10000
     || !in_array($estatus, $estadosPermitidos, true)
     || !in_array($prioridad, $prioridadesPermitidas, true)
-    || $tipoTicket === '' || mb_strlen($tipoTicket, 'UTF-8') > 100
     || $fechaCreacionNormalizada === null
     || ($fechaPrimeraRespuesta !== '' && $fechaPrimeraRespuestaNormalizada === null)
     || ($fechaResolucion !== '' && $fechaResolucionNormalizada === null)
@@ -113,6 +112,14 @@ if ($nombreUsuario === '' || $descripcion === ''
     responderCreacionAdmin(422, ['status' => 'error', 'message' => 'Revisa los datos del ticket.']);
 }
 $fechaCreacion = $fechaCreacionNormalizada;
+$clasificacion = clasificarSolicitud($descripcion);
+if ($clasificacion === null) {
+    responderCreacionAdmin(503, [
+        'status' => 'error',
+        'message' => $GLOBALS['gemini_classification_issue'] ?? 'No se pudo asignar automáticamente el tipo de ticket. Intenta de nuevo en unos minutos.',
+    ]);
+}
+$tipoTicket = $clasificacion['tipo_ticket'];
 if ($asignadoA !== '') {
     $stmtResponsable = $conexion->prepare("SELECT rol, modulos_permitidos FROM usuarios WHERE usuario = ? AND rol IN ('admin','superadmin') LIMIT 1");
     $stmtResponsable->bind_param('s', $asignadoA);
