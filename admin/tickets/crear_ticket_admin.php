@@ -73,7 +73,7 @@ if ($soporte_result) {
 
                 <div class="campo">
                     <label class="fw-bold">Seleccionar Usuario</label>
-                    <select id="nombre_select" name="usuario_id" class="form-select border-primary" required>
+                    <select id="nombre_select" name="usuario_id" class="form-select" required>
                         <option value="">Seleccionar...</option>
                         <?php foreach ($usuarios_array as $id => $data): ?>
                             <option value="<?= $id ?>"><?= htmlspecialchars($data['nombre_completo']) ?></option>
@@ -117,7 +117,7 @@ if ($soporte_result) {
 
                 <div class="campo">
                     <label>Estatus</label>
-                    <select name="estatus" class="form-select fw-bold text-primary border-primary">
+                    <select name="estatus" class="form-select fw-bold">
                         <option value="En proceso" selected>En proceso</option>
                         <option value="Pendiente">Pendiente</option>
                         <option value="Finalizado">Finalizado</option>

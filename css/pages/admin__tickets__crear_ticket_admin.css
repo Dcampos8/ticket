@@ -31,13 +31,19 @@
 .ticket-admin-content .campo small { color:#9297a1; font-weight:500; }
 .ticket-admin-content .form-control,
 .ticket-admin-content .form-select { min-height:43px; border-color:#dfe3e9; border-radius:9px; background-color:#fff; color:#303540; font-size:.86rem; box-shadow:none; }
+.ticket-admin-content .form-select,
+.ticket-admin-content .form-select option,
+.ticket-admin-content .form-select.text-primary,
+.ticket-admin-content .form-select.border-primary { color:#303540!important; }
+.ticket-admin-content .form-select option { background:#fff; }
+.ticket-admin-content .form-select.fw-bold { font-weight:650!important; }
 .ticket-admin-content .form-control:focus,
 .ticket-admin-content .form-select:focus { border-color:#cf343b; box-shadow:0 0 0 3px rgba(200,16,25,.1); }
 .ticket-admin-content .form-control[readonly] { background:#f6f7f9!important; color:#747a85; }
 .ticket-admin-content textarea.form-control { min-height:96px; }
 .ticket-form-hint { margin:-2px 0 5px; color:#7b818c; font-size:.78rem; }
 .ticket-admin-content .upload-box { min-height:124px; border:1px dashed #cbd1da; border-radius:11px; background:#fafbfc; font-size:.82rem; }
-.ticket-admin-content .upload-box:hover { border-color:#c81019; background:#fff7f7; color:#b20e16; }
+.ticket-admin-content .upload-box:hover { border-color:#c81019; background:#fff7f7; color:#343943; }
 .ticket-admin-content .preview-img { object-fit:contain; }
 .ticket-admin-content .full-width.text-center { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:20px!important; padding-top:20px; border-top:1px solid #eceef2; }
 .ticket-admin-content .full-width.text-center .btn { min-height:44px; margin:0!important; border-radius:9px; font-size:.86rem; font-weight:700; }
