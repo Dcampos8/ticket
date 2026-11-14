@@ -29,6 +29,8 @@
 .ticket-admin-content .campo { min-width:0; margin:8px 0 12px; }
 .ticket-admin-content .campo label { color:#414753; font-size:.8rem; font-weight:700; }
 .ticket-admin-content .campo small { color:#9297a1; font-weight:500; }
+.ticket-admin-content .ticket-type-hint { display:block; margin-top:6px; color:#747b87; font-size:.74rem; line-height:1.45; }
+.ticket-admin-content .ticket-type-hint.is-error { color:#747b87; }
 .ticket-admin-content .form-control,
 .ticket-admin-content .form-select { min-height:43px; border-color:#dfe3e9; border-radius:9px; background-color:#fff; color:#303540; font-size:.86rem; box-shadow:none; }
 .ticket-admin-content .form-select,

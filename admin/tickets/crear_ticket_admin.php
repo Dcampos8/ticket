@@ -105,14 +105,15 @@ if ($soporte_result) {
                 <div class="section-title"><i class="fa-regular fa-clipboard"></i>Detalles del ticket</div>
 
                 <div class="campo">
-                    <label>Tipo Ticket</label>
-                    <select name="tipo_ticket" class="form-select">
-                        <option value="Soporte">Soporte Técnico</option>
-                        <option value="Capacitacion">Capacitación</option>
-                        <option value="Ajuste facturas">Ajuste Facturas</option>
-                        <option value="Camaras">Cámaras / Seguridad</option>
-                        <option value="Diseño">Diseño Gráfico</option>
-                    </select>
+                    <label for="tipo_ticket">Tipo de ticket</label>
+                    <input id="tipo_ticket" name="tipo_ticket" class="form-control" list="tiposTicketSugeridos" maxlength="100" required placeholder="Se sugerirá con base en la descripción">
+                    <datalist id="tiposTicketSugeridos">
+                        <option value="Soporte técnico"><option value="Hardware"><option value="Software y sistemas">
+                        <option value="Red e internet"><option value="Accesos y cuentas"><option value="Correo electrónico">
+                        <option value="Telefonía"><option value="Impresoras"><option value="Ajuste facturas">
+                        <option value="Camaras"><option value="Capacitacion"><option value="Diseño"><option value="Otra Actividad">
+                    </datalist>
+                    <small id="tipoTicketSugerencia" class="ticket-type-hint" aria-live="polite">La IA sugerirá un tipo al escribir la descripción. Puedes cambiarlo o escribir uno propio.</small>
                 </div>
 
                 <div class="campo">
@@ -219,6 +220,51 @@ if ($soporte_result) {
 
 <script>
 const usuarios = <?= json_encode($usuarios_array, JSON_UNESCAPED_UNICODE) ?>;
+
+// Sugiere una categoría según la descripción y conserva cualquier edición manual.
+const descripcionTicket = document.querySelector('#formTicketAdmin [name="descripcion"]');
+const tipoTicketInput = document.getElementById('tipo_ticket');
+const estadoSugerenciaTipo = document.getElementById('tipoTicketSugerencia');
+let temporizadorClasificacion;
+let clasificacionEnCurso = 0;
+let ultimaSugerenciaAplicada = '';
+descripcionTicket.addEventListener('input', function() {
+    const consulta = ++clasificacionEnCurso;
+    window.clearTimeout(temporizadorClasificacion);
+    const texto = this.value.trim();
+    if (texto.length < 12) {
+        estadoSugerenciaTipo.textContent = 'La IA sugerirá un tipo al escribir la descripción. Puedes cambiarlo o escribir uno propio.';
+        return;
+    }
+    temporizadorClasificacion = window.setTimeout(async () => {
+        estadoSugerenciaTipo.textContent = 'Analizando la descripción…';
+        estadoSugerenciaTipo.classList.remove('is-error');
+        try {
+            const respuesta = await fetch('<?= BASE_URL ?>admin/tickets/backend/clasificar_ticket_admin.php', {
+                method: 'POST', credentials: 'same-origin',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json'},
+                body: new URLSearchParams({descripcion: texto, csrf_token: document.querySelector('#formTicketAdmin [name="csrf_token"]').value})
+            });
+            const datos = await respuesta.json();
+            if (consulta !== clasificacionEnCurso) return;
+            if (!respuesta.ok || datos.status !== 'ok') throw new Error(datos.message || 'No se pudo obtener la sugerencia.');
+            const tipoSugerido = String(datos.tipo_ticket || '').trim();
+            if (!tipoSugerido) throw new Error('La IA no devolvió un tipo de ticket.');
+            const valorActual = tipoTicketInput.value.trim();
+            if (valorActual === '' || valorActual === ultimaSugerenciaAplicada) {
+                tipoTicketInput.value = tipoSugerido;
+                ultimaSugerenciaAplicada = tipoSugerido;
+                estadoSugerenciaTipo.textContent = 'Sugerencia de IA: ' + tipoSugerido + '. Puedes editarla.';
+            } else {
+                estadoSugerenciaTipo.textContent = 'Sugerencia de IA: ' + tipoSugerido + '. Se conservó el tipo que escribiste.';
+            }
+        } catch (error) {
+            if (consulta !== clasificacionEnCurso) return;
+            estadoSugerenciaTipo.textContent = error.message || 'No se pudo sugerir el tipo; puedes escribirlo manualmente.';
+            estadoSugerenciaTipo.classList.add('is-error');
+        }
+    }, 600);
+});
 
 // Autocompletar datos
 document.getElementById('nombre_select').addEventListener('change', function() {

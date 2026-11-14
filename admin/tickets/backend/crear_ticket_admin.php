@@ -95,12 +95,6 @@ $fechaPrimeraRespuestaNormalizada = $normalizarFecha($fechaPrimeraRespuesta);
 $fechaResolucionNormalizada = $normalizarFecha($fechaResolucion);
 $fechaModificacionNormalizada = $normalizarFecha($fechaModificacion) ?? date('Y-m-d H:i:s');
 $estadosPermitidos = ['Pendiente', 'En proceso', 'Finalizado', 'Cancelado'];
-$tiposPermitidos = [
-    'Soporte', 'Soporte técnico', 'Hardware', 'Software y sistemas', 'Red e internet',
-    'Accesos y cuentas', 'Correo electrónico', 'Telefonía', 'Impresoras',
-    'Ajuste facturas', 'Camaras', 'Capacitacion', 'Diseño', 'Otra Actividad',
-];
-
 if ($nombreUsuario === '' || $descripcion === ''
     || mb_strlen($nombreUsuario, 'UTF-8') > 100
     || mb_strlen($nombreCompleto, 'UTF-8') > 150
@@ -110,7 +104,7 @@ if ($nombreUsuario === '' || $descripcion === ''
     || mb_strlen($comentarioAdmin, 'UTF-8') > 10000
     || !in_array($estatus, $estadosPermitidos, true)
     || !in_array($prioridad, $prioridadesPermitidas, true)
-    || !in_array($tipoTicket, $tiposPermitidos, true)
+    || $tipoTicket === '' || mb_strlen($tipoTicket, 'UTF-8') > 100
     || $fechaCreacionNormalizada === null
     || ($fechaPrimeraRespuesta !== '' && $fechaPrimeraRespuestaNormalizada === null)
     || ($fechaResolucion !== '' && $fechaResolucionNormalizada === null)
