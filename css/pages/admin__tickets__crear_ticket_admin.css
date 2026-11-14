@@ -3,7 +3,55 @@
 /* Ajuste para que el contenido respete el menú lateral del admin */
     .ticket-admin-content {
         margin-left: 0;
-        padding: 20px;
-        background-color: #f8f9fa;
+        padding: clamp(14px, 3vw, 34px);
+        background: radial-gradient(ellipse at 85% 0%, #fff1f1 0, transparent 38%), #f4f6f9;
         min-height: 100vh;
     }
+
+.ticket-admin-content .ticket-page { padding: 10px 0 42px; }
+.ticket-admin-content .form-container {
+    width: min(100%, 1040px);
+    max-width: 1040px;
+    padding: clamp(20px, 4vw, 42px);
+    border: 1px solid #e6e9ef;
+    border-radius: 18px;
+    box-shadow: 0 18px 48px rgba(27, 39, 59, .08);
+}
+.ticket-form-heading { display:flex; align-items:center; gap:17px; margin:0 0 30px; padding:0 0 24px; border-bottom:1px solid #eceef2; }
+.ticket-form-icon { display:grid; width:54px; height:54px; flex:0 0 54px; place-items:center; border-radius:16px; background:#fff0f0; color:#c81019; font-size:1.35rem; }
+.ticket-form-eyebrow { color:#969ba5; font-size:.68rem; font-weight:800; letter-spacing:.12em; }
+.ticket-form-heading h1 { margin:3px 0 4px; color:#252932; font-size:clamp(1.35rem, 3vw, 1.8rem); font-weight:800; letter-spacing:-.035em; }
+.ticket-form-heading p { margin:0; color:#737987; font-size:.88rem; }
+.ticket-admin-content .grid-form { column-gap:22px; row-gap:3px; }
+.ticket-admin-content .section-title { grid-column:1 / -1; gap:9px; margin:20px 0 8px; padding:0 0 10px; border-bottom:1px solid #eceef2; color:#3c414b; font-size:.76rem; letter-spacing:.075em; }
+.ticket-admin-content .section-title:first-of-type { margin-top:0; }
+.ticket-admin-content .section-title i { color:#c81019; font-size:.88rem; }
+.ticket-admin-content .campo { min-width:0; margin:8px 0 12px; }
+.ticket-admin-content .campo label { color:#414753; font-size:.8rem; font-weight:700; }
+.ticket-admin-content .campo small { color:#9297a1; font-weight:500; }
+.ticket-admin-content .form-control,
+.ticket-admin-content .form-select { min-height:43px; border-color:#dfe3e9; border-radius:9px; background-color:#fff; color:#303540; font-size:.86rem; box-shadow:none; }
+.ticket-admin-content .form-control:focus,
+.ticket-admin-content .form-select:focus { border-color:#cf343b; box-shadow:0 0 0 3px rgba(200,16,25,.1); }
+.ticket-admin-content .form-control[readonly] { background:#f6f7f9!important; color:#747a85; }
+.ticket-admin-content textarea.form-control { min-height:96px; }
+.ticket-form-hint { margin:-2px 0 5px; color:#7b818c; font-size:.78rem; }
+.ticket-admin-content .upload-box { min-height:124px; border:1px dashed #cbd1da; border-radius:11px; background:#fafbfc; font-size:.82rem; }
+.ticket-admin-content .upload-box:hover { border-color:#c81019; background:#fff7f7; color:#b20e16; }
+.ticket-admin-content .preview-img { object-fit:contain; }
+.ticket-admin-content .full-width.text-center { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:10px; margin-top:20px!important; padding-top:20px; border-top:1px solid #eceef2; }
+.ticket-admin-content .full-width.text-center .btn { min-height:44px; margin:0!important; border-radius:9px; font-size:.86rem; font-weight:700; }
+.ticket-admin-content .full-width.text-center .btn-primary { background:#c81019; }
+.ticket-admin-content .full-width.text-center .btn-primary:hover { background:#a90e16; }
+@media(max-width:700px) {
+    .ticket-admin-content { padding:10px; }
+    .ticket-admin-content .form-container { padding:20px 16px; border-radius:14px; }
+    .ticket-admin-content .grid-form { grid-template-columns:minmax(0,1fr); gap:0; }
+    .ticket-admin-content .section-title,.ticket-admin-content .full-width { grid-column:1; }
+    .ticket-form-heading { align-items:flex-start; gap:12px; margin-bottom:20px; }
+    .ticket-form-icon { width:44px; height:44px; flex-basis:44px; border-radius:13px; }
+    .ticket-form-heading p { font-size:.8rem; }
+    .ticket-admin-content .campo { margin:7px 0 10px; }
+    .ticket-admin-content .full-width.text-center { justify-content:stretch; }
+    .ticket-admin-content .full-width.text-center .btn { flex:1 1 100%; }
+}

@@ -57,13 +57,19 @@ if ($soporte_result) {
 <div class="ticket-admin-content">
     <div class="ticket-page">
         <div class="form-container shadow-sm">
-            <h3 class="mb-4 text-primary"><i class="fa-solid fa-clipboard-check me-2"></i>Nuevo Ticket Administrativo</h3>
+            <div class="ticket-form-heading">
+                <div class="ticket-form-icon"><i class="fa-solid fa-headset"></i></div>
+                <div><span class="ticket-form-eyebrow">SERVICE DESK · ADMINISTRACIÓN</span>
+                    <h1>Crear ticket</h1>
+                    <p>Registra la solicitud y completa su información de seguimiento.</p>
+                </div>
+            </div>
 
             <form id="formTicketAdmin" class="grid-form" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
                 <!-- ================= USUARIO ================= -->
-                <div class="section-title">Información del Solicitante</div>
+                <div class="section-title"><i class="fa-regular fa-user"></i>Información del solicitante</div>
 
                 <div class="campo">
                     <label class="fw-bold">Seleccionar Usuario</label>
@@ -96,7 +102,7 @@ if ($soporte_result) {
                 </div>
 
                 <!-- ================= DETALLES ================= -->
-                <div class="section-title">Detalles del Ticket</div>
+                <div class="section-title"><i class="fa-regular fa-clipboard"></i>Detalles del ticket</div>
 
                 <div class="campo">
                     <label>Tipo Ticket</label>
@@ -119,11 +125,6 @@ if ($soporte_result) {
                 </div>
 
                 <div class="campo">
-                    <label>Fecha de creación</label>
-                    <input type="datetime-local" name="fecha_creacion" class="form-control" value="<?= $fecha_actual_local ?>">
-                </div>
-
-                <div class="campo">
                     <label>Prioridad</label>
                     <select name="prioridad" class="form-select">
                         <option value="Baja">Baja</option><option value="Normal" selected>Normal</option>
@@ -139,6 +140,14 @@ if ($soporte_result) {
                             <option value="<?= htmlspecialchars($soporte['usuario'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($soporte['nombre_completo'] ?: $soporte['usuario']) ?></option>
                         <?php endforeach; ?>
                     </select>
+                </div>
+
+                <div class="section-title"><i class="fa-regular fa-clock"></i>Seguimiento y fechas</div>
+                <p class="ticket-form-hint full-width">Las fechas de respuesta, resolución y modificación son opcionales. Si no capturas la modificación, se guardará la fecha actual.</p>
+
+                <div class="campo">
+                    <label>Fecha de creación</label>
+                    <input type="datetime-local" name="fecha_creacion" class="form-control" value="<?= $fecha_actual_local ?>">
                 </div>
 
                 <div class="campo">
@@ -162,7 +171,7 @@ if ($soporte_result) {
                 </div>
 
                 <!-- ================= ADMIN ================= -->
-                <div class="section-title">Gestión de Sistemas (Admin)</div>
+                <div class="section-title"><i class="fa-solid fa-screwdriver-wrench"></i>Gestión de soporte</div>
 
                 <div class="campo full-width">
                     <label>Comentario / Solución</label>
@@ -170,7 +179,7 @@ if ($soporte_result) {
                 </div>
 
                 <!-- ================= ARCHIVOS ================= -->
-                <div class="section-title">Evidencias y Adjuntos</div>
+                <div class="section-title"><i class="fa-regular fa-folder-open"></i>Evidencias y adjuntos</div>
                 
                 <div class="campo">
                     <label>Imagen Usuario</label>
