@@ -635,3 +635,50 @@ body { margin-top: 0; }
     .cotz-page .cotz-form-footer>div:last-child { align-items:stretch; flex-direction:column; }
     .cotz-page .btn-cotz-primary { width:100%; }
 }
+
+/* Afinación de contraste para las reglas globales de marca y carga del logo. */
+.cotz-page .cotz-hero h1 { color:#fff!important; }
+.cotz-page a.cotz-hero-action,
+.cotz-page a.cotz-hero-action:visited,
+.cotz-page a.cotz-hero-action:hover,
+.cotz-page a.cotz-hero-action:focus { color:#fff!important; }
+.cotz-page .cotz-hero-action:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+.cotz-page .cotz-optional { margin-left:4px; color:#9297a0; font-size:.68rem; font-weight:500; letter-spacing:0; text-transform:none; }
+.cotz-page .cotz-logo-drop {
+    position:relative;
+    display:flex;
+    min-height:74px;
+    gap:11px;
+    padding:9px 11px;
+    border:1px dashed #cbd0d7;
+    border-radius:10px;
+    background:#fafbfc;
+}
+.cotz-page .cotz-logo-drop:focus-within { border-color:#a90e16; box-shadow:0 0 0 3px #c8101918; }
+.cotz-page .cotz-logo-pick {
+    display:flex;
+    flex:0 0 auto;
+    align-items:center;
+    gap:9px;
+    min-height:48px;
+    padding:7px 12px;
+    border:1px solid #d8dce2;
+    border-radius:8px;
+    background:#fff;
+    color:#33373d;
+    cursor:pointer;
+    transition:border-color .15s,background .15s;
+}
+.cotz-page .cotz-logo-pick:hover { border-color:#b70f17; background:#fff8f8; }
+.cotz-page .cotz-logo-pick>i { color:#a90e16; font-size:.95rem; }
+.cotz-page .cotz-logo-pick span { display:flex; flex-direction:column; gap:2px; }
+.cotz-page .cotz-logo-pick strong { color:#30343a; font-size:.78rem; }
+.cotz-page .cotz-logo-pick small { color:#7c828b; font-size:.64rem; }
+.cotz-page .cotz-logo-filename { align-self:center; min-width:0; overflow:hidden; color:#6f7580; font-size:.73rem; text-overflow:ellipsis; white-space:nowrap; }
+.cotz-page .cotz-logo-preview { display:none; width:48px; height:48px; object-fit:contain; padding:3px; border:1px solid #e1e4e8; border-radius:8px; background:#fff; }
+.cotz-page .cotz-file-input { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; clip-path:inset(50%)!important; border:0!important; }
+@media(max-width:767.98px) {
+    .cotz-page .cotz-logo-drop { flex-wrap:wrap; }
+    .cotz-page .cotz-logo-pick { flex:1 1 160px; }
+    .cotz-page .cotz-logo-filename { flex:1 1 100%; padding-left:2px; }
+}
