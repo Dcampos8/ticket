@@ -495,3 +495,143 @@ body{ margin-top: 0; }
 @media (prefers-reduced-motion: reduce) {
     .cotz-page *, #mainContent .kpi { transition-duration: .01ms !important; }
 }
+
+/* Rediseño integral con controles cómodos en pantalla táctil. */
+body { margin-top: 0; }
+.cotz-page {
+    --cotz-bg: #f4f5f7;
+    --cotz-surface: #fff;
+    --cotz-border: #e2e5e9;
+    --cotz-border-soft: #edf0f2;
+    --cotz-text: #25272b;
+    --cotz-muted: #737982;
+    --cotz-accent: #c81019;
+    --cotz-accent-dark: #a90e16;
+    --cotz-accent-light: #fff0f0;
+    max-width: 1680px;
+    padding: clamp(14px, 2.5vw, 34px) clamp(12px, 2.4vw, 36px) 42px;
+}
+.cotz-hero {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin:0 0 22px;
+    padding:clamp(20px, 3vw, 34px);
+    border:1px solid #36383c;
+    border-radius:16px;
+    background:linear-gradient(115deg,#27292d,#393b40);
+    color:#fff;
+    box-shadow:0 8px 22px #17191d18;
+}
+.cotz-hero-copy { min-width:0; }
+.cotz-eyebrow { color:#ffb8bb; font-size:.68rem; font-weight:800; letter-spacing:.13em; }
+.cotz-hero h1 { margin:5px 0 7px; color:#fff; font-size:clamp(1.45rem,3vw,2rem); font-weight:800; letter-spacing:-.04em; }
+.cotz-hero p { max-width:680px; margin:0; color:#d0d2d6; font-size:.9rem; line-height:1.5; }
+.cotz-hero-action { display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center; gap:9px; min-height:44px; padding:10px 16px; border-radius:9px; background:#c81019; color:#fff; font-size:.85rem; font-weight:750; text-decoration:none; transition:background .15s,transform .15s; }
+.cotz-hero-action:hover { transform:translateY(-1px); background:#a90e16; color:#fff; }
+.cotz-page .cotz-stat { position:relative; min-height:104px; padding:17px; overflow:hidden; border-radius:13px; box-shadow:0 3px 12px #20242b08; }
+.cotz-page .cotz-stat::before { position:absolute; inset:0 auto 0 0; width:3px; background:#c81019; content:""; }
+.cotz-page .cotz-stat-icon { width:42px; height:42px; border-radius:12px; background:#f1f2f4; color:#474b52; }
+.cotz-page .cotz-stat-label { margin-bottom:5px; font-size:.66rem; letter-spacing:.075em; }
+.cotz-page .cotz-stat-value { font-size:clamp(1.1rem,1.7vw,1.5rem); }
+.cotz-page .cotz-stat-note { font-size:.68rem; }
+.cotz-page .cotz-card { border-radius:15px; box-shadow:0 4px 16px #20242b08; }
+.cotz-page .cotz-card-header { gap:16px; padding:18px 22px; background:#fff; }
+.cotz-page .cotz-card-header h3 { font-size:1.03rem; }
+.cotz-page .cotz-card-header small { color:var(--cotz-muted); font-size:.77rem; line-height:1.45; }
+.cotz-page .cotz-card-icon { background:#fff0f0; color:#b10e16; }
+.cotz-page .cotz-card-body { padding:clamp(16px,2vw,25px); }
+.cotz-page .form-label { color:#41454c; font-size:.72rem; font-weight:750; }
+.cotz-page .form-control,.cotz-page .form-select { min-height:44px; border-color:#d9dde2; border-radius:9px; background-color:#fff; color:#30343a; font-size:.88rem; }
+.cotz-page .form-control::placeholder { color:#a0a5ad; }
+.cotz-page .form-control:focus,.cotz-page .form-select:focus { border-color:#c81019; box-shadow:0 0 0 3px #c8101918; }
+.cotz-page .cotz-logo-drop { min-height:48px; border-color:#d9dde2; background:#fafbfc; }
+.cotz-items-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; margin:25px 0 13px; }
+.cotz-items-heading h5 { display:flex; align-items:center; gap:9px; margin:0 0 4px; color:#30343a; font-size:.98rem; font-weight:800; }
+.cotz-items-heading h5 i { color:#c81019; font-size:.9rem; }
+.cotz-items-heading small { color:var(--cotz-muted); font-size:.76rem; }
+.cotz-page #tablaArticulos { border-radius:10px; overflow:hidden; }
+.cotz-page #tablaArticulos thead th { padding:12px 10px; background:#33363b; color:#fff; font-size:.67rem; letter-spacing:.06em; }
+.cotz-page #tablaArticulos td { padding:10px; }
+.cotz-page #tablaArticulos .form-control,.cotz-page #tablaArticulos .form-select { min-height:40px; font-size:.81rem; }
+.cotz-page #tablaArticulos .cotz-subtotal { margin-top:7px; font-size:.71rem; }
+.cotz-page #tablaArticulos .remove { display:inline-grid; width:36px; height:36px; place-items:center; border-radius:8px; color:#8a3035!important; text-decoration:none; }
+.cotz-page #tablaArticulos .remove:hover { background:#fff0f0; color:#a90e16!important; }
+.cotz-page .btn-cotz-outline { min-height:40px; padding:8px 13px; }
+.cotz-page .cotz-form-footer { align-items:flex-end; margin-top:16px; padding-top:18px; }
+.cotz-page .cotz-total-box .cotz-total-value { color:#292c31; font-size:1.65rem; }
+.cotz-page .btn-cotz-primary { min-height:46px; padding:11px 20px; background:#c81019; border-color:#c81019; box-shadow:0 4px 10px #c8101925; }
+.cotz-page .btn-cotz-primary:hover { background:#a90e16; border-color:#a90e16; }
+.cotz-search-wrap { position:relative; display:block; width:min(100%,330px); }
+.cotz-search-wrap>i { position:absolute; z-index:2; top:50%; left:12px; transform:translateY(-50%); color:#838891; font-size:.8rem; }
+.cotz-search-wrap .cotz-search { width:100%; max-width:none; min-height:40px; padding-left:35px; }
+.cotz-page .table-responsive { border-color:var(--cotz-border); border-radius:11px; }
+.cotz-page #tablaHistorial { min-width:780px; margin-bottom:0; }
+.cotz-page #tablaHistorial thead th { padding:12px 14px; background:#33363b; border-color:#4a4d52; color:#fff; font-size:.66rem; }
+.cotz-page #tablaHistorial td { padding:13px 14px; color:#42464d; font-size:.82rem; }
+.cotz-page #tablaHistorial tbody tr:hover { --bs-table-accent-bg:#fbf7f7; }
+.cotz-page .cotz-folio { display:inline-block; padding:5px 8px; border-radius:6px; background:#fff0f0; color:#a90e16; font-size:.73rem; }
+.cotz-page .cotz-destination { margin-left:2.7rem; color:#777d86; }
+.cotz-page .cotz-destination i { color:#8a3035; }
+.cotz-page .cotz-icon-btn { width:36px; height:36px; border-radius:9px; }
+.cotz-page .cotz-empty { padding:48px 16px; }
+
+@media(max-width:767.98px) {
+    .cotz-page { padding:12px 12px 28px; }
+    .cotz-hero { align-items:flex-start; flex-direction:column; gap:16px; margin-bottom:15px; padding:21px 18px; border-radius:13px; }
+    .cotz-hero p { font-size:.82rem; }
+    .cotz-hero-action { width:100%; }
+    .cotz-page .cotz-stat { min-height:94px; gap:10px; padding:13px 12px; }
+    .cotz-page .cotz-stat-icon { width:35px; height:35px; font-size:.92rem; }
+    .cotz-page .cotz-stat-label { font-size:.58rem; }
+    .cotz-page .cotz-stat-note { font-size:.61rem; }
+    .cotz-page .cotz-card-header { align-items:flex-start; flex-direction:column; padding:16px; }
+    .cotz-page .cotz-card-body { padding:14px; }
+    .cotz-page .cotz-search-wrap { width:100%; }
+    .cotz-page .cotz-form-footer { align-items:stretch; flex-direction:column; }
+    .cotz-page .cotz-form-footer>div:last-child { width:100%; justify-content:space-between; gap:12px!important; }
+    .cotz-page .cotz-total-box { text-align:left; }
+    .cotz-page .cotz-total-box .cotz-total-value { font-size:1.45rem; }
+    .cotz-page .btn-cotz-primary { width:auto; flex:1; }
+    .cotz-page .table-responsive { border:0; overflow:visible; background:transparent; }
+
+    /* Cada artículo se presenta como una ficha en lugar de una tabla ancha. */
+    .cotz-page #tablaArticulos { display:block; width:100%!important; min-width:0!important; overflow:visible; border:0; }
+    .cotz-page #tablaArticulos thead { display:none; }
+    .cotz-page #tablaArticulos tbody { display:grid; gap:11px; }
+    .cotz-page #tablaArticulos tbody tr { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"product product" "description description" "quantity price" "remove remove"; gap:8px 10px; padding:13px; border:1px solid #e0e3e8; border-radius:11px; background:#fff; box-shadow:0 2px 8px #20242b08; }
+    .cotz-page #tablaArticulos tbody td { display:block; min-width:0; padding:0; border:0; background:transparent; }
+    .cotz-page #tablaArticulos tbody td::before { display:block; margin:0 0 5px; color:#737982; content:attr(data-label); font-size:.62rem; font-weight:800; letter-spacing:.055em; text-transform:uppercase; }
+    .cotz-page #tablaArticulos tbody td:nth-child(1) { grid-area:product; }
+    .cotz-page #tablaArticulos tbody td:nth-child(2) { grid-area:description; }
+    .cotz-page #tablaArticulos tbody td:nth-child(3) { grid-area:quantity; }
+    .cotz-page #tablaArticulos tbody td:nth-child(4) { grid-area:price; }
+    .cotz-page #tablaArticulos tbody td:nth-child(5) { grid-area:remove; display:flex; justify-content:flex-end; border-top:1px solid #edf0f2; padding-top:5px; }
+    .cotz-page #tablaArticulos tbody td:nth-child(5)::before { align-self:center; margin:0 auto 0 0; }
+    .cotz-page #tablaArticulos .input-group { width:100%; }
+    .cotz-page #tablaArticulos .cotz-subtotal { text-align:left; }
+
+    /* Historial apilado en tarjetas sin desplazamiento horizontal. */
+    .cotz-page #tablaHistorial { display:block; width:100%!important; min-width:0!important; }
+    .cotz-page #tablaHistorial thead { display:none; }
+    .cotz-page #tablaHistorial tbody { display:grid; gap:10px; }
+    .cotz-page #tablaHistorial tbody tr { display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"folio total" "supplier supplier" "items items" "currency actions"; gap:0 12px; padding:13px; border:1px solid #e0e3e8; border-radius:11px; background:#fff; box-shadow:0 2px 8px #20242b08; }
+    .cotz-page #tablaHistorial tbody td { display:block; min-width:0; padding:8px 0; border:0; background:transparent!important; overflow-wrap:anywhere; }
+    .cotz-page #tablaHistorial tbody td::before { display:block; margin-bottom:4px; color:#7b8089; content:attr(data-label); font-size:.59rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    .cotz-page #tablaHistorial tbody td:nth-child(1) { grid-area:folio; }
+    .cotz-page #tablaHistorial tbody td:nth-child(2) { grid-area:supplier; border-top:1px solid #edf0f2; }
+    .cotz-page #tablaHistorial tbody td:nth-child(3) { grid-area:items; border-top:1px solid #edf0f2; color:#656b74!important; }
+    .cotz-page #tablaHistorial tbody td:nth-child(4) { grid-area:total; text-align:right; }
+    .cotz-page #tablaHistorial tbody td:nth-child(5) { grid-area:currency; border-top:1px solid #edf0f2; }
+    .cotz-page #tablaHistorial tbody td:nth-child(6) { grid-area:actions; display:flex; justify-content:flex-end; gap:8px; border-top:1px solid #edf0f2; }
+    .cotz-page #tablaHistorial tbody td:nth-child(4)::before { text-align:right; }
+    .cotz-page .cotz-destination { margin-left:0; }
+}
+@media(max-width:420px) {
+    .cotz-page .cotz-stat { align-items:flex-start; flex-direction:column; gap:7px; }
+    .cotz-page .cotz-stat-icon { width:30px; height:30px; border-radius:9px; }
+    .cotz-page .cotz-stat-value-name { max-width:100%; }
+    .cotz-page .cotz-form-footer>div:last-child { align-items:stretch; flex-direction:column; }
+    .cotz-page .btn-cotz-primary { width:100%; }
+}

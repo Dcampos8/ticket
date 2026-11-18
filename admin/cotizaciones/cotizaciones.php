@@ -289,14 +289,24 @@ include (ROOT_PATH . 'admin/menu.php');
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 <div class="container-fluid mt-4 cotz-page">
 
+    <header class="cotz-hero">
+        <div class="cotz-hero-copy">
+            <span class="cotz-eyebrow">COMPRAS · PROVEEDORES</span>
+            <h1>Gestión de cotizaciones</h1>
+            <p>Registra propuestas, indica a qué área van dirigidas y consulta los PDF desde el historial.</p>
+        </div>
+        <a class="cotz-hero-action" href="#formCotizacion"><i class="fa-solid fa-plus"></i><span>Nueva cotización</span></a>
+    </header>
+
     <!-- Tarjetas de resumen -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="cotz-stat">
                 <div class="cotz-stat-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 <div>
-                    <p class="cotz-stat-label">Cotizaciones</p>
+                    <p class="cotz-stat-label">Cotizaciones totales</p>
                     <div class="cotz-stat-value"><?= number_format($stats['total_cotizaciones']) ?></div>
+                    <small class="cotz-stat-note">En todo el historial</small>
                 </div>
             </div>
         </div>
@@ -334,7 +344,7 @@ include (ROOT_PATH . 'admin/menu.php');
 
     <div class="cotz-card mb-4">
         <div class="cotz-card-header">
-            <h3><span class="cotz-card-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span> Nueva Cotización</h3>
+            <div><h3><span class="cotz-card-icon"><i class="fa-solid fa-file-circle-plus"></i></span> Nueva cotización</h3><small>Completa los datos del proveedor y agrega sus productos o servicios.</small></div>
         </div>
         <div class="cotz-card-body">
             <?php if($msg): ?><div class="alert <?= claseAlerta($msg) ?>"><?= htmlspecialchars($msg, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
@@ -370,16 +380,16 @@ include (ROOT_PATH . 'admin/menu.php');
                     </div>
                 </div>
 
-                <h5 class="mt-4 mb-3"><i class="fa-solid fa-boxes-stacked me-2"></i> Artículos / Servicios</h5>
+                <div class="cotz-items-heading"><div><h5><i class="fa-solid fa-boxes-stacked"></i> Artículos y servicios</h5><small>Agrega una fila por cada concepto. Puedes ajustar cantidad, precio e IVA.</small></div></div>
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle" id="tablaArticulos">
                         <thead>
                             <tr>
-                                <th>Producto / Servicio</th>
-                                <th>Descripción</th>
-                                <th style="width:100px;">Cant.</th>
-                                <th style="width:190px;">Precio Unit.</th>
-                                <th style="width:50px;"></th>
+                                <th scope="col">Producto / Servicio</th>
+                                <th scope="col">Descripción</th>
+                                <th scope="col" style="width:100px;">Cant.</th>
+                                <th scope="col" style="width:190px;">Precio Unit.</th>
+                                <th scope="col" style="width:50px;"><span class="visually-hidden">Quitar</span></th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -403,8 +413,8 @@ include (ROOT_PATH . 'admin/menu.php');
 
     <div class="cotz-card">
         <div class="cotz-card-header">
-            <h3><span class="cotz-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Historial</h3>
-            <input type="text" id="buscarHistorial" class="form-control form-control-sm cotz-search" placeholder="Buscar por folio, cliente o destino...">
+            <div><h3><span class="cotz-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Historial de cotizaciones</h3><small>Consulta, filtra y abre los documentos guardados.</small></div>
+            <label class="cotz-search-wrap"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="visually-hidden">Buscar cotizaciones</span><input type="search" id="buscarHistorial" class="form-control form-control-sm cotz-search" placeholder="Proveedor, destino o folio"></label>
         </div>
         <div class="cotz-card-body">
             <?php if ($result->num_rows === 0): ?>
@@ -417,12 +427,12 @@ include (ROOT_PATH . 'admin/menu.php');
                 <table id="tablaHistorial" class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Folio</th>
-                            <th>Cliente</th>
-                            <th>Artículos</th>
-                            <th>Total</th>
-                            <th>Moneda</th>
-                            <th>Acciones</th>
+                            <th scope="col">Folio</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Artículos</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Moneda</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -435,8 +445,8 @@ include (ROOT_PATH . 'admin/menu.php');
                                 : '';
                         ?>
                         <tr>
-                            <td><span class="cotz-folio"><?= htmlspecialchars($row['folio'], ENT_QUOTES, 'UTF-8') ?></span></td>
-                            <td>
+                            <td data-label="Folio"><span class="cotz-folio"><?= htmlspecialchars($row['folio'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td data-label="Proveedor">
                                 <div class="cotz-client">
                                     <span class="cotz-avatar"<?= $logoUrl !== '' ? ' title="Logo de ' . htmlspecialchars($row['client_name'], ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
                                         <?php if ($logoUrl !== ''): ?>
@@ -451,17 +461,17 @@ include (ROOT_PATH . 'admin/menu.php');
                                     <small class="cotz-destination"><i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($row['client_destination'], ENT_QUOTES, 'UTF-8') ?></small>
                                 <?php endif; ?>
                             </td>
-                            <td class="small text-muted" style="max-width: 300px; white-space: normal; overflow-wrap: anywhere;">
+                            <td data-label="Artículos" class="small text-muted" style="max-width: 300px; white-space: normal; overflow-wrap: anywhere;">
                                 <?= htmlspecialchars($row['lista_productos']) ?>
                             </td>
-                            <td class="fw-bold">$<?= number_format($row['total'], 2) ?></td>
-                            <td>
+                            <td data-label="Total" class="fw-bold">$<?= number_format($row['total'], 2) ?></td>
+                            <td data-label="Moneda">
                                 <span class="badge <?= ($moneda_limpia == 'USD') ? 'badge-cotz-usd' : 'badge-cotz-mxn' ?>">
                                     <?= htmlspecialchars($moneda_limpia, ENT_QUOTES, 'UTF-8') ?>
                                 </span>
                             </td>
-                            <td>
-                                <a href="pdf_cotizacion.php?id=<?= (int)$row['id'] ?>" target="_blank" class="cotz-icon-btn" title="Ver PDF">
+                            <td data-label="Acciones">
+                                <a href="pdf_cotizacion.php?id=<?= (int)$row['id'] ?>" target="_blank" rel="noopener" class="cotz-icon-btn" title="Ver PDF" aria-label="Ver PDF de <?= htmlspecialchars($row['folio'], ENT_QUOTES, 'UTF-8') ?>">
                                     <i class="fa fa-file-pdf"></i>
                                 </a>
                                 <form method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar esta cotización?');">
@@ -508,10 +518,10 @@ $(document).ready(function(){
     function agregarFila() {
         $('#tablaArticulos tbody').append(`
             <tr>
-                <td><input type="text" name="productos[${c}][nombre]" class="form-control" required></td>
-                <td><input type="text" name="productos[${c}][descripcion]" class="form-control"></td>
-                <td><input type="number" name="productos[${c}][cantidad]" class="form-control text-center cotz-input-cant" value="1" min="1"></td>
-                <td>
+                <td data-label="Producto / Servicio"><input type="text" name="productos[${c}][nombre]" class="form-control" required placeholder="Ej. Servicio de mantenimiento"></td>
+                <td data-label="Descripción"><input type="text" name="productos[${c}][descripcion]" class="form-control" placeholder="Detalle opcional"></td>
+                <td data-label="Cantidad"><input type="number" name="productos[${c}][cantidad]" class="form-control text-center cotz-input-cant" value="1" min="1"></td>
+                <td data-label="Precio unitario e IVA">
                     <div class="input-group">
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" name="productos[${c}][precio]" class="form-control text-end cotz-input-precio" required min="0">
@@ -524,7 +534,7 @@ $(document).ready(function(){
                     </div>
                     <div class="cotz-subtotal">Subtotal: <span class="cotz-subtotal-valor">$0.00</span></div>
                 </td>
-                <td class="text-center"><button type="button" class="btn btn-link text-danger remove" title="Quitar fila"><i class="fa fa-trash"></i></button></td>
+                <td data-label="Quitar" class="text-center"><button type="button" class="btn btn-link text-danger remove" title="Quitar fila" aria-label="Quitar artículo"><i class="fa fa-trash"></i></button></td>
             </tr>`);
         c++;
         recalcularTotales();
