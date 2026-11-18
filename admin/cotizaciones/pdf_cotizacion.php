@@ -254,7 +254,8 @@ $pdf->Ln(3);
 
 // Tarjeta con los datos del cliente y de emisión (antes esta info no aparecía en el PDF)
 $boxY = $pdf->GetY();
-$boxH = 20;
+$boxH = 26;
+$destinoCotizacion = trim((string) ($cotizacion['client_destination'] ?? ''));
 $pdf->SetDrawColor(226, 232, 240);
 $pdf->SetFillColor(248, 250, 252);
 $pdf->Rect(10, $boxY, 190, $boxH, 'DF');
@@ -281,6 +282,12 @@ $pdf->SetFont('Arial', 'B', 9);
 $pdf->SetTextColor(79, 70, 229); // acento indigo, único toque de color del documento
 $pdf->SetXY(110, $boxY + 13);
 $pdf->Cell(85, 5, txt('Moneda: ' . $cotizacion['currency']), 0, 0);
+$pdf->SetFont('Arial', '', 8);
+$pdf->SetTextColor(71, 85, 105);
+$pdf->SetXY(14, $boxY + 19);
+$destinoPdf = mb_substr($destinoCotizacion, 0, 48, 'UTF-8');
+if (mb_strlen($destinoCotizacion, 'UTF-8') > 48) $destinoPdf .= '...';
+$pdf->Cell(90, 4, txt($destinoPdf !== '' ? 'Puesto / departamento: ' . $destinoPdf : ''), 0, 0);
 
 $pdf->SetTextColor(0, 0, 0);
 $pdf->SetXY(10, $boxY + $boxH + 6);
@@ -316,10 +323,13 @@ $pdf->SetTextColor(0, 0, 0);
 // Limpieza de búfer de salida
 ob_clean();
 
-// 2. Construimos el nombre del archivo: folio + nombre del cliente
-// Usamos trim() para quitar espacios extras y preg_replace para limpiar caracteres raros
-$nombre_base = $cotizacion['folio'] . ' - ' . $cotizacion['client_name'];
-$nombre_archivo_limpio = preg_replace('/[^A-Za-z0-9\-\_]/', '_', $nombre_base);
+// 2. Construimos el nombre del archivo con folio, cliente y destino.
+$partesNombre = [$cotizacion['folio'], $cotizacion['client_name']];
+if ($destinoCotizacion !== '') $partesNombre[] = $destinoCotizacion;
+$nombre_base = implode(' - ', $partesNombre);
+$nombreAscii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $nombre_base);
+if ($nombreAscii === false) $nombreAscii = $nombre_base;
+$nombre_archivo_limpio = trim((string) preg_replace('/[^A-Za-z0-9_-]+/', '_', $nombreAscii), '_-');
 
 // 3. Generamos la descarga o visualización
 // 'I' es para mostrar en navegador, 'D' forzaría la descarga automática

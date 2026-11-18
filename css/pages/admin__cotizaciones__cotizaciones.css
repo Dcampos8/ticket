@@ -280,6 +280,13 @@ body{ margin-top: 0; }
         display: flex;
         align-items: center;
     }
+    .cotz-page .cotz-destination {
+        display: block;
+        margin: .25rem 0 0 2.7rem;
+        color: var(--cotz-muted);
+        font-size: .72rem;
+    }
+    .cotz-page .cotz-destination i { margin-right: .2rem; color: var(--cotz-accent); }
     .cotz-page .badge-cotz-mxn {
         background: var(--cotz-accent-light);
         color: var(--cotz-accent-dark);

@@ -118,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar'])) {
    ========================= */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_cotizacion'])) {
     $client_name = trim($_POST['client_name'] ?? '');
+    $client_destination = trim($_POST['client_destination'] ?? '');
     $client_email = trim($_POST['client_email'] ?? '');
     $currency = trim($_POST['currency'] ?? 'MXN');
     $productos = $_POST['productos'] ?? [];
@@ -131,6 +132,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_cotizacion'])
     }
     if ($client_name === '') {
         $errores[] = "El nombre del cliente es obligatorio.";
+    }
+    if ($client_destination === '') {
+        $errores[] = "Indica el puesto o departamento al que va dirigida la cotización.";
+    } elseif (mb_strlen($client_destination, 'UTF-8') > 150) {
+        $errores[] = "El puesto o departamento no puede superar 150 caracteres.";
     }
     if (!in_array($currency, ['MXN', 'USD'], true)) {
         $errores[] = "Moneda no válida.";
@@ -192,8 +198,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_cotizacion'])
             $primerProducto = reset($productos);
             $folio = generarFolio($conexion, $client_name, $primerProducto['nombre'] ?? '');
 
-            $stmt = $conexion->prepare("INSERT INTO quotations (folio, client_name, client_email, currency, company_logo) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssss", $folio, $client_name, $client_email, $currency, $logo_path);
+            $stmt = $conexion->prepare("INSERT INTO quotations (folio, client_name, client_destination, client_email, currency, company_logo) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssss", $folio, $client_name, $client_destination, $client_email, $currency, $logo_path);
             $stmt->execute();
             $quotation_id = $conexion->insert_id;
             $stmt->close();
@@ -317,22 +323,26 @@ include (ROOT_PATH . 'admin/menu.php');
             <form method="POST" enctype="multipart/form-data" id="formCotizacion">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label">Cliente</label>
                         <input type="text" name="client_name" class="form-control" required>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Puesto o departamento destino</label>
+                        <input type="text" name="client_destination" class="form-control" maxlength="150" placeholder="Ej. Compras o Gerencia" required>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Email</label>
                         <input type="email" name="client_email" class="form-control">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label class="form-label">Moneda</label>
                         <select name="currency" id="selectCurrency" class="form-select fw-bold">
                             <option value="MXN">Peso Mexicano (MXN)</option>
                             <option value="USD">Dólar Americano (USD)</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label class="form-label">Logo (Opcional, máx. 2MB)</label>
                         <div class="cotz-logo-drop">
                             <img id="logoPreview" class="cotz-logo-preview" alt="Vista previa del logo">
@@ -375,7 +385,7 @@ include (ROOT_PATH . 'admin/menu.php');
     <div class="cotz-card">
         <div class="cotz-card-header">
             <h3><span class="cotz-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></span> Historial</h3>
-            <input type="text" id="buscarHistorial" class="form-control form-control-sm cotz-search" placeholder="Buscar por folio o cliente...">
+            <input type="text" id="buscarHistorial" class="form-control form-control-sm cotz-search" placeholder="Buscar por folio, cliente o destino...">
         </div>
         <div class="cotz-card-body">
             <?php if ($result->num_rows === 0): ?>
@@ -416,8 +426,11 @@ include (ROOT_PATH . 'admin/menu.php');
                                             <?= htmlspecialchars($inicial, ENT_QUOTES, 'UTF-8') ?>
                                         <?php endif; ?>
                                     </span>
-                                    <?= htmlspecialchars($row['client_name']) ?>
+                                    <span><?= htmlspecialchars($row['client_name'], ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
+                                <?php if (!empty($row['client_destination'])): ?>
+                                    <small class="cotz-destination"><i class="fa-solid fa-location-dot"></i> <?= htmlspecialchars($row['client_destination'], ENT_QUOTES, 'UTF-8') ?></small>
+                                <?php endif; ?>
                             </td>
                             <td class="small text-muted" style="max-width: 300px; white-space: normal; overflow-wrap: anywhere;">
                                 <?= htmlspecialchars($row['lista_productos']) ?>
@@ -524,7 +537,7 @@ $(document).ready(function(){
         }
     });
 
-    // Buscador simple del historial (por folio o cliente)
+    // Buscador simple del historial (folio, cliente y destino)
     $('#buscarHistorial').on('input', function(){
         const q = $(this).val().toLowerCase().trim();
         $('#tablaHistorial tbody tr').each(function(){

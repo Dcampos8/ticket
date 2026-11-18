@@ -40,6 +40,8 @@ En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como
 
 La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una fecha de creación para las cuentas nuevas y la lista de usuarios. Los registros anteriores quedan sin fecha porque la tabla no conserva el dato histórico.
 
+La migración `sql/migrations/20261118_cotizaciones_destino.sql` agrega a las cotizaciones el puesto o departamento de destino, que también aparece en el PDF y en su nombre de archivo.
+
 ## Tickets: asignación, SLA y ayuda
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.
