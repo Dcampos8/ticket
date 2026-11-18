@@ -259,13 +259,29 @@ $result = $conexion->query("
 /* =========================
    ESTADÍSTICAS RÁPIDAS (tarjetas del encabezado)
    ========================= */
+$columnCreatedAt = $conexion->query("SHOW COLUMNS FROM quotations LIKE 'created_at'");
+$tieneFechaCreacion = $columnCreatedAt && $columnCreatedAt->num_rows > 0;
+$sqlMesCotizaciones = $tieneFechaCreacion
+    ? "COALESCE(SUM(created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')), 0)"
+    : '0';
+$ordenProveedorFrecuente = $tieneFechaCreacion ? 'MAX(created_at) DESC, client_name ASC' : 'client_name ASC';
 $stats = $conexion->query("
     SELECT
         COUNT(*) AS total_cotizaciones,
-        COALESCE(SUM(CASE WHEN currency = 'MXN' THEN total ELSE 0 END), 0) AS total_mxn,
-        COALESCE(SUM(CASE WHEN currency = 'USD' THEN total ELSE 0 END), 0) AS total_usd
+        COUNT(DISTINCT NULLIF(TRIM(client_name), '')) AS total_proveedores,
+        $sqlMesCotizaciones AS cotizaciones_mes
     FROM quotations
-")->fetch_assoc();
+")->fetch_assoc() ?: ['total_cotizaciones' => 0, 'total_proveedores' => 0, 'cotizaciones_mes' => 0];
+$cotizacionesMesTexto = $tieneFechaCreacion ? number_format((int) $stats['cotizaciones_mes']) : '—';
+$cotizacionesMesNota = $tieneFechaCreacion ? 'Desde el día 1' : 'Fecha de registro no disponible';
+$proveedorMasCotizado = $conexion->query("
+    SELECT client_name, COUNT(*) AS cotizaciones
+    FROM quotations
+    WHERE TRIM(client_name) <> ''
+    GROUP BY client_name
+    ORDER BY cotizaciones DESC, $ordenProveedorFrecuente
+    LIMIT 1
+")->fetch_assoc() ?: null;
 // Renderizar navegación después de los handlers: guardar/eliminar redirigen.
 include (ROOT_PATH . 'admin/menu.php');
 ?>
@@ -286,28 +302,31 @@ include (ROOT_PATH . 'admin/menu.php');
         </div>
         <div class="col-6 col-lg-3">
             <div class="cotz-stat">
-                <div class="cotz-stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="cotz-stat-icon"><i class="fa-solid fa-truck-field"></i></div>
                 <div>
-                    <p class="cotz-stat-label">Total en MXN</p>
-                    <div class="cotz-stat-value">$<?= number_format($stats['total_mxn'], 2) ?></div>
+                    <p class="cotz-stat-label">Proveedores</p>
+                    <div class="cotz-stat-value"><?= number_format($stats['total_proveedores']) ?></div>
+                    <small class="cotz-stat-note">Con cotizaciones registradas</small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
             <div class="cotz-stat">
-                <div class="cotz-stat-icon"><i class="fa-solid fa-dollar-sign"></i></div>
+                <div class="cotz-stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
                 <div>
-                    <p class="cotz-stat-label">Total en USD</p>
-                    <div class="cotz-stat-value">$<?= number_format($stats['total_usd'], 2) ?></div>
+                    <p class="cotz-stat-label">Cotizaciones este mes</p>
+                    <div class="cotz-stat-value"><?= $cotizacionesMesTexto ?></div>
+                    <small class="cotz-stat-note"><?= $cotizacionesMesNota ?></small>
                 </div>
             </div>
         </div>
         <div class="col-6 col-lg-3">
             <div class="cotz-stat">
-                <div class="cotz-stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div class="cotz-stat-icon"><i class="fa-solid fa-award"></i></div>
                 <div>
-                    <p class="cotz-stat-label">Estatus</p>
-                    <div class="cotz-stat-value" style="font-size:1rem;">Módulo activo</div>
+                    <p class="cotz-stat-label">Más cotizado</p>
+                    <div class="cotz-stat-value cotz-stat-value-name"><?= htmlspecialchars($proveedorMasCotizado['client_name'] ?? 'Sin datos', ENT_QUOTES, 'UTF-8') ?></div>
+                    <small class="cotz-stat-note"><?= number_format((int) ($proveedorMasCotizado['cotizaciones'] ?? 0)) ?> cotización(es)</small>
                 </div>
             </div>
         </div>

@@ -101,6 +101,20 @@ body{ margin-top: 0; }
         color: var(--cotz-text);
         line-height: 1.1;
     }
+    .cotz-page .cotz-stat-note {
+        display: block;
+        margin-top: .3rem;
+        color: var(--cotz-muted);
+        font-size: .7rem;
+        line-height: 1.25;
+    }
+    .cotz-page .cotz-stat-value-name {
+        max-width: 230px;
+        overflow: hidden;
+        font-size: clamp(.84rem, 1.25vw, 1.1rem);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 
     /* Formulario */
     .cotz-page .form-label {
