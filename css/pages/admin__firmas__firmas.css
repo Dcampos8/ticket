@@ -25,6 +25,14 @@
 .firmas-submit { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 8px; background: #1e3a8a; color: #fff; font-weight: 650; cursor: pointer; transition: background .15s, transform .15s; }
 .firmas-submit:hover { background: #1d4ed8; transform: translateY(-1px); }
 .firmas-submit:focus-visible { outline: 3px solid rgba(37, 99, 235, .35); outline-offset: 2px; }
+.firmas-submit:disabled { opacity: .65; cursor: wait; }
+.firma-preview { margin-top: 22px; padding: clamp(20px, 4vw, 30px); border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; box-shadow: 0 8px 28px rgba(15, 23, 42, .06); }
+.firma-preview h2 { margin: 0 0 16px; color: #172554; font-size: 1.15rem; }
+.firma-preview img { display: block; width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+.firma-preview-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+.firmas-download { text-decoration: none; background: #fff; color: #1e3a8a; border: 1px solid #1e3a8a; }
+.firmas-download:hover { background: #eff6ff; }
+.firma-preview .firmas-alert { margin-top: 14px; }
 .firmas-alert { margin: 0 0 18px; padding: 12px 15px; border-radius: 8px; font-size: .9rem; }
 .firmas-alert.success { border: 1px solid #a7f3d0; background: #ecfdf5; color: #065f46; }
 .firmas-alert.error { border: 1px solid #fecaca; background: #fef2f2; color: #991b1b; }
@@ -34,4 +42,6 @@
     .firmas-field-wide { grid-column: auto; }
     .firmas-actions { align-items: stretch; flex-direction: column; }
     .firmas-submit { width: 100%; }
+    .firma-preview-actions { flex-direction: column; }
+    .firma-preview-actions > * { width: 100%; }
 }

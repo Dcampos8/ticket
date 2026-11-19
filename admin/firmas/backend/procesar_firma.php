@@ -110,6 +110,20 @@ if (!empty($telefono)) {
 imagettftext($img, 11, 0, $xInicio, $yContacto, $rojo_tv, $fontPath, mb_strtolower($correo, 'UTF-8'));
 
 /* ================= 6. GUARDADO Y ENVÍO ================= */
+$accion = (string) ($_POST['accion'] ?? 'send');
+if ($accion === 'preview') {
+    header('Content-Type: image/jpeg');
+    header('Cache-Control: no-store, private');
+    imagejpeg($img, null, 95);
+    imagedestroy($img);
+    exit();
+}
+if ($accion !== 'send') {
+    imagedestroy($img);
+    http_response_code(400);
+    exit('Acción no válida.');
+}
+
 $dirTmp = __DIR__.'/../tmp';
 if (!is_dir($dirTmp)) { mkdir($dirTmp, 0755, true); }
 
