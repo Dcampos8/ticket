@@ -42,20 +42,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar'])) {
 // --- GUARDAR / CREAR LICENCIA ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_licencia'])) {
     $service_name    = trim($_POST['service_name'] ?? '');
+    $license_type    = trim($_POST['license_type'] ?? 'Servicio');
     $provider        = trim($_POST['provider'] ?? '');
     $license_key     = trim($_POST['license_key'] ?? '');
     $cost            = floatval($_POST['cost'] ?? 0);
     $currency        = trim($_POST['currency'] ?? 'MXN');
     $expiration_date = trim($_POST['expiration_date'] ?? '');
+    $expiration_date = $expiration_date !== '' ? $expiration_date : null;
     $notes           = trim($_POST['notes'] ?? '');
 
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
         $_SESSION['flash_msg'] = "❌ Token de seguridad inválido.";
-    } elseif (empty($service_name) || empty($expiration_date)) {
-        $_SESSION['flash_msg'] = "❌ El nombre del servicio y la fecha de vencimiento son obligatorios.";
+    } elseif (empty($service_name)) {
+        $_SESSION['flash_msg'] = "❌ El nombre del servicio es obligatorio.";
     } else {
-        $stmt = $conexion->prepare("INSERT INTO licenses (service_name, provider, license_key, cost, currency, expiration_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssdsss", $service_name, $provider, $license_key, $cost, $currency, $expiration_date, $notes);
+        $stmt = $conexion->prepare("INSERT INTO licenses (service_name, license_type, provider, license_key, cost, currency, expiration_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssdsss", $service_name, $license_type, $provider, $license_key, $cost, $currency, $expiration_date, $notes);
 
         if ($stmt->execute()) {
             $_SESSION['flash_msg'] = "✅ Licencia guardada exitosamente: $service_name";
@@ -72,20 +74,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_licencia'])) 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_licencia'])) {
     $id              = intval($_POST['id'] ?? 0);
     $service_name    = trim($_POST['service_name'] ?? '');
+    $license_type    = trim($_POST['license_type'] ?? 'Servicio');
     $provider        = trim($_POST['provider'] ?? '');
     $license_key     = trim($_POST['license_key'] ?? '');
     $cost            = floatval($_POST['cost'] ?? 0);
     $currency        = trim($_POST['currency'] ?? 'MXN');
     $expiration_date = trim($_POST['expiration_date'] ?? '');
+    $expiration_date = $expiration_date !== '' ? $expiration_date : null;
     $notes           = trim($_POST['notes'] ?? '');
 
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
         $_SESSION['flash_msg'] = "❌ Token de seguridad inválido.";
-    } elseif ($id <= 0 || empty($service_name) || empty($expiration_date)) {
+    } elseif ($id <= 0 || empty($service_name)) {
         $_SESSION['flash_msg'] = "❌ Datos incompletos para actualizar el registro.";
     } else {
-        $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, provider = ?, license_key = ?, cost = ?, currency = ?, expiration_date = ?, notes = ? WHERE id = ?");
-        $stmt->bind_param("sssdsssi", $service_name, $provider, $license_key, $cost, $currency, $expiration_date, $notes, $id);
+        $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, license_type = ?, provider = ?, license_key = ?, cost = ?, currency = ?, expiration_date = ?, notes = ? WHERE id = ?");
+        $stmt->bind_param("ssssdsssi", $service_name, $license_type, $provider, $license_key, $cost, $currency, $expiration_date, $notes, $id);
 
         if ($stmt->execute()) {
             $_SESSION['flash_msg'] = "✅ Licencia actualizada correctamente: $service_name";
@@ -116,7 +120,7 @@ function claseAlerta($msg) {
 /* =========================
    CONSULTA REGISTROS
    ========================= */
-$result = $conexion->query("SELECT *, DATEDIFF(expiration_date, CURDATE()) AS dias_restantes FROM licenses ORDER BY expiration_date ASC");
+$result = $conexion->query("SELECT *, DATEDIFF(expiration_date, CURDATE()) AS dias_restantes FROM licenses ORDER BY expiration_date IS NULL ASC, expiration_date ASC");
 
 /* =========================
    ESTADÍSTICAS RÁPIDAS
@@ -158,7 +162,7 @@ $stats = $conexion->query("
             <div class="lic-stat">
                 <div class="lic-stat-icon" style="background:#fee2e2; color:#dc2626;"><i class="fa-solid fa-circle-xmark"></i></div>
                 <div>
-                    <p class="lic-stat-label">Vencidas / Expiradas</p>
+            <p class="lic-stat-label">Vencidas</p>
                     <div class="lic-stat-value"><?= number_format($stats['vencidas']) ?></div>
                 </div>
             </div>
@@ -180,6 +184,12 @@ $stats = $conexion->query("
                     <div class="col-md-4">
                         <label class="form-label">Servicio / Servidor / Software</label>
                         <input type="text" name="service_name" class="form-control" placeholder="Ej. VPS DigitalOcean, Office 365" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de licencia</label>
+                        <select name="license_type" class="form-select">
+                            <option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Proveedor / Dominio</label>
@@ -205,8 +215,9 @@ $stats = $conexion->query("
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Fecha de Vencimiento</label>
-                        <input type="date" name="expiration_date" class="form-control" required>
+                        <label class="form-label">Fecha de vencimiento (opcional)</label>
+                        <input type="date" name="expiration_date" class="form-control">
+                        <small class="text-muted">Déjala vacía si es perpetua o no tiene vencimiento.</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Notas / Observaciones</label>
@@ -240,7 +251,7 @@ $stats = $conexion->query("
                 <table id="tablaLicencias" class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Servicio / Servidor</th>
+                            <th>Activo / Tipo</th>
                             <th>Proveedor</th>
                             <th>Licencia / Ref</th>
                             <th>Costo</th>
@@ -254,7 +265,10 @@ $stats = $conexion->query("
                         <?php while ($row = $result->fetch_assoc()): ?>
                         <?php
                             $dias = (int)$row['dias_restantes'];
-                            if ($dias < 0) {
+                            if ($row['expiration_date'] === null || $row['expiration_date'] === '') {
+                                $badgeClass = 'badge-status-ok';
+                                $statusText = 'Sin vencimiento';
+                            } elseif ($dias < 0) {
                                 $badgeClass = 'badge-status-danger';
                                 $statusText = 'Vencida (' . abs($dias) . ' días)';
                             } elseif ($dias <= 30) {
@@ -266,11 +280,11 @@ $stats = $conexion->query("
                             }
                         ?>
                         <tr>
-                            <td class="fw-bold"><?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="fw-bold"><?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?><br><small class="text-muted fw-normal"><?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?></small></td>
                             <td><?= htmlspecialchars($row['provider'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
                             <td><code><?= htmlspecialchars($row['license_key'] ?? '-', ENT_QUOTES, 'UTF-8') ?></code></td>
                             <td class="fw-bold">$<?= number_format($row['cost'], 2) ?> <small class="text-muted"><?= htmlspecialchars($row['currency']) ?></small></td>
-                            <td><?= date('d/m/Y', strtotime($row['expiration_date'])) ?></td>
+                            <td><?= $row['expiration_date'] ? date('d/m/Y', strtotime($row['expiration_date'])) : '—' ?></td>
                             <td><span class="badge <?= $badgeClass ?>"><?= $statusText ?></span></td>
                             <td class="small text-muted"><?= htmlspecialchars($row['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
@@ -278,6 +292,7 @@ $stats = $conexion->query("
                                 <button type="button" class="lic-icon-btn btn-edit me-1" 
                                     data-id="<?= $row['id'] ?>"
                                     data-service_name="<?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?>"
+                                    data-license_type="<?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?>"
                                     data-provider="<?= htmlspecialchars($row['provider'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     data-license_key="<?= htmlspecialchars($row['license_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     data-cost="<?= $row['cost'] ?>"
@@ -326,6 +341,12 @@ $stats = $conexion->query("
                             <input type="text" name="service_name" id="edit_service_name" class="form-control" required>
                         </div>
                         <div class="col-md-6">
+                            <label class="form-label">Tipo de licencia</label>
+                            <select name="license_type" id="edit_license_type" class="form-select">
+                                <option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label">Proveedor / Dominio</label>
                             <input type="text" name="provider" id="edit_provider" class="form-control">
                         </div>
@@ -348,8 +369,8 @@ $stats = $conexion->query("
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de Vencimiento</label>
-                            <input type="date" name="expiration_date" id="edit_expiration_date" class="form-control" required>
+                            <label class="form-label">Fecha de vencimiento (opcional)</label>
+                            <input type="date" name="expiration_date" id="edit_expiration_date" class="form-control">
                         </div>
                         <div class="col-md-8">
                             <label class="form-label">Notas / Observaciones</label>
@@ -382,6 +403,7 @@ $(document).ready(function(){
         const $btn = $(this);
         $('#edit_id').val($btn.data('id'));
         $('#edit_service_name').val($btn.data('service_name'));
+        $('#edit_license_type').val($btn.data('license_type'));
         $('#edit_provider').val($btn.data('provider'));
         $('#edit_license_key').val($btn.data('license_key'));
         $('#edit_cost').val($btn.data('cost'));

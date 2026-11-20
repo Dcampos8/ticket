@@ -42,6 +42,8 @@ La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una f
 
 La migración `sql/migrations/20261118_cotizaciones_destino.sql` agrega a las cotizaciones el puesto o departamento de destino, que también aparece en el PDF y en su nombre de archivo.
 
+La migración `sql/migrations/20261119_licencias_sin_vencimiento.sql` permite clasificar licencias y registrar activos perpetuos o sin fecha de vencimiento.
+
 ## Tickets: asignación, SLA y ayuda
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.
