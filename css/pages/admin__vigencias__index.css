@@ -155,6 +155,28 @@ body { margin-top: 0; }
     .lic-detail-list > div:last-child { border-bottom: 0; }
     .lic-detail-list dt { color: var(--lic-muted); font-size: .8rem; font-weight: 700; }
     .lic-detail-list dd { margin: 0; overflow-wrap: anywhere; }
+    #modalEditar .modal-dialog { width: calc(100% - 2rem); max-width: 820px; }
+    #modalEditar .modal-content { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 24px 70px rgba(15, 23, 42, .22); }
+    #modalEditar .modal-header { padding: 1.15rem 1.35rem; background: #f8fafc; border-bottom-color: #e8edf4; }
+    #modalEditar .modal-title { display: flex; align-items: center; font-size: 1.15rem; color: #172554; }
+    #modalEditar .modal-body { padding: 1.35rem; }
+    #modalEditar .modal-body > .row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.05rem 1rem; margin: 0; align-items: end; }
+    #modalEditar .modal-body > .row > [class*="col-"] { width: auto; max-width: none; min-width: 0; padding: 0; }
+    #modalEditar .modal-body > .row > :nth-child(1),
+    #modalEditar .modal-body > .row > :nth-child(2),
+    #modalEditar .modal-body > .row > :nth-child(3),
+    #modalEditar .modal-body > .row > :nth-child(4) { grid-column: span 6; }
+    #modalEditar .modal-body > .row > :nth-child(5) { grid-column: span 3; }
+    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 5; }
+    #modalEditar .modal-body > .row > :nth-child(8) { grid-column: span 12; }
+    #modalEditar .modal-body .form-label { display: block; min-height: 1.1rem; margin-bottom: .45rem; font-size: .72rem; line-height: 1.35; }
+    #modalEditar .modal-body .form-control,
+    #modalEditar .modal-body .form-select,
+    #modalEditar .modal-body .input-group-text { min-height: 44px; font-size: .92rem; }
+    #modalEditar .modal-body .form-select { min-width: 0; padding-right: 2rem; }
+    #modalEditar .modal-footer { padding: 1rem 1.35rem; border-top-color: #e8edf4; }
+    #modalEditar .modal-footer .btn { min-height: 42px; border-radius: 9px; font-weight: 600; }
 
     .badge-status-ok { background: #dcfce7; color: #15803d; font-weight: 600; }
     .badge-status-warn { background: #fef3c7; color: #b45309; font-weight: 600; }
@@ -203,4 +225,15 @@ body { margin-top: 0; }
         .lic-page #tablaLicencias th:nth-child(6) { display: none; }
         .lic-page #tablaLicencias td:nth-child(6) { display: none; }
         .lic-detail-list > div { grid-template-columns: 1fr; gap: 3px; }
+        #modalEditar .modal-dialog { width: calc(100% - 1rem); margin: .5rem auto; }
+        #modalEditar .modal-header, #modalEditar .modal-body { padding: 1rem; }
+        #modalEditar .modal-body > .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem .75rem; }
+        #modalEditar .modal-body > .row > [class*="col-"] { grid-column: span 1 !important; }
+        #modalEditar .modal-body > .row > :nth-child(1),
+        #modalEditar .modal-body > .row > :nth-child(2),
+        #modalEditar .modal-body > .row > :nth-child(3),
+        #modalEditar .modal-body > .row > :nth-child(4),
+        #modalEditar .modal-body > .row > :nth-child(8) { grid-column: span 2 !important; }
+        #modalEditar .modal-footer { padding: .85rem 1rem; }
+        #modalEditar .modal-footer .btn { padding-inline: .8rem; }
     }
