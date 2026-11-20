@@ -130,6 +130,8 @@ body { margin-top: 0; }
 
     /* Tablas y Badges */
     .lic-page .lic-search { max-width: 280px; }
+    .lic-page .lic-table-tools { display: flex; flex-wrap: wrap; gap: .55rem; margin-left: auto; }
+    .lic-page .lic-table-tools .lic-filter { width: auto; min-width: 145px; }
     .lic-page #tablaLicencias thead th {
         font-size: .72rem;
         text-transform: uppercase;
@@ -143,12 +145,12 @@ body { margin-top: 0; }
     .lic-page #tablaLicencias tbody tr:hover { background: var(--lic-bg); }
     .lic-page #tablaLicencias { width: 100%; table-layout: fixed; }
     .lic-page #tablaLicencias th, .lic-page #tablaLicencias td { overflow-wrap: anywhere; vertical-align: middle; }
-    .lic-page #tablaLicencias th:nth-child(1) { width: 24%; }
-    .lic-page #tablaLicencias th:nth-child(2) { width: 15%; }
+    .lic-page #tablaLicencias th:nth-child(1) { width: 21%; }
+    .lic-page #tablaLicencias th:nth-child(2) { width: 13%; }
     .lic-page #tablaLicencias th:nth-child(3) { width: 20%; }
     .lic-page #tablaLicencias th:nth-child(4) { width: 13%; }
-    .lic-page #tablaLicencias th:nth-child(5) { width: 17%; }
-    .lic-page #tablaLicencias th:nth-child(6) { width: 11%; }
+    .lic-page #tablaLicencias th:nth-child(5) { width: 20%; }
+    .lic-page #tablaLicencias th:nth-child(6) { width: 13%; }
     .lic-page #tablaLicencias td .btn { white-space: nowrap; }
     .lic-detail-list { margin: 0; }
     .lic-detail-list > div { display: grid; grid-template-columns: minmax(130px, 40%) 1fr; gap: 12px; padding: .7rem 0; border-bottom: 1px solid var(--lic-border-soft); }
@@ -164,12 +166,17 @@ body { margin-top: 0; }
     #modalEditar .modal-body > .row > [class*="col-"] { width: auto; max-width: none; min-width: 0; padding: 0; }
     #modalEditar .modal-body > .row > :nth-child(1),
     #modalEditar .modal-body > .row > :nth-child(2),
-    #modalEditar .modal-body > .row > :nth-child(3),
-    #modalEditar .modal-body > .row > :nth-child(4) { grid-column: span 6; }
-    #modalEditar .modal-body > .row > :nth-child(5) { grid-column: span 3; }
-    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 4; }
-    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 5; }
-    #modalEditar .modal-body > .row > :nth-child(8) { grid-column: span 12; }
+    #modalEditar .modal-body > .row > :nth-child(3) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(4),
+    #modalEditar .modal-body > .row > :nth-child(5) { grid-column: span 6; }
+    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 8; }
+    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(8),
+    #modalEditar .modal-body > .row > :nth-child(13) { grid-column: span 12; }
+    #modalEditar .modal-body > .row > :nth-child(9) { grid-column: span 2; }
+    #modalEditar .modal-body > .row > :nth-child(10) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(11),
+    #modalEditar .modal-body > .row > :nth-child(12) { grid-column: span 3; }
     #modalEditar .modal-body .form-label { display: block; min-height: 1.1rem; margin-bottom: .45rem; font-size: .72rem; line-height: 1.35; }
     #modalEditar .modal-body .form-control,
     #modalEditar .modal-body .form-select,
@@ -217,13 +224,16 @@ body { margin-top: 0; }
     @media (max-width: 575.98px) {
         .lic-page .lic-card-body { padding: 1rem; }
         .lic-page #tablaLicencias { font-size: .82rem; }
-        .lic-page #tablaLicencias th:nth-child(2), .lic-page #tablaLicencias td:nth-child(2) { display: none; }
-        .lic-page #tablaLicencias th:nth-child(1) { width: 34%; }
-        .lic-page #tablaLicencias th:nth-child(3) { width: 27%; }
-        .lic-page #tablaLicencias th:nth-child(4) { width: 15%; }
-        .lic-page #tablaLicencias th:nth-child(5) { width: 24%; }
-        .lic-page #tablaLicencias th:nth-child(6) { display: none; }
-        .lic-page #tablaLicencias td:nth-child(6) { display: none; }
+        .lic-page .lic-table-tools { width: 100%; margin-left: 0; }
+        .lic-page .lic-table-tools > * { flex: 1 1 100%; width: 100%; max-width: none; }
+        .lic-page #tablaLicencias th:nth-child(2), .lic-page #tablaLicencias td:nth-child(2),
+        .lic-page #tablaLicencias th:nth-child(3), .lic-page #tablaLicencias td:nth-child(3),
+        .lic-page #tablaLicencias th:nth-child(5), .lic-page #tablaLicencias td:nth-child(5) { display: none; }
+        .lic-page #tablaLicencias th:nth-child(1) { width: 45%; }
+        .lic-page #tablaLicencias th:nth-child(4) { width: 25%; }
+        .lic-page #tablaLicencias th:nth-child(6) { width: 30%; }
+        .lic-page #tablaLicencias td .btn-detail { padding: .3rem .4rem; white-space: normal; }
+        .lic-page #tablaLicencias td .btn-detail span { font-size: .72rem; }
         .lic-detail-list > div { grid-template-columns: 1fr; gap: 3px; }
         #modalEditar .modal-dialog { width: calc(100% - 1rem); margin: .5rem auto; }
         #modalEditar .modal-header, #modalEditar .modal-body { padding: 1rem; }
@@ -233,7 +243,11 @@ body { margin-top: 0; }
         #modalEditar .modal-body > .row > :nth-child(2),
         #modalEditar .modal-body > .row > :nth-child(3),
         #modalEditar .modal-body > .row > :nth-child(4),
-        #modalEditar .modal-body > .row > :nth-child(8) { grid-column: span 2 !important; }
+        #modalEditar .modal-body > .row > :nth-child(5),
+        #modalEditar .modal-body > .row > :nth-child(6),
+        #modalEditar .modal-body > .row > :nth-child(7),
+        #modalEditar .modal-body > .row > :nth-child(8),
+        #modalEditar .modal-body > .row > :nth-child(13) { grid-column: span 2 !important; }
         #modalEditar .modal-footer { padding: .85rem 1rem; }
         #modalEditar .modal-footer .btn { padding-inline: .8rem; }
     }

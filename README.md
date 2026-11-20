@@ -44,6 +44,8 @@ La migración `sql/migrations/20261118_cotizaciones_destino.sql` agrega a las co
 
 La migración `sql/migrations/20261119_licencias_sin_vencimiento.sql` permite clasificar licencias y registrar activos perpetuos o sin fecha de vencimiento.
 
+La migración `sql/migrations/20261120_licencias_detalle_y_claves.sql` agrega modalidad, edición, cantidad, asignación y fecha de compra a las licencias. Aplícala después de la migración del 19 de noviembre. Las claves se cifran con `APP_SETTINGS_ENCRYPTION_KEY`, que debe tener al menos 32 caracteres aleatorios; al abrir Licencias se migran automáticamente las claves históricas en texto plano. La llave debe conservarse para poder descifrar las claves guardadas.
+
 ## Tickets: asignación, SLA y ayuda
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.
