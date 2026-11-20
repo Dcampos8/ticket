@@ -490,18 +490,18 @@ $stats = $conexion->query("
                             <label class="form-label">Versión / edición</label>
                             <input type="text" name="version_edition" id="edit_version_edition" class="form-control">
                         </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Cambiar clave / serial / referencia</label>
-                            <input type="password" name="license_key" id="edit_license_key" class="form-control" placeholder="Déjalo vacío para conservar la clave actual" autocomplete="new-password">
-                            <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="clear_license_key" id="edit_clear_license_key"><label class="form-check-label" for="edit_clear_license_key">Eliminar clave guardada</label></div>
+                        <div class="col-md-9">
+                            <label class="form-label">Asignada a / equipo</label>
+                            <input type="text" name="assigned_to" id="edit_assigned_to" class="form-control">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Cantidad</label>
                             <input type="number" name="quantity" id="edit_quantity" class="form-control" min="1" max="100000" required>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label">Asignada a / equipo</label>
-                            <input type="text" name="assigned_to" id="edit_assigned_to" class="form-control">
+                            <label class="form-label">Cambiar clave / serial / referencia</label>
+                            <input type="password" name="license_key" id="edit_license_key" class="form-control" placeholder="Déjalo vacío para conservar la clave actual" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
+                            <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="clear_license_key" id="edit_clear_license_key"><label class="form-check-label" for="edit_clear_license_key">Eliminar clave guardada</label></div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Costo total</label>

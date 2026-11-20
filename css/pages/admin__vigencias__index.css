@@ -169,12 +169,12 @@ body { margin-top: 0; }
     #modalEditar .modal-body > .row > :nth-child(3) { grid-column: span 4; }
     #modalEditar .modal-body > .row > :nth-child(4),
     #modalEditar .modal-body > .row > :nth-child(5) { grid-column: span 6; }
-    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 8; }
-    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 9; }
+    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 3; }
     #modalEditar .modal-body > .row > :nth-child(8),
     #modalEditar .modal-body > .row > :nth-child(13) { grid-column: span 12; }
-    #modalEditar .modal-body > .row > :nth-child(9) { grid-column: span 2; }
-    #modalEditar .modal-body > .row > :nth-child(10) { grid-column: span 4; }
+    #modalEditar .modal-body > .row > :nth-child(9),
+    #modalEditar .modal-body > .row > :nth-child(10),
     #modalEditar .modal-body > .row > :nth-child(11),
     #modalEditar .modal-body > .row > :nth-child(12) { grid-column: span 3; }
     #modalEditar .modal-body .form-label { display: block; min-height: 1.1rem; margin-bottom: .45rem; font-size: .72rem; line-height: 1.35; }
