@@ -251,14 +251,12 @@ $stats = $conexion->query("
                 <table id="tablaLicencias" class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            <th>Activo / Tipo</th>
+                            <th>Activo</th>
+                            <th>Tipo</th>
                             <th>Proveedor</th>
-                            <th>Licencia / Ref</th>
-                            <th>Costo</th>
                             <th>Vencimiento</th>
                             <th>Estado</th>
-                            <th>Notas</th>
-                            <th>Acciones</th>
+                            <th>Detalle</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -280,16 +278,13 @@ $stats = $conexion->query("
                             }
                         ?>
                         <tr>
-                            <td class="fw-bold"><?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?><br><small class="text-muted fw-normal"><?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?></small></td>
-                            <td><?= htmlspecialchars($row['provider'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><code><?= htmlspecialchars($row['license_key'] ?? '-', ENT_QUOTES, 'UTF-8') ?></code></td>
-                            <td class="fw-bold">$<?= number_format($row['cost'], 2) ?> <small class="text-muted"><?= htmlspecialchars($row['currency']) ?></small></td>
+                            <td class="fw-bold lic-cell-wrap"><?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="lic-cell-wrap"><?= htmlspecialchars($row['provider'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= $row['expiration_date'] ? date('d/m/Y', strtotime($row['expiration_date'])) : '—' ?></td>
                             <td><span class="badge <?= $badgeClass ?>"><?= $statusText ?></span></td>
-                            <td class="small text-muted"><?= htmlspecialchars($row['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
-                                <!-- Botón Editar (Modal) -->
-                                <button type="button" class="lic-icon-btn btn-edit me-1" 
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-detail"
                                     data-id="<?= $row['id'] ?>"
                                     data-service_name="<?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-license_type="<?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?>"
@@ -299,18 +294,10 @@ $stats = $conexion->query("
                                     data-currency="<?= $row['currency'] ?>"
                                     data-expiration_date="<?= $row['expiration_date'] ?>"
                                     data-notes="<?= htmlspecialchars($row['notes'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                    title="Editar">
-                                    <i class="fa fa-pen"></i>
+                                    data-status="<?= htmlspecialchars($statusText, ENT_QUOTES, 'UTF-8') ?>"
+                                    data-status_class="<?= $badgeClass ?>">
+                                    Ver datos
                                 </button>
-
-                                <!-- Formulario Eliminar -->
-                                <form method="POST" style="display:inline" onsubmit="return confirm('¿Deseas eliminar este registro?');">
-                                    <input type="hidden" name="eliminar" value="<?= (int)$row['id'] ?>">
-                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
-                                    <button type="submit" class="lic-icon-btn lic-icon-danger" title="Eliminar">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </form>
                             </td>
                         </tr>
                         <?php endwhile; ?>
@@ -318,6 +305,40 @@ $stats = $conexion->query("
                 </table>
             </div>
             <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de datos completos -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content lic-page">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-info me-2 text-primary"></i>Datos del registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="lic-detail-list">
+                    <div><dt>Activo</dt><dd id="detail_service_name"></dd></div>
+                    <div><dt>Tipo</dt><dd id="detail_license_type"></dd></div>
+                    <div><dt>Proveedor / dominio</dt><dd id="detail_provider"></dd></div>
+                    <div><dt>Licencia / serial / IP / ID</dt><dd id="detail_license_key"></dd></div>
+                    <div><dt>Costo</dt><dd id="detail_cost"></dd></div>
+                    <div><dt>Vencimiento</dt><dd id="detail_expiration_date"></dd></div>
+                    <div><dt>Estado</dt><dd><span id="detail_status" class="badge"></span></dd></div>
+                    <div><dt>Notas</dt><dd id="detail_notes"></dd></div>
+                </dl>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <form method="POST" id="formEliminarLicencia" onsubmit="return confirm('¿Deseas eliminar este registro?');">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="submit" name="eliminar" id="detail_delete" class="btn btn-outline-danger"><i class="fa fa-trash me-1"></i> Eliminar</button>
+                </form>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" id="detail_edit" class="btn btn-lic-primary"><i class="fa fa-pen me-1"></i> Editar</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -398,21 +419,46 @@ $(document).ready(function(){
         });
     });
 
-    // Cargar datos en el Modal de Edición
-    $('.btn-edit').on('click', function(){
-        const $btn = $(this);
-        $('#edit_id').val($btn.data('id'));
-        $('#edit_service_name').val($btn.data('service_name'));
-        $('#edit_license_type').val($btn.data('license_type'));
-        $('#edit_provider').val($btn.data('provider'));
-        $('#edit_license_key').val($btn.data('license_key'));
-        $('#edit_cost').val($btn.data('cost'));
-        $('#edit_currency').val($btn.data('currency'));
-        $('#edit_expiration_date').val($btn.data('expiration_date'));
-        $('#edit_notes').val($btn.data('notes'));
+    let registroSeleccionado = null;
+    const modalDetalleEl = document.getElementById('modalDetalle');
+    const modalEdicionEl = document.getElementById('modalEditar');
+    const modalDetalle = new bootstrap.Modal(modalDetalleEl);
+    const modalEdicion = new bootstrap.Modal(modalEdicionEl);
 
-        const modalEditar = new bootstrap.Modal(document.getElementById('modalEditar'));
-        modalEditar.show();
+    $('.btn-detail').on('click', function(){
+        const $btn = $(this);
+        registroSeleccionado = $btn.data();
+        const texto = (id, valor) => document.getElementById(id).textContent = valor || '—';
+        texto('detail_service_name', registroSeleccionado.service_name);
+        texto('detail_license_type', registroSeleccionado.license_type);
+        texto('detail_provider', registroSeleccionado.provider);
+        texto('detail_license_key', registroSeleccionado.license_key);
+        texto('detail_cost', '$' + Number(registroSeleccionado.cost || 0).toFixed(2) + ' ' + registroSeleccionado.currency);
+        texto('detail_expiration_date', registroSeleccionado.expiration_date ? new Date(registroSeleccionado.expiration_date + 'T00:00:00').toLocaleDateString('es-MX') : 'Sin vencimiento');
+        texto('detail_notes', registroSeleccionado.notes);
+        $('#detail_status').text(registroSeleccionado.status || '—').attr('class', 'badge ' + (registroSeleccionado.status_class || 'badge-status-ok'));
+        $('#detail_delete').val(registroSeleccionado.id);
+        modalDetalle.show();
     });
+
+    $('#detail_edit').on('click', function(){
+        if (!registroSeleccionado) return;
+        const datos = registroSeleccionado;
+        $('#edit_id').val(datos.id);
+        $('#edit_service_name').val(datos.service_name);
+        $('#edit_license_type').val(datos.license_type);
+        $('#edit_provider').val(datos.provider);
+        $('#edit_license_key').val(datos.license_key);
+        $('#edit_cost').val(datos.cost);
+        $('#edit_currency').val(datos.currency);
+        $('#edit_expiration_date').val(datos.expiration_date);
+        $('#edit_notes').val(datos.notes);
+        modalDetalle.hide();
+        modalDetalleEl.addEventListener('hidden.bs.modal', function abrirEdicion(){
+            modalDetalleEl.removeEventListener('hidden.bs.modal', abrirEdicion);
+            modalEdicion.show();
+        });
+    });
+
 });
 </script>

@@ -141,6 +141,20 @@ body { margin-top: 0; }
     }
     .lic-page #tablaLicencias td { border-color: var(--lic-border-soft); }
     .lic-page #tablaLicencias tbody tr:hover { background: var(--lic-bg); }
+    .lic-page #tablaLicencias { width: 100%; table-layout: fixed; }
+    .lic-page #tablaLicencias th, .lic-page #tablaLicencias td { overflow-wrap: anywhere; vertical-align: middle; }
+    .lic-page #tablaLicencias th:nth-child(1) { width: 24%; }
+    .lic-page #tablaLicencias th:nth-child(2) { width: 15%; }
+    .lic-page #tablaLicencias th:nth-child(3) { width: 20%; }
+    .lic-page #tablaLicencias th:nth-child(4) { width: 13%; }
+    .lic-page #tablaLicencias th:nth-child(5) { width: 17%; }
+    .lic-page #tablaLicencias th:nth-child(6) { width: 11%; }
+    .lic-page #tablaLicencias td .btn { white-space: nowrap; }
+    .lic-detail-list { margin: 0; }
+    .lic-detail-list > div { display: grid; grid-template-columns: minmax(130px, 40%) 1fr; gap: 12px; padding: .7rem 0; border-bottom: 1px solid var(--lic-border-soft); }
+    .lic-detail-list > div:last-child { border-bottom: 0; }
+    .lic-detail-list dt { color: var(--lic-muted); font-size: .8rem; font-weight: 700; }
+    .lic-detail-list dd { margin: 0; overflow-wrap: anywhere; }
 
     .badge-status-ok { background: #dcfce7; color: #15803d; font-weight: 600; }
     .badge-status-warn { background: #fef3c7; color: #b45309; font-weight: 600; }
@@ -177,4 +191,16 @@ body { margin-top: 0; }
         color: var(--lic-border);
         margin-bottom: .75rem;
         display: block;
+    }
+    @media (max-width: 575.98px) {
+        .lic-page .lic-card-body { padding: 1rem; }
+        .lic-page #tablaLicencias { font-size: .82rem; }
+        .lic-page #tablaLicencias th:nth-child(2), .lic-page #tablaLicencias td:nth-child(2) { display: none; }
+        .lic-page #tablaLicencias th:nth-child(1) { width: 34%; }
+        .lic-page #tablaLicencias th:nth-child(3) { width: 27%; }
+        .lic-page #tablaLicencias th:nth-child(4) { width: 15%; }
+        .lic-page #tablaLicencias th:nth-child(5) { width: 24%; }
+        .lic-page #tablaLicencias th:nth-child(6) { display: none; }
+        .lic-page #tablaLicencias td:nth-child(6) { display: none; }
+        .lic-detail-list > div { grid-template-columns: 1fr; gap: 3px; }
     }
