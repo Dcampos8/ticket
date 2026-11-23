@@ -5,6 +5,39 @@ ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
+require_once __DIR__ . '/../config/env.php';
+
+// reCAPTCHA v3: validar en servidor antes de consultar credenciales.
+$siteKey = trim((string) env('RECAPTCHA_V3_SITE_KEY', ''));
+$secretKey = trim((string) env('RECAPTCHA_V3_SECRET_KEY', ''));
+$captchaToken = trim((string) ($_POST['recaptcha_token'] ?? ''));
+$baseHost = parse_url((string) env('APP_BASE_URL', ''), PHP_URL_HOST);
+$captchaValido = false;
+
+if ($siteKey !== '' && $secretKey !== '' && $captchaToken !== '' && strlen($captchaToken) <= 4096) {
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => http_build_query(['secret' => $secretKey, 'response' => $captchaToken]),
+            'timeout' => 5,
+            'ignore_errors' => true,
+        ],
+    ]);
+    $respuestaCaptcha = @file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context);
+    $resultadoCaptcha = is_string($respuestaCaptcha) ? json_decode($respuestaCaptcha, true) : null;
+    $captchaValido = is_array($resultadoCaptcha)
+        && ($resultadoCaptcha['success'] ?? false) === true
+        && ($resultadoCaptcha['action'] ?? '') === 'login'
+        && (float) ($resultadoCaptcha['score'] ?? 0) >= 0.5
+        && is_string($baseHost)
+        && strcasecmp((string) ($resultadoCaptcha['hostname'] ?? ''), $baseHost) === 0;
+}
+
+if (!$captchaValido) {
+    header('Location: ../login.php?error=captcha');
+    exit;
+}
 
 // Usamos @ para evitar que un include fallido dispare error 500 directamente
 if (!file_exists('../backend/conexion.php')) {

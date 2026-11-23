@@ -1,5 +1,7 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/env.php';
+$recaptchaSiteKey = trim((string) env('RECAPTCHA_V3_SITE_KEY', ''));
 ?>
 
 <!DOCTYPE html>
@@ -30,8 +32,15 @@ session_start();
     <?php if (isset($_GET['error']) && $_GET['error'] === '1'): ?>
       <div class="error-msg">Usuario o contraseña incorrectos.</div>
     <?php endif; ?>
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'captcha'): ?>
+      <div class="error-msg">No se pudo validar el CAPTCHA. Intenta de nuevo.</div>
+    <?php endif; ?>
+    <?php if ($recaptchaSiteKey === ''): ?>
+      <div class="error-msg">El CAPTCHA no está configurado. Contacta a soporte.</div>
+    <?php endif; ?>
 
-    <form method="POST" action="core/validar_login.php">
+    <form id="login-form" method="POST" action="core/validar_login.php">
+      <input type="hidden" id="recaptcha-token" name="recaptcha_token" value="">
       <label class="field-label" for="usuario">Usuario</label>
       <input type="text" id="usuario" name="usuario" placeholder="Tu usuario" required autocomplete="username" />
 
@@ -46,6 +55,22 @@ session_start();
 
   <p class="login-footer">&copy; <?= date('Y') ?> Transportes Valadez — Sistema de Tickets</p>
 </div>
+
+<?php if ($recaptchaSiteKey !== ''): ?>
+<script src="https://www.google.com/recaptcha/api.js?render=<?= htmlspecialchars($recaptchaSiteKey, ENT_QUOTES, 'UTF-8') ?>"></script>
+<script>
+  const loginForm = document.getElementById('login-form');
+  loginForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    grecaptcha.ready(function () {
+      grecaptcha.execute(<?= json_encode($recaptchaSiteKey) ?>, {action: 'login'}).then(function (token) {
+        document.getElementById('recaptcha-token').value = token;
+        loginForm.submit();
+      });
+    });
+  });
+</script>
+<?php endif; ?>
 
 </body>
 </html>
