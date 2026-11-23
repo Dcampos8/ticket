@@ -140,15 +140,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_licencia']
     } else {
         if ($renewal_cycle === 'No aplica') { $renewal_months = null; $auto_renewal = 0; }
         $keyAction = $clearKey ? '__CLEAR__' : $encryptedKey;
-        $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, license_type = ?, license_mode = ?, version_edition = ?, quantity = ?, assigned_to = ?, purchase_date = ?, provider = ?, license_key = IF(? = '__CLEAR__', '', IF(? = '', license_key, ?)), cost = ?, currency = ?, expiration_date = ?, renewal_cycle = ?, renewal_months = ?, auto_renewal = ?, notes = ? WHERE id = ?");
-        $stmt->bind_param("ssssissssssdsssiisi", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $keyAction, $keyAction, $keyAction, $cost, $currency, $expiration_date, $renewal_cycle, $renewal_months, $auto_renewal, $notes, $id);
-
-        if ($stmt->execute()) {
+        try {
+            $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, license_type = ?, license_mode = ?, version_edition = ?, quantity = ?, assigned_to = ?, purchase_date = ?, provider = ?, license_key = IF(? = '__CLEAR__', '', IF(? = '', license_key, ?)), cost = ?, currency = ?, expiration_date = ?, renewal_cycle = ?, renewal_months = ?, auto_renewal = ?, notes = ? WHERE id = ?");
+            $stmt->bind_param("ssssissssssdsssiisi", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $keyAction, $keyAction, $keyAction, $cost, $currency, $expiration_date, $renewal_cycle, $renewal_months, $auto_renewal, $notes, $id);
+            $stmt->execute();
             $_SESSION['flash_msg'] = "✅ Licencia actualizada correctamente: $service_name";
-        } else {
-            $_SESSION['flash_msg'] = "❌ Error al actualizar: " . $conexion->error;
+            $stmt->close();
+        } catch (mysqli_sql_exception $e) {
+            error_log('Error al actualizar licencia ' . $id . ': ' . $e->getMessage());
+            $_SESSION['flash_msg'] = '❌ No se pudo actualizar la licencia. Revisa el registro de errores del servidor y confirma que estén aplicadas todas las migraciones de licencias.';
         }
-        $stmt->close();
     }
     header("Location: index.php");
     exit;
