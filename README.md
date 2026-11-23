@@ -46,6 +46,8 @@ La migración `sql/migrations/20261119_licencias_sin_vencimiento.sql` permite cl
 
 La migración `sql/migrations/20261120_licencias_detalle_y_claves.sql` agrega modalidad, edición, cantidad, asignación y fecha de compra a las licencias. Aplícala después de la migración del 19 de noviembre. Las claves se cifran con `APP_SETTINGS_ENCRYPTION_KEY`, que debe tener al menos 32 caracteres aleatorios; al abrir Licencias se migran automáticamente las claves históricas en texto plano. La llave debe conservarse para poder descifrar las claves guardadas.
 
+La migración `sql/migrations/20261123_licencias_ciclos_renovacion.sql` agrega frecuencia de renovación e indicador de renovación automática. Aplícala después de las migraciones de licencias del 19 y 20 de noviembre.
+
 ## Tickets: asignación, SLA y ayuda
 
 - Antes de desplegar cambios de tickets, aplica una sola vez `sql/migrations/20261007_ticket_operacion_y_base_conocimiento.sql` sobre la base existente.

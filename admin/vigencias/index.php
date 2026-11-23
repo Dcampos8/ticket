@@ -63,21 +63,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_licencia'])) 
     $currency        = trim($_POST['currency'] ?? 'MXN');
     $expiration_date = trim($_POST['expiration_date'] ?? '');
     $expiration_date = $expiration_date !== '' ? $expiration_date : null;
+    $renewal_cycle   = trim($_POST['renewal_cycle'] ?? 'No aplica');
+    $renewal_months  = $renewal_cycle === 'Personalizado' ? (int) ($_POST['renewal_months'] ?? 0) : null;
+    $auto_renewal    = isset($_POST['auto_renewal']) ? 1 : 0;
     $notes           = trim($_POST['notes'] ?? '');
+    $requiereRenovacion = $license_mode === 'Suscripción' || in_array($license_type, ['Hosting', 'Dominio'], true);
+    $cicloValido = in_array($renewal_cycle, ['No aplica', 'Mensual', 'Bimestral', 'Trimestral', 'Semestral', 'Anual', 'Bienal', 'Personalizado'], true);
 
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
         $_SESSION['flash_msg'] = "❌ Token de seguridad inválido.";
-    } elseif (empty($service_name) || !in_array($license_type, ['Servicio', 'Software', 'Sistema operativo', 'Servidor', 'Otro'], true)
-        || !in_array($license_mode, ['Perpetua', 'OEM', 'Suscripción', 'Licencia por volumen', 'Freemium', 'Otro'], true)
+    } elseif (empty($service_name) || !in_array($license_type, ['Hosting', 'Dominio', 'Windows', 'Office', 'Servicio', 'Software', 'Sistema operativo', 'Servidor', 'Otro'], true)
+        || !in_array($license_mode, ['Perpetua', 'OEM', 'Retail', 'Suscripción', 'Licencia por volumen', 'Freemium', 'Otro'], true)
         || !in_array($currency, ['MXN', 'USD'], true)
+        || !$cicloValido || ($requiereRenovacion && $renewal_cycle === 'No aplica')
+        || ($renewal_cycle !== 'No aplica' && $expiration_date === null)
+        || ($renewal_cycle === 'Personalizado' && ($renewal_months < 1 || $renewal_months > 120))
         || !fechaLicenciaValida($purchase_date) || !fechaLicenciaValida($expiration_date)
         || $license_key === null) {
         $_SESSION['flash_msg'] = $license_key === null
             ? '❌ Configura APP_SETTINGS_ENCRYPTION_KEY con al menos 32 caracteres para guardar claves de licencia.'
             : '❌ Revisa el nombre, el tipo y la modalidad de la licencia.';
     } else {
-        $stmt = $conexion->prepare("INSERT INTO licenses (service_name, license_type, license_mode, version_edition, quantity, assigned_to, purchase_date, provider, license_key, cost, currency, expiration_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssissssdsss", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $license_key, $cost, $currency, $expiration_date, $notes);
+        if ($renewal_cycle === 'No aplica') { $renewal_months = null; $auto_renewal = 0; }
+        $stmt = $conexion->prepare("INSERT INTO licenses (service_name, license_type, license_mode, version_edition, quantity, assigned_to, purchase_date, provider, license_key, cost, currency, expiration_date, renewal_cycle, renewal_months, auto_renewal, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssissssdsssiis", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $license_key, $cost, $currency, $expiration_date, $renewal_cycle, $renewal_months, $auto_renewal, $notes);
 
         if ($stmt->execute()) {
             $_SESSION['flash_msg'] = "✅ Licencia guardada exitosamente: $service_name";
@@ -106,6 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_licencia']
     $currency        = trim($_POST['currency'] ?? 'MXN');
     $expiration_date = trim($_POST['expiration_date'] ?? '');
     $expiration_date = $expiration_date !== '' ? $expiration_date : null;
+    $renewal_cycle   = trim($_POST['renewal_cycle'] ?? 'No aplica');
+    $renewal_months  = $renewal_cycle === 'Personalizado' ? (int) ($_POST['renewal_months'] ?? 0) : null;
+    $auto_renewal    = isset($_POST['auto_renewal']) ? 1 : 0;
     $notes           = trim($_POST['notes'] ?? '');
     $keySubmitted = trim((string) ($_POST['license_key'] ?? ''));
     $clearKey = isset($_POST['clear_license_key']);
@@ -113,18 +125,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar_licencia']
 
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
         $_SESSION['flash_msg'] = "❌ Token de seguridad inválido.";
-    } elseif ($id <= 0 || empty($service_name) || !in_array($license_type, ['Servicio', 'Software', 'Sistema operativo', 'Servidor', 'Otro'], true)
-        || !in_array($license_mode, ['Perpetua', 'OEM', 'Suscripción', 'Licencia por volumen', 'Freemium', 'Otro'], true)
+    } elseif ($id <= 0 || empty($service_name) || !in_array($license_type, ['Hosting', 'Dominio', 'Windows', 'Office', 'Servicio', 'Software', 'Sistema operativo', 'Servidor', 'Otro'], true)
+        || !in_array($license_mode, ['Perpetua', 'OEM', 'Retail', 'Suscripción', 'Licencia por volumen', 'Freemium', 'Otro'], true)
         || !in_array($currency, ['MXN', 'USD'], true)
+        || !in_array($renewal_cycle, ['No aplica', 'Mensual', 'Bimestral', 'Trimestral', 'Semestral', 'Anual', 'Bienal', 'Personalizado'], true)
+        || (($license_mode === 'Suscripción' || in_array($license_type, ['Hosting', 'Dominio'], true)) && $renewal_cycle === 'No aplica')
+        || ($renewal_cycle !== 'No aplica' && $expiration_date === null)
+        || ($renewal_cycle === 'Personalizado' && ($renewal_months < 1 || $renewal_months > 120))
         || !fechaLicenciaValida($purchase_date) || !fechaLicenciaValida($expiration_date)
         || $encryptedKey === null) {
         $_SESSION['flash_msg'] = $encryptedKey === null
             ? '❌ Configura APP_SETTINGS_ENCRYPTION_KEY con al menos 32 caracteres para guardar claves de licencia.'
             : '❌ Revisa los datos, fechas, moneda y modalidad del registro.';
     } else {
+        if ($renewal_cycle === 'No aplica') { $renewal_months = null; $auto_renewal = 0; }
         $keyAction = $clearKey ? '__CLEAR__' : $encryptedKey;
-        $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, license_type = ?, license_mode = ?, version_edition = ?, quantity = ?, assigned_to = ?, purchase_date = ?, provider = ?, license_key = IF(? = '__CLEAR__', '', IF(? = '', license_key, ?)), cost = ?, currency = ?, expiration_date = ?, notes = ? WHERE id = ?");
-        $stmt->bind_param("ssssissssssdsssi", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $keyAction, $keyAction, $keyAction, $cost, $currency, $expiration_date, $notes, $id);
+        $stmt = $conexion->prepare("UPDATE licenses SET service_name = ?, license_type = ?, license_mode = ?, version_edition = ?, quantity = ?, assigned_to = ?, purchase_date = ?, provider = ?, license_key = IF(? = '__CLEAR__', '', IF(? = '', license_key, ?)), cost = ?, currency = ?, expiration_date = ?, renewal_cycle = ?, renewal_months = ?, auto_renewal = ?, notes = ? WHERE id = ?");
+        $stmt->bind_param("ssssissssssdsssiisi", $service_name, $license_type, $license_mode, $version_edition, $quantity, $assigned_to, $purchase_date, $provider, $keyAction, $keyAction, $keyAction, $cost, $currency, $expiration_date, $renewal_cycle, $renewal_months, $auto_renewal, $notes, $id);
 
         if ($stmt->execute()) {
             $_SESSION['flash_msg'] = "✅ Licencia actualizada correctamente: $service_name";
@@ -252,33 +269,33 @@ $stats = $conexion->query("
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Tipo de licencia</label>
-                        <select name="license_type" class="form-select">
-                            <option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
+                        <select name="license_type" id="license_type" class="form-select">
+                            <option>Servicio</option><option>Hosting</option><option>Dominio</option><option>Windows</option><option>Office</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Modalidad</label>
-                        <select name="license_mode" class="form-select">
-                            <option>Perpetua</option><option>OEM</option><option>Suscripción</option><option>Licencia por volumen</option><option>Freemium</option><option>Otro</option>
+                        <label class="form-label" id="license_mode_label">Modalidad / canal</label>
+                        <select name="license_mode" id="license_mode" class="form-select">
+                            <option>Perpetua</option><option>OEM</option><option>Retail</option><option>Suscripción</option><option>Licencia por volumen</option><option>Freemium</option><option>Otro</option>
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Proveedor / Dominio</label>
+                        <label class="form-label" id="provider_label">Proveedor</label>
                         <input type="text" name="provider" class="form-control" placeholder="Ej. Namecheap, Microsoft, AWS">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Versión / edición</label>
+                    <div class="col-md-4 lic-field-version">
+                        <label class="form-label" id="version_edition_label">Versión / edición</label>
                         <input type="text" name="version_edition" class="form-control" placeholder="Ej. Windows 11 Pro">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Clave / serial / referencia</label>
                         <input type="password" name="license_key" class="form-control" placeholder="Se guardará cifrada" autocomplete="new-password">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 lic-field-quantity">
                         <label class="form-label">Cantidad</label>
                         <input type="number" name="quantity" class="form-control" min="1" max="100000" value="1" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 lic-field-assigned">
                         <label class="form-label">Asignada a / equipo</label>
                         <input type="text" name="assigned_to" class="form-control" placeholder="Ej. PC-VENTAS-01 o María López">
                     </div>
@@ -301,10 +318,25 @@ $stats = $conexion->query("
                         <label class="form-label">Fecha de compra</label>
                         <input type="date" name="purchase_date" class="form-control">
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Fecha de vencimiento (opcional)</label>
-                        <input type="date" name="expiration_date" class="form-control">
-                        <small class="text-muted">Déjala vacía si es perpetua o no tiene vencimiento.</small>
+                    <div class="col-md-3 lic-renewal-field">
+                        <label class="form-label">Renovación</label>
+                        <select name="renewal_cycle" id="renewal_cycle" class="form-select">
+                            <option>No aplica</option><option>Mensual</option><option>Bimestral</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Bienal</option><option>Personalizado</option>
+                        </select>
+                        <small class="text-muted">Para intervalos propios, selecciona Personalizado.</small>
+                    </div>
+                    <div class="col-md-2 lic-custom-cycle-field d-none">
+                        <label class="form-label">Cada cuántos meses</label>
+                        <input type="number" name="renewal_months" id="renewal_months" class="form-control" min="1" max="120" placeholder="Ej. 18">
+                    </div>
+                    <div class="col-md-3 lic-renewal-field">
+                        <label class="form-label" id="expiration_label">Vencimiento / renovación</label>
+                        <input type="date" name="expiration_date" id="expiration_date" class="form-control">
+                        <small class="text-muted">Captura la siguiente fecha límite.</small>
+                    </div>
+                    <div class="col-md-4 lic-auto-renewal-field d-none">
+                        <label class="form-label d-block">Renovación automática</label>
+                        <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="auto_renewal" id="auto_renewal"><label class="form-check-label" for="auto_renewal">Se renueva automáticamente</label></div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Notas / Observaciones</label>
@@ -328,7 +360,7 @@ $stats = $conexion->query("
             <div class="lic-table-tools">
                 <input type="search" id="buscarLicencia" class="form-control form-control-sm lic-search" placeholder="Buscar en todos los datos...">
                 <select id="filtrarTipo" class="form-select form-select-sm lic-filter" aria-label="Filtrar por tipo">
-                    <option value="">Todos los tipos</option><option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
+                    <option value="">Todos los tipos</option><option>Hosting</option><option>Dominio</option><option>Windows</option><option>Office</option><option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
                 </select>
                 <select id="filtrarEstado" class="form-select form-select-sm lic-filter" aria-label="Filtrar por estado">
                     <option value="">Todos los estados</option><option value="Sin vencimiento">Sin vencimiento</option><option value="Vigente">Vigentes</option><option value="Por vencer">Por vencer</option><option value="Vencida">Vencidas</option>
@@ -376,7 +408,7 @@ $stats = $conexion->query("
                                 $statusGroup = 'Vigente';
                             }
                         ?>
-                        <?php $searchIndex = implode(' ', [$row['service_name'], $row['license_type'] ?? '', $row['license_mode'] ?? 'Otro', $row['version_edition'] ?? '', $row['provider'] ?? '', $row['assigned_to'] ?? '', $row['quantity'] ?? 1, $row['cost'], $row['currency'], $row['purchase_date'] ?? '', $row['expiration_date'] ? date('d/m/Y', strtotime($row['expiration_date'])) : '', $statusText, $row['notes'] ?? '', $row['license_key_mask'] ?? '']); ?>
+                        <?php $searchIndex = implode(' ', [$row['service_name'], $row['license_type'] ?? '', $row['license_mode'] ?? 'Otro', $row['version_edition'] ?? '', $row['provider'] ?? '', $row['assigned_to'] ?? '', $row['quantity'] ?? 1, $row['cost'], $row['currency'], $row['renewal_cycle'] ?? '', $row['renewal_months'] ?? '', !empty($row['auto_renewal']) ? 'renovación automática' : '', $row['purchase_date'] ?? '', $row['expiration_date'] ? date('d/m/Y', strtotime($row['expiration_date'])) : '', $statusText, $row['notes'] ?? '', $row['license_key_mask'] ?? '']); ?>
                         <tr data-id="<?= (int) $row['id'] ?>" data-search="<?= htmlspecialchars(mb_strtolower($searchIndex, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>" data-type="<?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?>" data-status-group="<?= htmlspecialchars($statusGroup, ENT_QUOTES, 'UTF-8') ?>">
                             <td class="fw-bold lic-cell-wrap"><?= htmlspecialchars($row['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($row['license_type'] ?? 'Servicio', ENT_QUOTES, 'UTF-8') ?></td>
@@ -393,6 +425,9 @@ $stats = $conexion->query("
                                     data-cost="<?= $row['cost'] ?>"
                                     data-currency="<?= $row['currency'] ?>"
                                     data-expiration_date="<?= $row['expiration_date'] ?>"
+                                    data-renewal_cycle="<?= htmlspecialchars($row['renewal_cycle'] ?? 'No aplica', ENT_QUOTES, 'UTF-8') ?>"
+                                    data-renewal_months="<?= (int) ($row['renewal_months'] ?? 0) ?>"
+                                    data-auto_renewal="<?= (int) ($row['auto_renewal'] ?? 0) ?>"
                                     data-license_mode="<?= htmlspecialchars($row['license_mode'] ?? 'Otro', ENT_QUOTES, 'UTF-8') ?>"
                                     data-version_edition="<?= htmlspecialchars($row['version_edition'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     data-quantity="<?= (int) ($row['quantity'] ?? 1) ?>"
@@ -436,6 +471,8 @@ $stats = $conexion->query("
                     <div><dt>Costo total</dt><dd id="detail_cost"></dd></div>
                     <div><dt>Fecha de compra</dt><dd id="detail_purchase_date"></dd></div>
                     <div><dt>Vencimiento</dt><dd id="detail_expiration_date"></dd></div>
+                    <div><dt>Frecuencia de renovación</dt><dd id="detail_renewal_cycle"></dd></div>
+                    <div><dt>Renovación automática</dt><dd id="detail_auto_renewal"></dd></div>
                     <div><dt>Estado</dt><dd><span id="detail_status" class="badge"></span></dd></div>
                     <div><dt>Notas</dt><dd id="detail_notes"></dd></div>
                 </dl>
@@ -462,70 +499,82 @@ $stats = $conexion->query("
                 <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Editar Licencia o Vigencia</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="POST">
+            <form method="POST" id="editFormLicencia">
                 <div class="modal-body">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="id" id="edit_id">
 
-                    <div class="row g-3">
-                        <div class="col-md-4">
+                    <div class="row g-3 lic-edit-grid">
+                        <div class="col-md-4 edit-field-name">
                             <label class="form-label">Servicio / Servidor / Software</label>
                             <input type="text" name="service_name" id="edit_service_name" class="form-control" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 edit-field-type">
                             <label class="form-label">Tipo de licencia</label>
                             <select name="license_type" id="edit_license_type" class="form-select">
-                                <option>Servicio</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
+                                <option>Servicio</option><option>Hosting</option><option>Dominio</option><option>Windows</option><option>Office</option><option>Software</option><option>Sistema operativo</option><option>Servidor</option><option>Otro</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Modalidad</label>
-                            <select name="license_mode" id="edit_license_mode" class="form-select"><option>Perpetua</option><option>OEM</option><option>Suscripción</option><option>Licencia por volumen</option><option>Freemium</option><option>Otro</option></select>
+                        <div class="col-md-4 edit-field-mode">
+                            <label class="form-label" id="edit_license_mode_label">Modalidad / canal</label>
+                            <select name="license_mode" id="edit_license_mode" class="form-select"><option>Perpetua</option><option>OEM</option><option>Retail</option><option>Suscripción</option><option>Licencia por volumen</option><option>Freemium</option><option>Otro</option></select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Proveedor / Dominio</label>
+                        <div class="col-md-6 edit-field-provider">
+                            <label class="form-label" id="edit_provider_label">Proveedor</label>
                             <input type="text" name="provider" id="edit_provider" class="form-control">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Versión / edición</label>
+                        <div class="col-md-6 edit-field-version">
+                            <label class="form-label" id="edit_version_edition_label">Versión / edición</label>
                             <input type="text" name="version_edition" id="edit_version_edition" class="form-control">
                         </div>
-                        <div class="col-md-9">
+                        <div class="col-md-9 edit-field-assigned">
                             <label class="form-label">Asignada a / equipo</label>
                             <input type="text" name="assigned_to" id="edit_assigned_to" class="form-control">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 edit-field-quantity">
                             <label class="form-label">Cantidad</label>
                             <input type="number" name="quantity" id="edit_quantity" class="form-control" min="1" max="100000" required>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12 edit-field-key">
                             <label class="form-label">Cambiar clave / serial / referencia</label>
                             <input type="password" name="license_key" id="edit_license_key" class="form-control" placeholder="Déjalo vacío para conservar la clave actual" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')">
                             <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="clear_license_key" id="edit_clear_license_key"><label class="form-check-label" for="edit_clear_license_key">Eliminar clave guardada</label></div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 edit-field-cost">
                             <label class="form-label">Costo total</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
                                 <input type="number" step="0.01" name="cost" id="edit_cost" class="form-control" min="0">
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 edit-field-currency">
                             <label class="form-label">Moneda</label>
                             <select name="currency" id="edit_currency" class="form-select fw-bold">
                                 <option value="MXN">Peso Mexicano (MXN)</option>
                                 <option value="USD">Dólar Americano (USD)</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 edit-field-purchase">
                             <label class="form-label">Fecha de compra</label>
                             <input type="date" name="purchase_date" id="edit_purchase_date" class="form-control">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Fecha de vencimiento (opcional)</label>
+                        <div class="col-md-4 edit-field-cycle lic-renewal-field">
+                            <label class="form-label">Renovación</label>
+                            <select name="renewal_cycle" id="edit_renewal_cycle" class="form-select"><option>No aplica</option><option>Mensual</option><option>Bimestral</option><option>Trimestral</option><option>Semestral</option><option>Anual</option><option>Bienal</option><option>Personalizado</option></select>
+                        </div>
+                        <div class="col-md-3 edit-field-custom-cycle lic-custom-cycle-field d-none">
+                            <label class="form-label">Cada cuántos meses</label>
+                            <input type="number" name="renewal_months" id="edit_renewal_months" class="form-control" min="1" max="120" placeholder="Ej. 18">
+                        </div>
+                        <div class="col-md-4 edit-field-expiration lic-renewal-field">
+                            <label class="form-label" id="edit_expiration_label">Vencimiento / renovación</label>
                             <input type="date" name="expiration_date" id="edit_expiration_date" class="form-control">
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-4 edit-field-auto-renewal lic-auto-renewal-field d-none">
+                            <label class="form-label d-block">Renovación automática</label>
+                            <div class="form-check mt-2"><input class="form-check-input" type="checkbox" name="auto_renewal" id="edit_auto_renewal"><label class="form-check-label" for="edit_auto_renewal">Se renueva automáticamente</label></div>
+                        </div>
+                        <div class="col-md-12 edit-field-notes">
                             <label class="form-label">Notas / Observaciones</label>
                             <input type="text" name="notes" id="edit_notes" class="form-control">
                         </div>
@@ -551,6 +600,59 @@ $(document).ready(function(){
     const modalEdicion = new bootstrap.Modal(modalEdicionEl);
     const csrfToken = document.querySelector('#formLicencia [name="csrf_token"]').value;
     const endpointClave = <?= json_encode((defined('BASE_URL') ? rtrim(BASE_URL, '/') : '') . '/admin/vigencias/clave.php', JSON_UNESCAPED_SLASHES) ?>;
+
+    function configurarFormularioLicencia(form, autoDefaults = false) {
+        if (!form) return;
+        const editing = form.id === 'editFormLicencia';
+        const type = form.querySelector('[name="license_type"]');
+        const mode = form.querySelector('[name="license_mode"]');
+        const cycle = form.querySelector('[name="renewal_cycle"]');
+        const months = form.querySelector('[name="renewal_months"]');
+        const expiry = form.querySelector('[name="expiration_date"]');
+        const typeValue = type.value;
+        const hosting = ['Hosting', 'Dominio'].includes(typeValue);
+        if (autoDefaults && hosting) {
+            if (mode.value === 'Perpetua' || mode.value === 'Otro') mode.value = 'Suscripción';
+            if (cycle.value === 'No aplica') cycle.value = 'Anual';
+        }
+        const software = ['Windows', 'Office', 'Software', 'Sistema operativo', 'Servidor'].includes(typeValue);
+        const showVersion = software || hosting || typeValue === 'Servicio';
+        const showRenewal = hosting || mode.value === 'Suscripción' || cycle.value !== 'No aplica' || expiry.value !== '';
+        const requiresCycle = hosting || mode.value === 'Suscripción';
+        const noCycleOption = Array.from(cycle.options).find((option) => option.value === 'No aplica');
+        if (requiresCycle && cycle.value === 'No aplica') cycle.value = '';
+        if (noCycleOption) noCycleOption.disabled = requiresCycle;
+        const cycleSelected = cycle.value !== 'No aplica';
+
+        const versionField = form.querySelector('.lic-field-version, .edit-field-version');
+        const assignedField = form.querySelector('.lic-field-assigned, .edit-field-assigned');
+        if (versionField) versionField.classList.toggle('d-none', !showVersion);
+        if (assignedField) assignedField.classList.toggle('d-none', !software);
+        form.querySelectorAll('.lic-renewal-field').forEach((field) => field.classList.toggle('d-none', !showRenewal));
+        form.querySelectorAll('.lic-auto-renewal-field').forEach((field) => field.classList.toggle('d-none', !showRenewal));
+        form.querySelectorAll('.lic-custom-cycle-field').forEach((field) => field.classList.toggle('d-none', cycle.value !== 'Personalizado'));
+        cycle.required = requiresCycle;
+        expiry.required = requiresCycle || cycleSelected;
+        months.required = cycle.value === 'Personalizado';
+
+        const versionLabel = document.getElementById(editing ? 'edit_version_edition_label' : 'version_edition_label');
+        const modeLabel = document.getElementById(editing ? 'edit_license_mode_label' : 'license_mode_label');
+        const expirationLabel = document.getElementById(editing ? 'edit_expiration_label' : 'expiration_label');
+        const providerLabel = document.getElementById(editing ? 'edit_provider_label' : 'provider_label');
+        if (versionLabel) versionLabel.textContent = hosting ? (typeValue === 'Dominio' ? 'Dominio / producto' : 'Plan / paquete') : 'Versión / edición';
+        if (modeLabel) modeLabel.textContent = software ? 'Canal / modalidad de licencia' : 'Modalidad / contrato';
+        if (expirationLabel) expirationLabel.textContent = cycleSelected ? 'Próxima renovación' : 'Fecha de vencimiento (opcional)';
+        if (providerLabel) providerLabel.textContent = typeValue === 'Hosting' ? 'Proveedor de hosting' : (typeValue === 'Dominio' ? 'Registrador / proveedor' : 'Proveedor');
+    }
+
+    [document.getElementById('formLicencia'), document.getElementById('editFormLicencia')].forEach((form) => {
+        if (!form) return;
+        form.querySelector('[name="license_type"]').addEventListener('change', () => configurarFormularioLicencia(form, true));
+        form.querySelector('[name="license_mode"]').addEventListener('change', () => configurarFormularioLicencia(form));
+        form.querySelector('[name="renewal_cycle"]').addEventListener('change', () => configurarFormularioLicencia(form));
+        form.querySelector('[name="expiration_date"]').addEventListener('change', () => configurarFormularioLicencia(form));
+        configurarFormularioLicencia(form);
+    });
 
     async function clavesCoincidentes(termino) {
         if (termino.length < 2) return [];
@@ -605,6 +707,9 @@ $(document).ready(function(){
         texto('detail_cost', '$' + Number(registroSeleccionado.cost || 0).toFixed(2) + ' ' + registroSeleccionado.currency);
         texto('detail_purchase_date', registroSeleccionado.purchase_date ? new Date(registroSeleccionado.purchase_date + 'T00:00:00').toLocaleDateString('es-MX') : '—');
         texto('detail_expiration_date', registroSeleccionado.expiration_date ? new Date(registroSeleccionado.expiration_date + 'T00:00:00').toLocaleDateString('es-MX') : 'Sin vencimiento');
+        const ciclo = registroSeleccionado.renewal_cycle || 'No aplica';
+        texto('detail_renewal_cycle', ciclo === 'Personalizado' ? `Cada ${registroSeleccionado.renewal_months || '—'} meses` : ciclo);
+        texto('detail_auto_renewal', Number(registroSeleccionado.auto_renewal) === 1 ? 'Sí' : 'No');
         texto('detail_notes', registroSeleccionado.notes);
         $('#detail_status').text(registroSeleccionado.status || '—').attr('class', 'badge ' + (registroSeleccionado.status_class || 'badge-status-ok'));
         $('#detail_delete').val(registroSeleccionado.id);
@@ -649,7 +754,11 @@ $(document).ready(function(){
         $('#edit_currency').val(datos.currency);
         $('#edit_purchase_date').val(datos.purchase_date);
         $('#edit_expiration_date').val(datos.expiration_date);
+        $('#edit_renewal_cycle').val(datos.renewal_cycle || 'No aplica');
+        $('#edit_renewal_months').val(datos.renewal_months || '');
+        $('#edit_auto_renewal').prop('checked', Number(datos.auto_renewal) === 1);
         $('#edit_notes').val(datos.notes);
+        configurarFormularioLicencia(document.getElementById('editFormLicencia'));
         modalDetalle.hide();
         modalDetalleEl.addEventListener('hidden.bs.modal', function abrirEdicion(){
             modalDetalleEl.removeEventListener('hidden.bs.modal', abrirEdicion);

@@ -164,19 +164,22 @@ body { margin-top: 0; }
     #modalEditar .modal-body { padding: 1.35rem; }
     #modalEditar .modal-body > .row { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.05rem 1rem; margin: 0; align-items: end; }
     #modalEditar .modal-body > .row > [class*="col-"] { width: auto; max-width: none; min-width: 0; padding: 0; }
-    #modalEditar .modal-body > .row > :nth-child(1),
-    #modalEditar .modal-body > .row > :nth-child(2),
-    #modalEditar .modal-body > .row > :nth-child(3) { grid-column: span 4; }
-    #modalEditar .modal-body > .row > :nth-child(4),
-    #modalEditar .modal-body > .row > :nth-child(5) { grid-column: span 6; }
-    #modalEditar .modal-body > .row > :nth-child(6) { grid-column: span 9; }
-    #modalEditar .modal-body > .row > :nth-child(7) { grid-column: span 3; }
-    #modalEditar .modal-body > .row > :nth-child(8),
-    #modalEditar .modal-body > .row > :nth-child(13) { grid-column: span 12; }
-    #modalEditar .modal-body > .row > :nth-child(9),
-    #modalEditar .modal-body > .row > :nth-child(10),
-    #modalEditar .modal-body > .row > :nth-child(11),
-    #modalEditar .modal-body > .row > :nth-child(12) { grid-column: span 3; }
+    #modalEditar .lic-edit-grid > .edit-field-name,
+    #modalEditar .lic-edit-grid > .edit-field-type,
+    #modalEditar .lic-edit-grid > .edit-field-mode { grid-column: span 4; }
+    #modalEditar .lic-edit-grid > .edit-field-provider,
+    #modalEditar .lic-edit-grid > .edit-field-version { grid-column: span 6; }
+    #modalEditar .lic-edit-grid > .edit-field-assigned { grid-column: span 9; }
+    #modalEditar .lic-edit-grid > .edit-field-quantity { grid-column: span 3; }
+    #modalEditar .lic-edit-grid > .edit-field-key,
+    #modalEditar .lic-edit-grid > .edit-field-notes { grid-column: span 12; }
+    #modalEditar .lic-edit-grid > .edit-field-cost,
+    #modalEditar .lic-edit-grid > .edit-field-currency,
+    #modalEditar .lic-edit-grid > .edit-field-purchase { grid-column: span 3; }
+    #modalEditar .lic-edit-grid > .edit-field-cycle { grid-column: span 3; }
+    #modalEditar .lic-edit-grid > .edit-field-custom-cycle { grid-column: span 2; }
+    #modalEditar .lic-edit-grid > .edit-field-expiration { grid-column: span 3; }
+    #modalEditar .lic-edit-grid > .edit-field-auto-renewal { grid-column: span 4; }
     #modalEditar .modal-body .form-label { display: block; min-height: 1.1rem; margin-bottom: .45rem; font-size: .72rem; line-height: 1.35; }
     #modalEditar .modal-body .form-control,
     #modalEditar .modal-body .form-select,
@@ -239,15 +242,7 @@ body { margin-top: 0; }
         #modalEditar .modal-header, #modalEditar .modal-body { padding: 1rem; }
         #modalEditar .modal-body > .row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem .75rem; }
         #modalEditar .modal-body > .row > [class*="col-"] { grid-column: span 1 !important; }
-        #modalEditar .modal-body > .row > :nth-child(1),
-        #modalEditar .modal-body > .row > :nth-child(2),
-        #modalEditar .modal-body > .row > :nth-child(3),
-        #modalEditar .modal-body > .row > :nth-child(4),
-        #modalEditar .modal-body > .row > :nth-child(5),
-        #modalEditar .modal-body > .row > :nth-child(6),
-        #modalEditar .modal-body > .row > :nth-child(7),
-        #modalEditar .modal-body > .row > :nth-child(8),
-        #modalEditar .modal-body > .row > :nth-child(13) { grid-column: span 2 !important; }
+        #modalEditar .lic-edit-grid > [class*="edit-field-"] { grid-column: span 2 !important; }
         #modalEditar .modal-footer { padding: .85rem 1rem; }
         #modalEditar .modal-footer .btn { padding-inline: .8rem; }
     }
