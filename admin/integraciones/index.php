@@ -50,6 +50,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $sqlPortTest,
                 $socketError
             );
+            if ($socketMessage !== '') {
+                $error .= ' Detalle de red: ' . $socketMessage;
+            }
         } else {
             fclose($socket);
             try {
