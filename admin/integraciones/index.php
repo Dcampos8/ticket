@@ -9,6 +9,7 @@ $csrf = asegurarTokenCsrf();
 $mensaje = '';
 $error = '';
 $vistaPreviaUsuarios = null;
+$modoVistaPrevia = 'full';
 $campos = [
     'MAIL_MENSAJERIA_HOST' => ['Correo de mensajería', 'Servidor SMTP', false, 'text'],
     'MAIL_MENSAJERIA_USER' => ['Correo de mensajería', 'Usuario', false, 'text'],
@@ -77,8 +78,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
     elseif (($_POST['accion'] ?? '') === 'previsualizar_usuarios_sqlserver') {
         try {
-            $vistaPreviaUsuarios = previsualizarUsuariosSqlServer($conexion);
+            $modoVistaPrevia = (string) ($_POST['modo_sincronizacion'] ?? 'full');
+            if (!in_array($modoVistaPrevia, ['full', 'insert_only'], true)) {
+                throw new InvalidArgumentException('Modo de vista previa no válido.');
+            }
+            $vistaPreviaUsuarios = previsualizarUsuariosSqlServer($conexion, $modoVistaPrevia);
             $_SESSION['sqlserver_users_sync_preview_token'] = bin2hex(random_bytes(32));
+            $_SESSION['sqlserver_users_sync_preview_mode'] = $modoVistaPrevia;
         } catch (Throwable $e) {
             error_log('Vista previa de usuarios SQL Server fallida (' . get_class($e) . '): ' . $e->getMessage());
             $error = 'No se pudo obtener la vista previa. Revisa la conexión y los registros PHP.';
@@ -87,18 +93,33 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     elseif (($_POST['accion'] ?? '') === 'confirmar_sincronizacion_usuarios_sqlserver') {
         $tokenVista = (string) ($_SESSION['sqlserver_users_sync_preview_token'] ?? '');
         $tokenRecibido = (string) ($_POST['preview_token'] ?? '');
+        $modoVistaPrevia = (string) ($_SESSION['sqlserver_users_sync_preview_mode'] ?? '');
         if ($tokenVista === '' || $tokenRecibido === '' || !hash_equals($tokenVista, $tokenRecibido)) {
             $error = 'La vista previa expiró. Obtén una nueva antes de sincronizar.';
+        } elseif (!in_array($modoVistaPrevia, ['full', 'insert_only'], true)) {
+            $error = 'El modo de sincronización expiró. Obtén una nueva vista previa.';
         } else {
             unset($_SESSION['sqlserver_users_sync_preview_token']);
+            unset($_SESSION['sqlserver_users_sync_preview_mode']);
             try {
-                $stats = sincronizarUsuariosSqlServer($conexion, 'full');
-                $mensaje = sprintf(
-                    'Sincronización completada. Agregados: %d; actualizados: %d; sin contraseña utilizable: %d.',
-                    $stats['insertados'],
-                    $stats['actualizados'],
-                    $stats['sin_contrasena']
-                );
+                $stats = sincronizarUsuariosSqlServer($conexion, $modoVistaPrevia);
+                if ($modoVistaPrevia === 'insert_only') {
+                    $mensaje = sprintf(
+                        'Importación de nuevos usuarios activos completada. Agregados: %d; existentes omitidos: %d; inactivos omitidos: %d; sin contraseña utilizable: %d.',
+                        $stats['insertados'],
+                        $stats['omitidos'] - $stats['inactivos_omitidos'],
+                        $stats['inactivos_omitidos'],
+                        $stats['sin_contrasena']
+                    );
+                } else {
+                    $mensaje = sprintf(
+                        'Sincronización completa terminada. Agregados: %d; actualizados: %d; inactivos nuevos omitidos: %d; sin contraseña utilizable: %d.',
+                        $stats['insertados'],
+                        $stats['actualizados'],
+                        $stats['inactivos_omitidos'],
+                        $stats['sin_contrasena']
+                    );
+                }
             } catch (Throwable $e) {
                 error_log('Sincronización manual de usuarios SQL Server fallida (' . get_class($e) . ').');
                 $error = 'No se completó la sincronización. Revisa la conexión y los registros PHP.';
@@ -150,11 +171,20 @@ include ROOT_PATH . 'admin/menu.php';
       <input type="hidden" name="accion" value="probar_conexion_sqlserver">
       <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-plug-circle-check me-2"></i>Probar conexión</button>
     </form>
-    <form method="post" class="d-inline-block" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Obteniendo datos...';">
-      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
-      <input type="hidden" name="accion" value="previsualizar_usuarios_sqlserver">
-      <button class="btn btn-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-magnifying-glass me-2"></i>Obtener vista previa</button>
-    </form>
+    <div class="d-flex flex-wrap gap-2">
+      <form method="post" class="d-inline-block" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Obteniendo datos...';">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="accion" value="previsualizar_usuarios_sqlserver">
+        <input type="hidden" name="modo_sincronizacion" value="full">
+        <button class="btn btn-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-arrows-rotate me-2"></i>Vista previa completa</button>
+      </form>
+      <form method="post" class="d-inline-block" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Buscando nuevos...';">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="accion" value="previsualizar_usuarios_sqlserver">
+        <input type="hidden" name="modo_sincronizacion" value="insert_only">
+        <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-user-plus me-2"></i>Vista previa: solo nuevos activos</button>
+      </form>
+    </div>
     <p class="small text-muted mt-3 mb-0">La tarea periódica de <code>backend/sincronizar_usuarios_sqlserver.php</code> agrega solo cuentas nuevas y omite las existentes.</p>
     <?php if (is_array($vistaPreviaUsuarios)): ?>
       <?php
@@ -164,12 +194,18 @@ include ROOT_PATH . 'admin/menu.php';
       <hr class="my-4">
       <div class="d-flex flex-wrap gap-2 mb-3">
         <span class="badge text-bg-secondary">Leídos: <?= (int) $resumenSync['total'] ?></span>
-        <span class="badge text-bg-success">Se agregarán: <?= (int) $resumenSync['agregar'] ?></span>
-        <span class="badge text-bg-primary">Se actualizarán: <?= (int) $resumenSync['actualizar'] ?></span>
-        <span class="badge text-bg-warning">Sin contraseña y se omitirán: <?= (int) $resumenSync['omitir_sin_contrasena'] ?></span>
-        <span class="badge text-bg-dark">Inactivos: <?= (int) $resumenSync['inactivos'] ?></span>
+        <span class="badge text-bg-success">Nuevos activos a agregar: <?= (int) $resumenSync['agregar'] ?></span>
+        <?php if ($modoVistaPrevia === 'full'): ?>
+          <span class="badge text-bg-primary">Existentes a actualizar: <?= (int) $resumenSync['actualizar'] ?></span>
+        <?php else: ?>
+          <span class="badge text-bg-secondary">Ya existen; se omiten: <?= (int) $resumenSync['omitir_existentes'] ?></span>
+        <?php endif; ?>
+        <span class="badge text-bg-dark">Nuevos inactivos; se omiten: <?= (int) $resumenSync['omitir_inactivos'] ?></span>
+        <span class="badge text-bg-warning">Sin contraseña; se omiten: <?= (int) $resumenSync['omitir_sin_contrasena'] ?></span>
       </div>
-      <div class="alert alert-info py-2">La vista previa no modifica MySQL. Al confirmar, el sistema volverá a leer SQL Server; las contraseñas no se muestran y se guardan como hashes.</div>
+      <div class="alert alert-info py-2">
+        <?php if ($modoVistaPrevia === 'full'): ?>La vista previa no modifica MySQL. Al confirmar, actualiza datos y estado de cuentas existentes; solo agrega usuarios nuevos activos.<?php else: ?>La vista previa no modifica MySQL. Al confirmar, solo agrega usuarios activos que no existan en MySQL y omite todas las cuentas existentes.<?php endif; ?> Las contraseñas no se muestran y se guardan como hashes.
+      </div>
       <?php if ($filasSync): ?>
         <div class="table-responsive" style="max-height: 460px; overflow: auto;">
           <table class="table table-sm table-striped table-hover align-middle">
@@ -190,11 +226,11 @@ include ROOT_PATH . 'admin/menu.php';
             </tbody>
           </table>
         </div>
-        <form method="post" class="mt-3" onsubmit="if(!confirm('Se sincronizarán los campos indicados y se conservarán roles, áreas y permisos. ¿Confirmas?')) return false; const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Sincronizando...';">
+        <form method="post" class="mt-3" onsubmit="if(!confirm('Se aplicará la acción indicada en la vista previa. ¿Confirmas?')) return false; const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Sincronizando...';">
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="accion" value="confirmar_sincronizacion_usuarios_sqlserver">
           <input type="hidden" name="preview_token" value="<?= htmlspecialchars((string) ($_SESSION['sqlserver_users_sync_preview_token'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
-          <button class="btn btn-success" type="submit"><i class="fa-solid fa-check me-2"></i>Sincronizar estos usuarios</button>
+          <button class="btn btn-success" type="submit"><i class="fa-solid fa-check me-2"></i><?= $modoVistaPrevia === 'insert_only' ? 'Agregar solo los nuevos activos' : 'Sincronizar usuarios existentes y nuevos activos' ?></button>
         </form>
       <?php else: ?>
         <div class="alert alert-warning mb-0">SQL Server no devolvió cuentas con un identificador de usuario válido.</div>

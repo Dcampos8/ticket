@@ -30,8 +30,11 @@ function obtenerUsuariosSqlServer(): array
 }
 
 /** Construye una vista previa segura que no incluye contraseña ni hash. */
-function previsualizarUsuariosSqlServer(mysqli $mysql): array
+function previsualizarUsuariosSqlServer(mysqli $mysql, string $mode = 'full'): array
 {
+    if (!in_array($mode, ['full', 'insert_only'], true)) {
+        throw new InvalidArgumentException('Modo de vista previa no válido.');
+    }
     $rows = obtenerUsuariosSqlServer();
     $existing = $mysql->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
     if (!$existing) {
@@ -39,7 +42,7 @@ function previsualizarUsuariosSqlServer(mysqli $mysql): array
     }
 
     $preview = [];
-    $stats = ['total' => 0, 'agregar' => 0, 'actualizar' => 0, 'omitir_sin_contrasena' => 0, 'inactivos' => 0];
+    $stats = ['total' => 0, 'agregar' => 0, 'actualizar' => 0, 'omitir_existentes' => 0, 'omitir_inactivos' => 0, 'omitir_sin_contrasena' => 0, 'inactivos' => 0];
     try {
         foreach ($rows as $row) {
             $user = trim((string) ($row['id_usuario'] ?? ''));
@@ -54,12 +57,23 @@ function previsualizarUsuariosSqlServer(mysqli $mysql): array
             $email = trim((string) ($row['email'] ?? ''));
 
             if (!$active) $stats['inactivos']++;
-            if (!$hasPassword && !$found) {
+            if ($mode === 'insert_only' && $found) {
+                $action = 'Omitir: ya existe en MySQL';
+                $stats['omitir_existentes']++;
+            } elseif (!$found && !$active) {
+                $action = 'Omitir: cuenta inactiva';
+                $stats['omitir_inactivos']++;
+            } elseif (!$hasPassword && !$found) {
                 $action = 'Omitir: falta contraseña';
                 $stats['omitir_sin_contrasena']++;
             } elseif ($found) {
-                $action = $hasPassword ? 'Actualizar datos sincronizados' : 'Actualizar datos; conservar contraseña';
-                $stats['actualizar']++;
+                if ($mode === 'insert_only') {
+                    $action = 'Omitir: ya existe en MySQL';
+                    $stats['omitir_existentes']++;
+                } else {
+                    $action = $hasPassword ? 'Actualizar datos sincronizados' : 'Actualizar datos; conservar contraseña';
+                    $stats['actualizar']++;
+                }
             } else {
                 $action = 'Agregar';
                 $stats['agregar']++;
@@ -84,7 +98,8 @@ function previsualizarUsuariosSqlServer(mysqli $mysql): array
 
 /**
  * Importa Usuarios de SQL Server a MySQL.
- * full actualiza las columnas sincronizadas de cuentas existentes; insert_only las omite.
+ * full actualiza las columnas sincronizadas de cuentas existentes y solo agrega nuevas activas;
+ * insert_only agrega nuevas activas y omite existentes e inactivas.
  */
 function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
 {
@@ -111,7 +126,7 @@ function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
         throw new RuntimeException('No se pudieron preparar las consultas de sincronización en MySQL.');
     }
 
-    $stats = ['insertados' => 0, 'actualizados' => 0, 'omitidos' => 0, 'sin_contrasena' => 0];
+    $stats = ['insertados' => 0, 'actualizados' => 0, 'omitidos' => 0, 'inactivos_omitidos' => 0, 'sin_contrasena' => 0];
     $mysql->begin_transaction();
     try {
         foreach ($sourceRows as $row) {
@@ -128,6 +143,11 @@ function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
             $active = strtoupper(trim((string) ($row['status'] ?? ''))) === 'A' ? 1 : 0;
             if ($mode === 'insert_only' && ($found || !$active)) {
                 $stats['omitidos']++;
+                if (!$found && !$active) $stats['inactivos_omitidos']++;
+                continue;
+            }
+            if ($mode === 'full' && !$found && !$active) {
+                $stats['inactivos_omitidos']++;
                 continue;
             }
 

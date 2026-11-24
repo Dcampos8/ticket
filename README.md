@@ -40,7 +40,7 @@ En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como
 
 ### Sincronización de usuarios desde SQL Server
 
-La pantalla **Conexiones e integraciones** permite revisar una vista previa y confirmar la sincronización manual inicial. La vista previa muestra usuario, nombre, correo, estado y acción, pero nunca la contraseña. Al confirmar, el sistema vuelve a leer SQL Server, actualiza en MySQL el nombre, correo, hash de contraseña y estado para los usuarios existentes, y agrega los nuevos. Conserva rol, área y permisos que administra la aplicación. Los usuarios con `status = 'B'` quedan inactivos; `status = 'A'` queda activo. Una contraseña vacía no se copia ni reemplaza un hash existente.
+La pantalla **Conexiones e integraciones** permite revisar una vista previa y confirmar dos modos de sincronización manual. La vista previa muestra usuario, nombre, correo, estado y acción, pero nunca la contraseña. El modo completo actualiza datos y estado de cuentas existentes y agrega solo usuarios nuevos activos. El modo de nuevos agrega únicamente usuarios activos que no existen en MySQL y omite los existentes. Conserva rol, área y permisos que administra la aplicación. Los usuarios existentes con `status = 'B'` quedan inactivos; los nuevos con `status = 'B'` no se importan. `status = 'A'` queda activo. Una contraseña vacía no se copia ni reemplaza un hash existente.
 
 La tarea `backend/sincronizar_usuarios_sqlserver.php` trabaja en modo incremental: agrega solo usuarios activos que todavía no existan en MySQL y omite los demás. Configura el Programador de tareas de Windows o cron para ejecutarla con PHP CLI con la frecuencia que necesites. Los cambios de datos y estado en cuentas existentes se aplican con la sincronización manual.
 
