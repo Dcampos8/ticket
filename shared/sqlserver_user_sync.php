@@ -21,6 +21,67 @@ function conectarSqlServerUsuarios(): PDO
     ]);
 }
 
+/** Lee la fuente una vez y devuelve filas en memoria; nunca persiste contraseñas en texto. */
+function obtenerUsuariosSqlServer(): array
+{
+    $sqlsrv = conectarSqlServerUsuarios();
+    $source = $sqlsrv->query('SELECT id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
+    return $source->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/** Construye una vista previa segura que no incluye contraseña ni hash. */
+function previsualizarUsuariosSqlServer(mysqli $mysql): array
+{
+    $rows = obtenerUsuariosSqlServer();
+    $existing = $mysql->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
+    if (!$existing) {
+        throw new RuntimeException('No se pudo preparar la consulta de vista previa en MySQL.');
+    }
+
+    $preview = [];
+    $stats = ['total' => 0, 'agregar' => 0, 'actualizar' => 0, 'omitir_sin_contrasena' => 0, 'inactivos' => 0];
+    try {
+        foreach ($rows as $row) {
+            $user = trim((string) ($row['id_usuario'] ?? ''));
+            if ($user === '') continue;
+            $existing->bind_param('s', $user);
+            $existing->execute();
+            $found = (bool) $existing->get_result()->fetch_assoc();
+            $hasPassword = (string) ($row['elpassword'] ?? '') !== '';
+            $status = strtoupper(trim((string) ($row['status'] ?? '')));
+            $active = $status === 'A';
+            $name = trim((string) ($row['nombre'] ?? ''));
+            $email = trim((string) ($row['email'] ?? ''));
+
+            if (!$active) $stats['inactivos']++;
+            if (!$hasPassword && !$found) {
+                $action = 'Omitir: falta contraseña';
+                $stats['omitir_sin_contrasena']++;
+            } elseif ($found) {
+                $action = $hasPassword ? 'Actualizar datos sincronizados' : 'Actualizar datos; conservar contraseña';
+                $stats['actualizar']++;
+            } else {
+                $action = 'Agregar';
+                $stats['agregar']++;
+            }
+
+            $preview[] = [
+                'usuario' => $user,
+                'nombre' => $name,
+                'email' => $email,
+                'estado' => $active ? 'Activo' : ($status === 'B' ? 'Inactivo' : 'Inactivo (estado no reconocido)'),
+                'contrasena' => $hasPassword ? 'Disponible; se guardará como hash' : 'Vacía',
+                'accion' => $action,
+            ];
+        }
+    } finally {
+        $existing->close();
+    }
+
+    $stats['total'] = count($preview);
+    return ['estadisticas' => $stats, 'usuarios' => $preview];
+}
+
 /**
  * Importa Usuarios de SQL Server a MySQL.
  * full actualiza las columnas sincronizadas de cuentas existentes; insert_only las omite.
@@ -31,8 +92,7 @@ function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
         throw new InvalidArgumentException('Modo de sincronización no válido.');
     }
 
-    $sqlsrv = conectarSqlServerUsuarios();
-    $source = $sqlsrv->query('SELECT id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
+    $sourceRows = obtenerUsuariosSqlServer();
     $existing = $mysql->prepare('SELECT id FROM usuarios WHERE usuario = ? LIMIT 1');
     $upsert = $mysql->prepare(
         'INSERT INTO usuarios (usuario, contrasena, nombre_completo, email, area, rol, activo)
@@ -54,7 +114,7 @@ function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
     $stats = ['insertados' => 0, 'actualizados' => 0, 'omitidos' => 0, 'sin_contrasena' => 0];
     $mysql->begin_transaction();
     try {
-        while ($row = $source->fetch()) {
+        foreach ($sourceRows as $row) {
             $user = trim((string) ($row['id_usuario'] ?? ''));
             $plainPassword = (string) ($row['elpassword'] ?? '');
             if ($user === '') {
@@ -119,7 +179,6 @@ function sincronizarUsuariosSqlServer(mysqli $mysql, string $mode): array
         $upsert->close();
         $insert->close();
         $updateWithoutPassword->close();
-        $sqlsrv = null;
     }
     return $stats;
 }
