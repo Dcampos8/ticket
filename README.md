@@ -40,9 +40,7 @@ En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como
 
 ### Sincronización de usuarios desde SQL Server
 
-La pantalla **Conexiones e integraciones** permite revisar una vista previa y confirmar dos modos de sincronización manual. La vista previa muestra usuario, nombre, correo, estado y acción, pero nunca la contraseña. El modo completo actualiza datos y estado de cuentas existentes y agrega solo usuarios nuevos activos. El modo de nuevos agrega únicamente usuarios activos que no existen en MySQL y omite los existentes. Conserva rol, área y permisos que administra la aplicación. Los usuarios existentes con `status = 'B'` quedan inactivos; los nuevos con `status = 'B'` no se importan. `status = 'A'` queda activo. Una contraseña vacía no se copia ni reemplaza un hash existente.
-
-La tarea `backend/sincronizar_usuarios_sqlserver.php` trabaja en modo incremental: agrega solo usuarios activos que todavía no existan en MySQL y omite los demás. Configura el Programador de tareas de Windows o cron para ejecutarla con PHP CLI con la frecuencia que necesites. Los cambios de datos y estado en cuentas existentes se aplican con la sincronización manual.
+La sincronización de usuarios es exclusivamente manual desde **Conexiones e integraciones**; no hay tarea automática. Permite revisar una vista previa y confirmar dos modos. La vista previa muestra usuario, nombre, correo, estado y acción, pero nunca la contraseña. El modo completo actualiza datos y estado de cuentas existentes y agrega solo usuarios nuevos activos. El modo de nuevos agrega únicamente usuarios activos que no existen en MySQL y omite los existentes. Conserva rol, área y permisos que administra la aplicación. Los usuarios existentes con `status = 'B'` quedan inactivos; los nuevos con `status = 'B'` no se importan. `status = 'A'` queda activo. Una contraseña vacía no se copia ni reemplaza un hash existente.
 
 Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql` y habilita `odbc` y `pdo_odbc` en la configuración PHP del hosting. Ejecuta `odbcinst -j` por SSH y crea `.odbc.ini` en la ruta que aparezca como `USER DATA SOURCES` (en la cuenta actual, `/home/u568802486/.odbc.ini`), con el DSN que usa Hostinger:
 
@@ -57,7 +55,7 @@ Port = 1278
 
 Ajusta host y puerto a los valores reales. En `.env`, configura `DB2_HOST`, `DB2_PORT` y `DB2_NAME` con los mismos valores para la prueba TCP, además de `DB2_USER` y `DB2_PASS`. El código conecta con `PDO('odbc:mssql_odbc', ...)`. Usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
 
-En Windows, usa `php.exe` como programa de la tarea y `C:\\ruta\\a\\ticket\\backend\\sincronizar_usuarios_sqlserver.php` como argumento. La sincronización manual es solo para superadministradores.
+La sincronización manual es solo para superadministradores.
 
 La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una fecha de creación para las cuentas nuevas y la lista de usuarios. Los registros anteriores quedan sin fecha porque la tabla no conserva el dato histórico.
 

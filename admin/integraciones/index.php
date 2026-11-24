@@ -185,7 +185,6 @@ include ROOT_PATH . 'admin/menu.php';
         <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-user-plus me-2"></i>Vista previa: solo nuevos activos</button>
       </form>
     </div>
-    <p class="small text-muted mt-3 mb-0">La tarea periódica de <code>backend/sincronizar_usuarios_sqlserver.php</code> agrega solo cuentas nuevas y omite las existentes.</p>
     <?php if (is_array($vistaPreviaUsuarios)): ?>
       <?php
         $resumenSync = $vistaPreviaUsuarios['estadisticas'];
