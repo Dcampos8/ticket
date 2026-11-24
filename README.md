@@ -38,6 +38,16 @@ En Windows, crea una tarea diaria en el Programador de tareas con `php.exe` como
 4. Configura la base de datos del sistema. Los respaldos completos con datos reales no se versionan; guarda únicamente migraciones incrementales revisadas en `sql/migrations/`.
 5. Asegura que `uploads/` exista, sea escribible por PHP y no permita ejecutar scripts subidos.
 
+### Sincronización de usuarios desde SQL Server
+
+La pantalla **Conexiones e integraciones** permite ejecutar la sincronización manual inicial. Esta actualiza en MySQL el nombre, correo, hash de contraseña y estado para los usuarios que ya existan, y agrega los nuevos. Conserva rol, área y permisos que administra la aplicación. Los usuarios con `status = 'B'` quedan inactivos; `status = 'A'` queda activo. Una contraseña vacía no se copia ni reemplaza un hash existente.
+
+La tarea `backend/sincronizar_usuarios_sqlserver.php` trabaja en modo incremental: agrega solo usuarios activos que todavía no existan en MySQL y omite los demás. Configura el Programador de tareas de Windows o cron para ejecutarla con PHP CLI con la frecuencia que necesites. Los cambios de datos y estado en cuentas existentes se aplican con la sincronización manual.
+
+Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql`, habilita `PDO_SQLSRV` en el PHP de la aplicación y configura `DB2_HOST`, `DB2_PORT`, `DB2_NAME`, `DB2_USER` y `DB2_PASS` en `.env`. `DB2_HOST` debe ser enrutable desde el servidor donde se ejecuta PHP; el nombre local de una instancia, como `HPSERVER1\\COMPAC`, solo funcionará si ese servidor puede resolverlo y alcanzar SQL Server. Limita el firewall de SQL Server a la IP de origen de la aplicación y usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
+
+En Windows, usa `php.exe` como programa de la tarea y `C:\\ruta\\a\\ticket\\backend\\sincronizar_usuarios_sqlserver.php` como argumento. La sincronización manual es solo para superadministradores.
+
 La migración `sql/migrations/20261109_usuarios_fecha_creacion.sql` agrega una fecha de creación para las cuentas nuevas y la lista de usuarios. Los registros anteriores quedan sin fecha porque la tabla no conserva el dato histórico.
 
 La migración `sql/migrations/20261118_cotizaciones_destino.sql` agrega a las cotizaciones el puesto o departamento de destino, que también aparece en el PDF y en su nombre de archivo.

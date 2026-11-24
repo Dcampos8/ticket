@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../config.php';
 require_once ROOT_PATH . 'shared/permisos.php';
 require_once ROOT_PATH . 'shared/security.php';
 require_once ROOT_PATH . 'shared/integration_settings.php';
+require_once ROOT_PATH . 'shared/sqlserver_user_sync.php';
 if (!esSuperAdmin()) { http_response_code(403); exit('Acceso denegado.'); }
 $csrf = asegurarTokenCsrf();
 $mensaje = '';
@@ -34,6 +35,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
         $error = 'No se pudo guardar el estado. Verifica que la migración de integraciones esté aplicada.';
     }
+    elseif (($_POST['accion'] ?? '') === 'sincronizar_usuarios') {
+        if (($_POST['modo_sincronizacion'] ?? '') !== 'full') {
+            $error = 'Modo de sincronización no válido.';
+        } else {
+            try {
+                $stats = sincronizarUsuariosSqlServer($conexion, 'full');
+                $mensaje = sprintf(
+                    'Sincronización manual completada. Agregados: %d; actualizados: %d; registros sin contraseña utilizable: %d.',
+                    $stats['insertados'],
+                    $stats['actualizados'],
+                    $stats['sin_contrasena']
+                );
+            } catch (Throwable $e) {
+                error_log('Sincronización manual de usuarios SQL Server fallida (' . get_class($e) . ').');
+                $error = 'No se completó la sincronización. Revisa DB2_HOST, DB2_NAME, el controlador PDO_SQLSRV, la conexión de red y los registros PHP.';
+            }
+        }
+    }
     else {
         $ok = true;
         foreach ($campos as $clave => [$grupo, $etiqueta, $secreto, $tipo]) {
@@ -63,6 +82,25 @@ include ROOT_PATH . 'admin/menu.php';
   <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if (($_GET['estado'] ?? '') === 'baja'): ?><div class="alert alert-warning">El sitio está dado de baja. El superadministrador conserva el acceso.</div><?php elseif (($_GET['estado'] ?? '') === 'activo'): ?><div class="alert alert-success">El sitio está activo nuevamente.</div><?php endif; ?>
   <?php $sitioBaja = sitioEstaDadoDeBaja(); ?>
+  <?php
+    $sqlsrvDisponible = in_array('sqlsrv', PDO::getAvailableDrivers(), true);
+    $sqlsrvConfigurado = trim((string) env('DB2_HOST', '')) !== ''
+        && trim((string) env('DB2_NAME', '')) !== ''
+        && trim((string) env('DB2_USER', '')) !== '';
+  ?>
+  <section class="card mb-4"><div class="card-body">
+    <h2 class="h5 mb-1">Sincronización de usuarios de SQL Server</h2>
+    <p class="text-muted">La sincronización manual actualiza nombre, correo, contraseña (guardada como hash) y estado de cuentas existentes. Conserva roles, áreas y permisos de la aplicación. Las cuentas con estado B quedan inactivas.</p>
+    <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">El PHP de este servidor no reporta PDO_SQLSRV. Habilita el controlador antes de sincronizar.</div><?php endif; ?>
+    <?php if (!$sqlsrvConfigurado): ?><div class="alert alert-warning mb-3">Falta completar DB2_HOST, DB2_NAME y DB2_USER en el archivo .env.</div><?php endif; ?>
+    <form method="post" onsubmit="return confirm('Esto reemplazará en MySQL los campos sincronizados para usuarios que ya existan. ¿Continuar?')">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="accion" value="sincronizar_usuarios">
+      <input type="hidden" name="modo_sincronizacion" value="full">
+      <button class="btn btn-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-users-gear me-2"></i>Sincronizar ahora</button>
+    </form>
+    <p class="small text-muted mt-3 mb-0">La tarea periódica de <code>backend/sincronizar_usuarios_sqlserver.php</code> agrega solo cuentas nuevas y omite las existentes.</p>
+  </div></section>
   <section class="card mb-4"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
     <div><h2 class="h5 mb-1">Disponibilidad del sitio</h2><p class="text-muted mb-0">Al darlo de baja, los usuarios y administradores verán un aviso de indisponibilidad. El superadministrador seguirá usando el sistema.</p></div>
     <form method="post" class="m-0"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="accion" value="estado_sitio"><input type="hidden" name="sitio_dado_de_baja" value="<?= $sitioBaja ? '0' : '1' ?>"><button class="btn <?= $sitioBaja ? 'btn-success' : 'btn-danger' ?>" type="submit"><i class="fa-solid <?= $sitioBaja ? 'fa-circle-check' : 'fa-power-off' ?> me-2"></i><?= $sitioBaja ? 'Reactivar sitio' : 'Dar de baja el sitio' ?></button></form>

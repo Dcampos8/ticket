@@ -61,6 +61,12 @@ $stmt->execute();
 $resultado = $stmt->get_result();
 
 if ($fila = $resultado->fetch_assoc()) {
+    if (isset($fila['activo']) && (int) $fila['activo'] !== 1) {
+        $stmt->close();
+        $conexion->close();
+        header("Location: ../login.php?error=1");
+        exit;
+    }
     $contrasenaNormalizada = normalizarContrasena($contrasena);
     $contrasenaValida = password_verify($contrasenaNormalizada, (string) $fila['contrasena']);
     // Compatibilidad: hashes anteriores no están normalizados. Si la
