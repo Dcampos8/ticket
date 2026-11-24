@@ -60,8 +60,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $sqlsrvTest->query('SELECT TOP (0) id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
                 $mensaje = 'Conexión exitosa. El servidor cloud pudo acceder a dbo.Usuarios en SQL Server.';
             } catch (Throwable $e) {
-                error_log('Prueba PDO SQL Server fallida (' . get_class($e) . ').');
-                $error = 'El puerto TCP responde, pero PDO no pudo consultar dbo.Usuarios. Revisa DB2_NAME, las credenciales SQL, el controlador PDO_SQLSRV y el esquema de la tabla.';
+                $detallePdo = trim((string) $e->getMessage());
+                $valoresSensibles = array_filter([
+                    (string) env('DB2_PASS', ''),
+                    (string) env('DB2_USER', ''),
+                ], static fn($valor) => $valor !== '');
+                if ($valoresSensibles) {
+                    $detallePdo = str_replace($valoresSensibles, '[oculto]', $detallePdo);
+                }
+                $codigoPdo = (string) $e->getCode();
+                error_log('Prueba PDO SQL Server fallida (' . get_class($e) . ', código ' . $codigoPdo . '): ' . $detallePdo);
+                $error = 'El puerto TCP responde, pero PDO falló. Detalle técnico: ' . ($detallePdo !== '' ? $detallePdo : 'sin mensaje del controlador') . ' (código ' . $codigoPdo . ').';
             }
         }
     }
