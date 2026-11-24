@@ -36,13 +36,30 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $error = 'No se pudo guardar el estado. Verifica que la migración de integraciones esté aplicada.';
     }
     elseif (($_POST['accion'] ?? '') === 'probar_conexion_sqlserver') {
-        try {
-            $sqlsrvTest = conectarSqlServerUsuarios();
-            $sqlsrvTest->query('SELECT TOP (0) id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
-            $mensaje = 'Conexión exitosa. El servidor cloud pudo acceder a dbo.Usuarios en SQL Server.';
-        } catch (Throwable $e) {
-            error_log('Prueba de conexión SQL Server fallida (' . get_class($e) . ').');
-            $error = 'No se pudo conectar o consultar dbo.Usuarios. Revisa DB2_HOST, DB2_PORT, DB2_NAME, las credenciales, PDO_SQLSRV y el firewall.';
+        $sqlHostTest = trim((string) env('DB2_HOST', ''));
+        $sqlPortTest = (int) env('DB2_PORT', '1433');
+        $socketError = 0;
+        $socketMessage = '';
+        $socket = $sqlHostTest !== '' && $sqlPortTest > 0
+            ? @fsockopen($sqlHostTest, $sqlPortTest, $socketError, $socketMessage, 5)
+            : false;
+        if ($socket === false) {
+            $error = sprintf(
+                'El PHP cloud no logra abrir TCP a %s:%d (error %d). Revisa el reenvío del router hacia el puerto SQL local, la IP pública y si el proveedor permite ese tráfico saliente.',
+                $sqlHostTest !== '' ? $sqlHostTest : '(sin host)',
+                $sqlPortTest,
+                $socketError
+            );
+        } else {
+            fclose($socket);
+            try {
+                $sqlsrvTest = conectarSqlServerUsuarios();
+                $sqlsrvTest->query('SELECT TOP (0) id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
+                $mensaje = 'Conexión exitosa. El servidor cloud pudo acceder a dbo.Usuarios en SQL Server.';
+            } catch (Throwable $e) {
+                error_log('Prueba PDO SQL Server fallida (' . get_class($e) . ').');
+                $error = 'El puerto TCP responde, pero PDO no pudo consultar dbo.Usuarios. Revisa DB2_NAME, las credenciales SQL, el controlador PDO_SQLSRV y el esquema de la tabla.';
+            }
         }
     }
     elseif (($_POST['accion'] ?? '') === 'sincronizar_usuarios') {
