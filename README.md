@@ -44,7 +44,18 @@ La pantalla **Conexiones e integraciones** permite ejecutar la sincronización m
 
 La tarea `backend/sincronizar_usuarios_sqlserver.php` trabaja en modo incremental: agrega solo usuarios activos que todavía no existan en MySQL y omite los demás. Configura el Programador de tareas de Windows o cron para ejecutarla con PHP CLI con la frecuencia que necesites. Los cambios de datos y estado en cuentas existentes se aplican con la sincronización manual.
 
-Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql`, habilita `PDO_SQLSRV` en el PHP de la aplicación y configura `DB2_HOST`, `DB2_PORT`, `DB2_NAME`, `DB2_USER` y `DB2_PASS` en `.env`. Para un SQL Server remoto con puerto fijo, usa su IP o DNS como `DB2_HOST` y el puerto TCP como `DB2_PORT` (1433 es el valor predeterminado de este proyecto). Usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
+Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql` y habilita `odbc` y `pdo_odbc` en la configuración PHP del hosting. En la raíz de archivos del plan crea `.odbc.ini` con el DSN que usa Hostinger:
+
+```ini
+[mssql_odbc]
+Description = MSSQL Server
+Driver = FreeTDS
+Database = ADMP24
+Server = 201.165.202.26
+Port = 1278
+```
+
+Ajusta host y puerto a los valores reales. En `.env`, configura `DB2_HOST`, `DB2_PORT` y `DB2_NAME` con los mismos valores para la prueba TCP, además de `DB2_USER` y `DB2_PASS`. El código conecta con `PDO('odbc:mssql_odbc', ...)`. Usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
 
 En Windows, usa `php.exe` como programa de la tarea y `C:\\ruta\\a\\ticket\\backend\\sincronizar_usuarios_sqlserver.php` como argumento. La sincronización manual es solo para superadministradores.
 

@@ -70,7 +70,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 }
                 $codigoPdo = (string) $e->getCode();
                 error_log('Prueba PDO SQL Server fallida (' . get_class($e) . ', código ' . $codigoPdo . '): ' . $detallePdo);
-                $error = 'El puerto TCP responde, pero PDO falló. Detalle técnico: ' . ($detallePdo !== '' ? $detallePdo : 'sin mensaje del controlador') . ' (código ' . $codigoPdo . ').';
+                $error = 'El puerto TCP responde, pero PDO ODBC falló. Detalle técnico: ' . ($detallePdo !== '' ? $detallePdo : 'sin mensaje del controlador') . ' (código ' . $codigoPdo . ').';
             }
         }
     }
@@ -88,7 +88,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 );
             } catch (Throwable $e) {
                 error_log('Sincronización manual de usuarios SQL Server fallida (' . get_class($e) . ').');
-                $error = 'No se completó la sincronización. Revisa DB2_HOST, DB2_NAME, el controlador PDO_SQLSRV, la conexión de red y los registros PHP.';
+                $error = 'No se completó la sincronización. Revisa el DSN mssql_odbc, DB2_USER, DB2_PASS, la conexión de red y los registros PHP.';
             }
         }
     }
@@ -122,15 +122,15 @@ include ROOT_PATH . 'admin/menu.php';
   <?php if (($_GET['estado'] ?? '') === 'baja'): ?><div class="alert alert-warning">El sitio está dado de baja. El superadministrador conserva el acceso.</div><?php elseif (($_GET['estado'] ?? '') === 'activo'): ?><div class="alert alert-success">El sitio está activo nuevamente.</div><?php endif; ?>
   <?php $sitioBaja = sitioEstaDadoDeBaja(); ?>
   <?php
-    $sqlsrvDisponible = in_array('sqlsrv', PDO::getAvailableDrivers(), true);
+    $sqlsrvDisponible = extension_loaded('odbc') && in_array('odbc', PDO::getAvailableDrivers(), true);
     $sqlsrvConfigurado = trim((string) env('DB2_HOST', '')) !== ''
         && trim((string) env('DB2_NAME', '')) !== ''
         && trim((string) env('DB2_USER', '')) !== '';
   ?>
   <section class="card mb-4"><div class="card-body">
     <h2 class="h5 mb-1">Sincronización de usuarios de SQL Server</h2>
-    <p class="text-muted">La sincronización manual actualiza nombre, correo, contraseña (guardada como hash) y estado de cuentas existentes. Conserva roles, áreas y permisos de la aplicación. Las cuentas con estado B quedan inactivas.</p>
-    <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">El PHP de este servidor no reporta PDO_SQLSRV. Habilita el controlador antes de sincronizar.</div><?php endif; ?>
+    <p class="text-muted">La sincronización manual actualiza nombre, correo, contraseña (guardada como hash) y estado de cuentas existentes. Conserva roles, áreas y permisos de la aplicación. Las cuentas con estado B quedan inactivas. La conexión usa el DSN ODBC <code>mssql_odbc</code> definido en <code>.odbc.ini</code>.</p>
+    <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">Habilita las extensiones PHP <code>odbc</code> y <code>pdo_odbc</code> en el panel del hosting.</div><?php endif; ?>
     <?php if (!$sqlsrvConfigurado): ?><div class="alert alert-warning mb-3">Falta completar DB2_HOST, DB2_NAME y DB2_USER en el archivo .env.</div><?php endif; ?>
     <form method="post" class="d-inline-block me-2 mb-2">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">

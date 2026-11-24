@@ -5,28 +5,19 @@ require_once __DIR__ . '/passwords.php';
 /** Conecta a la base de usuarios de SQL Server sin exponer los errores al usuario. */
 function conectarSqlServerUsuarios(): PDO
 {
-    if (!in_array('sqlsrv', PDO::getAvailableDrivers(), true)) {
-        throw new RuntimeException('El servidor PHP no tiene habilitado PDO_SQLSRV.');
+    if (!extension_loaded('odbc') || !in_array('odbc', PDO::getAvailableDrivers(), true)) {
+        throw new RuntimeException('El servidor PHP requiere las extensiones odbc y pdo_odbc habilitadas.');
     }
 
-    $host = trim((string) env('DB2_HOST', ''));
-    $database = trim((string) env('DB2_NAME', ''));
-    $port = trim((string) env('DB2_PORT', '1433'));
     $username = (string) env('DB2_USER', '');
     $password = (string) env('DB2_PASS', '');
-    if ($host === '' || $database === '' || $username === '') {
-        throw new RuntimeException('Falta configurar DB2_HOST, DB2_NAME o DB2_USER en .env.');
+    if ($username === '') {
+        throw new RuntimeException('Falta configurar DB2_USER en .env.');
     }
 
-    $server = $host;
-    if ($port !== '' && ctype_digit($port) && strpos($host, ',') === false) {
-        $server .= ',' . $port;
-    }
-    $dsn = 'sqlsrv:Server=' . $server . ';Database=' . $database . ';Encrypt=1;TrustServerCertificate=1';
-    return new PDO($dsn, $username, $password, [
+    return new PDO('odbc:mssql_odbc', $username, $password, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 }
 
