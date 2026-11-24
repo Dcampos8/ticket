@@ -14,10 +14,10 @@
 .hours-select-form select { max-width:520px; }
 .hours-card { overflow:hidden; border:1px solid #e5e7eb; border-radius:11px; background:#fff; }
 .hours-table-wrap { overflow-x:auto; }
-.hours-table { width:100%; border-collapse:collapse; }
+.hours-table { width:100%; min-width:900px; border-collapse:collapse; }
 .hours-table th,.hours-table td { padding:12px 17px; border-bottom:1px solid #eef0f3; text-align:left; }
 .hours-table thead th { background:#f8f9fb; color:#757b86; font-size:.66rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
-.hours-table tbody th { width:30%; color:#393d45; font-size:.83rem; font-weight:700; }
+.hours-table tbody th { width:14%; color:#393d45; font-size:.83rem; font-weight:700; }
 .hours-table td .form-control { max-width:190px; min-height:38px; border-color:#dfe2e7; }
 .hours-toggle { display:inline-flex; align-items:center; gap:8px; color:#656b75; font-size:.78rem; cursor:pointer; }
 .hours-toggle input { width:17px; height:17px; accent-color:#ed1c24; }

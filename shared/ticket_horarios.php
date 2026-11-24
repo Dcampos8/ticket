@@ -16,13 +16,15 @@ function cargarHorariosTicket(mysqli $conexion): array
 {
     $horarios = [];
     try {
-        $resultado = $conexion->query('SELECT usuario, dia_semana, activo, hora_inicio, hora_fin FROM ticket_horarios_atencion');
+        $resultado = $conexion->query('SELECT usuario, dia_semana, activo, hora_inicio, hora_fin, comida_inicio, comida_fin FROM ticket_horarios_atencion');
         if ($resultado) {
             while ($fila = $resultado->fetch_assoc()) {
                 $horarios[(string) $fila['usuario']][(int) $fila['dia_semana']] = [
                     'activo' => (bool) $fila['activo'],
                     'hora_inicio' => (string) $fila['hora_inicio'],
                     'hora_fin' => (string) $fila['hora_fin'],
+                    'comida_inicio' => (string) ($fila['comida_inicio'] ?? ''),
+                    'comida_fin' => (string) ($fila['comida_fin'] ?? ''),
                 ];
             }
         }
@@ -32,6 +34,24 @@ function cargarHorariosTicket(mysqli $conexion): array
     $predeterminado = horarioTicketPredeterminado();
     $horarios[TICKET_HORARIO_BASE] = array_replace($predeterminado, $horarios[TICKET_HORARIO_BASE] ?? []);
     return $horarios;
+}
+
+function segmentosHorarioTicket(DateTimeImmutable $dia, array $turno): array
+{
+    if (empty($turno['activo'])) return [];
+    [$horaInicio, $minutoInicio] = array_map('intval', explode(':', substr((string) $turno['hora_inicio'], 0, 5)));
+    [$horaFin, $minutoFin] = array_map('intval', explode(':', substr((string) $turno['hora_fin'], 0, 5)));
+    $apertura = $dia->setTime($horaInicio, $minutoInicio, 0);
+    $cierre = $dia->setTime($horaFin, $minutoFin, 0);
+    $comidaInicioRaw = trim((string) ($turno['comida_inicio'] ?? ''));
+    $comidaFinRaw = trim((string) ($turno['comida_fin'] ?? ''));
+    if ($comidaInicioRaw === '' || $comidaFinRaw === '') return [[$apertura, $cierre]];
+    [$horaComidaInicio, $minutoComidaInicio] = array_map('intval', explode(':', substr($comidaInicioRaw, 0, 5)));
+    [$horaComidaFin, $minutoComidaFin] = array_map('intval', explode(':', substr($comidaFinRaw, 0, 5)));
+    $comidaInicio = $dia->setTime($horaComidaInicio, $minutoComidaInicio, 0);
+    $comidaFin = $dia->setTime($horaComidaFin, $minutoComidaFin, 0);
+    if ($comidaInicio <= $apertura || $comidaFin >= $cierre || $comidaInicio >= $comidaFin) return [[$apertura, $cierre]];
+    return [[$apertura, $comidaInicio], [$comidaFin, $cierre]];
 }
 
 function horarioParaTicket(array $horarios, ?string $usuario): array
@@ -50,22 +70,14 @@ function calcularVencimientoTicketLaborable(DateTimeImmutable $inicio, int $minu
     while ($restante > 0 && $guardia++ < 3660) {
         $dia = (int) $cursor->format('N');
         $turno = $horario[$dia] ?? null;
-        if (empty($turno['activo'])) {
-            $cursor = $cursor->modify('tomorrow')->setTime(0, 0);
-            continue;
+        foreach (segmentosHorarioTicket($cursor->setTime(0, 0), (array) $turno) as [$apertura, $cierre]) {
+            if ($cursor < $apertura) $cursor = $apertura;
+            if ($cursor >= $cierre) continue;
+            $disponibles = $cierre->getTimestamp() - $cursor->getTimestamp();
+            if ($restante <= $disponibles) return $cursor->modify('+' . $restante . ' seconds');
+            $restante -= $disponibles;
+            $cursor = $cierre;
         }
-        [$horaInicio, $minutoInicio] = array_map('intval', explode(':', substr((string) $turno['hora_inicio'], 0, 5)));
-        [$horaFin, $minutoFin] = array_map('intval', explode(':', substr((string) $turno['hora_fin'], 0, 5)));
-        $apertura = $cursor->setTime($horaInicio, $minutoInicio, 0);
-        $cierre = $cursor->setTime($horaFin, $minutoFin, 0);
-        if ($cursor < $apertura) $cursor = $apertura;
-        if ($cursor >= $cierre) {
-            $cursor = $cursor->modify('tomorrow')->setTime(0, 0);
-            continue;
-        }
-        $disponibles = $cierre->getTimestamp() - $cursor->getTimestamp();
-        if ($restante <= $disponibles) return $cursor->modify('+' . $restante . ' seconds');
-        $restante -= $disponibles;
         $cursor = $cursor->modify('tomorrow')->setTime(0, 0);
     }
     return $cursor;
@@ -80,11 +92,7 @@ function minutosLaborablesEntre(DateTimeImmutable $inicio, DateTimeImmutable $fi
     $guardia = 0;
     while ($diaActual <= $ultimoDia && $guardia++ < 3660) {
         $turno = $horario[(int) $diaActual->format('N')] ?? null;
-        if (!empty($turno['activo'])) {
-            [$horaInicio, $minutoInicio] = array_map('intval', explode(':', substr((string) $turno['hora_inicio'], 0, 5)));
-            [$horaFin, $minutoFin] = array_map('intval', explode(':', substr((string) $turno['hora_fin'], 0, 5)));
-            $apertura = $diaActual->setTime($horaInicio, $minutoInicio, 0);
-            $cierre = $diaActual->setTime($horaFin, $minutoFin, 0);
+        foreach (segmentosHorarioTicket($diaActual, (array) $turno) as [$apertura, $cierre]) {
             $desde = $inicio > $apertura ? $inicio : $apertura;
             $hasta = $fin < $cierre ? $fin : $cierre;
             if ($hasta > $desde) $segundos += $hasta->getTimestamp() - $desde->getTimestamp();

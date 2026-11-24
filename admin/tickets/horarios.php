@@ -11,6 +11,14 @@ require_once ROOT_PATH . 'backend/conexion.php';
 $csrf = asegurarTokenCsrf();
 $tablaHorariosDisponible = false;
 try { $resultadoTablaHorarios = $conexion->query("SHOW TABLES LIKE 'ticket_horarios_atencion'"); $tablaHorariosDisponible = $resultadoTablaHorarios && $resultadoTablaHorarios->num_rows > 0; } catch (Throwable $e) { $tablaHorariosDisponible = false; }
+$columnasComidaDisponibles = false;
+if ($tablaHorariosDisponible) {
+    try {
+        $resultadoColumnaComida = $conexion->query("SHOW COLUMNS FROM ticket_horarios_atencion LIKE 'comida_inicio'");
+        $resultadoColumnaComidaFin = $conexion->query("SHOW COLUMNS FROM ticket_horarios_atencion LIKE 'comida_fin'");
+        $columnasComidaDisponibles = $resultadoColumnaComida && $resultadoColumnaComida->num_rows > 0 && $resultadoColumnaComidaFin && $resultadoColumnaComidaFin->num_rows > 0;
+    } catch (Throwable $e) { $columnasComidaDisponibles = false; }
+}
 $diasSemana = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 7 => 'Domingo'];
 $errores = [];
 $guardado = ($_GET['guardado'] ?? '') === '1';
@@ -31,18 +39,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $activo = isset($dia['activo']);
         $apertura = trim((string) ($dia['inicio'] ?? '09:00'));
         $cierre = trim((string) ($dia['fin'] ?? '19:00'));
+        $comidaInicio = trim((string) ($dia['comida_inicio'] ?? ''));
+        $comidaFin = trim((string) ($dia['comida_fin'] ?? ''));
         if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $apertura) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $cierre) || $apertura >= $cierre) {
             $errores[] = "Revisa el horario de {$nombreDia}; la hora final debe ser posterior a la inicial.";
             continue;
         }
-        $horarioGuardado[$numeroDia] = [$activo ? 1 : 0, $apertura . ':00', $cierre . ':00'];
+        $comidaConfigurada = $comidaInicio !== '' || $comidaFin !== '';
+        if ($comidaConfigurada && (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $comidaInicio) || !preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $comidaFin) || $comidaInicio <= $apertura || $comidaFin >= $cierre || $comidaInicio >= $comidaFin)) {
+            $errores[] = "Revisa el horario de comida de {$nombreDia}; debe quedar completo y dentro del horario de atención.";
+            continue;
+        }
+        $horarioGuardado[$numeroDia] = [$activo ? 1 : 0, $apertura . ':00', $cierre . ':00', $comidaConfigurada ? $comidaInicio . ':00' : null, $comidaConfigurada ? $comidaFin . ':00' : null];
     }
     if (!$errores && count($horarioGuardado) === 7) {
         try {
             $conexion->begin_transaction();
-            $stmt = $conexion->prepare('INSERT INTO ticket_horarios_atencion (usuario, dia_semana, activo, hora_inicio, hora_fin) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE activo = VALUES(activo), hora_inicio = VALUES(hora_inicio), hora_fin = VALUES(hora_fin)');
-            foreach ($horarioGuardado as $numeroDia => [$activo, $apertura, $cierre]) {
-                $stmt->bind_param('siiss', $seleccionado, $numeroDia, $activo, $apertura, $cierre);
+            $stmt = $conexion->prepare('INSERT INTO ticket_horarios_atencion (usuario, dia_semana, activo, hora_inicio, hora_fin, comida_inicio, comida_fin) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE activo = VALUES(activo), hora_inicio = VALUES(hora_inicio), hora_fin = VALUES(hora_fin), comida_inicio = VALUES(comida_inicio), comida_fin = VALUES(comida_fin)');
+            foreach ($horarioGuardado as $numeroDia => [$activo, $apertura, $cierre, $comidaInicio, $comidaFin]) {
+                $stmt->bind_param('siissss', $seleccionado, $numeroDia, $activo, $apertura, $cierre, $comidaInicio, $comidaFin);
                 if (!$stmt->execute()) throw new RuntimeException('No se pudo guardar el horario.');
             }
             $stmt->close();
@@ -71,8 +86,9 @@ include ROOT_PATH . 'admin/menu.php';
   </header>
   <?php if ($guardado): ?><div class="alert alert-success"><i class="fa-solid fa-circle-check me-2"></i>Horario guardado. Los vencimientos activos se calcularán con este horario.</div><?php endif; ?>
   <?php if (!$tablaHorariosDisponible): ?><div class="alert alert-warning">Aplica primero la migración <code>20261112_ticket_horarios_atencion.sql</code> en la base de datos para guardar horarios.</div><?php endif; ?>
+  <?php if ($tablaHorariosDisponible && !$columnasComidaDisponibles): ?><div class="alert alert-warning">Para configurar comida y descontarla de los SLA, aplica la migración <code>20261124_ticket_horario_comida.sql</code> en la base de datos.</div><?php endif; ?>
   <?php foreach ($errores as $error): ?><div class="alert alert-danger"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div><?php endforeach; ?>
-  <section class="hours-note"><i class="fa-solid fa-circle-info"></i><div><strong>Horario semanal, zona Ciudad de México</strong><span>Los tickets asignados usan el horario de su responsable. Los tickets sin asignar heredan el horario base de Sistemas. Los días y horas inactivos no cuentan para el SLA.</span></div></section>
+  <section class="hours-note"><i class="fa-solid fa-circle-info"></i><div><strong>Horario semanal, zona Ciudad de México</strong><span>Los tickets asignados usan el horario de su responsable. Los tickets sin asignar heredan el horario base de Sistemas. Los días y el intervalo de comida no cuentan para los SLA de respuesta ni resolución.</span></div></section>
   <form method="get" class="hours-select-form">
     <label for="usuario_horario">Configurar horario de</label>
     <select id="usuario_horario" name="usuario" class="form-select" onchange="this.form.submit()">
@@ -85,16 +101,18 @@ include ROOT_PATH . 'admin/menu.php';
   <form method="post" class="hours-card">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="usuario_horario" value="<?= htmlspecialchars($seleccionado, ENT_QUOTES, 'UTF-8') ?>">
-    <div class="hours-table-wrap"><table class="hours-table"><thead><tr><th>Día</th><th>Atiende</th><th>Desde</th><th>Hasta</th></tr></thead><tbody>
-      <?php foreach ($diasSemana as $numeroDia => $nombreDia): $turno = $horario[$numeroDia] ?? ['activo' => false, 'hora_inicio' => '09:00:00', 'hora_fin' => '19:00:00']; $inicioVisible = $_POST['dias'][$numeroDia]['inicio'] ?? substr((string) ($turno['hora_inicio'] ?? '09:00:00'), 0, 5); $finVisible = $_POST['dias'][$numeroDia]['fin'] ?? substr((string) ($turno['hora_fin'] ?? '19:00:00'), 0, 5); ?>
+    <div class="hours-table-wrap"><table class="hours-table"><thead><tr><th>Día</th><th>Atiende</th><th>Desde</th><th>Hasta</th><th>Comida desde</th><th>Comida hasta</th></tr></thead><tbody>
+      <?php foreach ($diasSemana as $numeroDia => $nombreDia): $turno = $horario[$numeroDia] ?? ['activo' => false, 'hora_inicio' => '09:00:00', 'hora_fin' => '19:00:00', 'comida_inicio' => '', 'comida_fin' => '']; $inicioVisible = $_POST['dias'][$numeroDia]['inicio'] ?? substr((string) ($turno['hora_inicio'] ?? '09:00:00'), 0, 5); $finVisible = $_POST['dias'][$numeroDia]['fin'] ?? substr((string) ($turno['hora_fin'] ?? '19:00:00'), 0, 5); $inicioComidaVisible = $_POST['dias'][$numeroDia]['comida_inicio'] ?? substr((string) ($turno['comida_inicio'] ?? ''), 0, 5); $finComidaVisible = $_POST['dias'][$numeroDia]['comida_fin'] ?? substr((string) ($turno['comida_fin'] ?? ''), 0, 5); ?>
         <tr>
           <th scope="row"><?= htmlspecialchars($nombreDia, ENT_QUOTES, 'UTF-8') ?></th>
           <td><label class="hours-toggle"><input type="checkbox" name="dias[<?= $numeroDia ?>][activo]" value="1" <?= !empty($_POST) ? (isset($_POST['dias'][$numeroDia]['activo']) ? 'checked' : '') : (!empty($turno['activo']) ? 'checked' : '') ?>><span>Activo</span></label></td>
           <td><input aria-label="Hora de inicio, <?= htmlspecialchars($nombreDia, ENT_QUOTES, 'UTF-8') ?>" class="form-control" type="time" name="dias[<?= $numeroDia ?>][inicio]" value="<?= htmlspecialchars((string) $inicioVisible, ENT_QUOTES, 'UTF-8') ?>" required></td>
           <td><input aria-label="Hora de fin, <?= htmlspecialchars($nombreDia, ENT_QUOTES, 'UTF-8') ?>" class="form-control" type="time" name="dias[<?= $numeroDia ?>][fin]" value="<?= htmlspecialchars((string) $finVisible, ENT_QUOTES, 'UTF-8') ?>" required></td>
+          <td><input aria-label="Inicio de comida, <?= htmlspecialchars($nombreDia, ENT_QUOTES, 'UTF-8') ?>" class="form-control" type="time" name="dias[<?= $numeroDia ?>][comida_inicio]" value="<?= htmlspecialchars((string) $inicioComidaVisible, ENT_QUOTES, 'UTF-8') ?>"></td>
+          <td><input aria-label="Fin de comida, <?= htmlspecialchars($nombreDia, ENT_QUOTES, 'UTF-8') ?>" class="form-control" type="time" name="dias[<?= $numeroDia ?>][comida_fin]" value="<?= htmlspecialchars((string) $finComidaVisible, ENT_QUOTES, 'UTF-8') ?>"></td>
         </tr>
       <?php endforeach; ?>
     </tbody></table></div>
-    <footer><span>Ejemplo: de lunes a viernes, de 9:00 a 19:00.</span><button type="submit" class="btn btn-danger"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar horario</button></footer>
+    <footer><span>La comida es opcional: deja ambas horas vacías si no aplica. Ejemplo: lunes a viernes, de 9:00 a 19:00, comida de 14:00 a 15:00.</span><button type="submit" class="btn btn-danger"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar horario</button></footer>
   </form>
 </main>
