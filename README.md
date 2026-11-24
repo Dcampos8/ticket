@@ -44,7 +44,7 @@ La pantalla **Conexiones e integraciones** permite ejecutar la sincronización m
 
 La tarea `backend/sincronizar_usuarios_sqlserver.php` trabaja en modo incremental: agrega solo usuarios activos que todavía no existan en MySQL y omite los demás. Configura el Programador de tareas de Windows o cron para ejecutarla con PHP CLI con la frecuencia que necesites. Los cambios de datos y estado en cuentas existentes se aplican con la sincronización manual.
 
-Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql`, habilita `PDO_SQLSRV` en el PHP de la aplicación y configura `DB2_HOST`, `DB2_PORT`, `DB2_NAME`, `DB2_USER` y `DB2_PASS` en `.env`. `DB2_HOST` debe ser enrutable desde el servidor donde se ejecuta PHP; el nombre local de una instancia, como `HPSERVER1\\COMPAC`, solo funcionará si ese servidor puede resolverlo y alcanzar SQL Server. Limita el firewall de SQL Server a la IP de origen de la aplicación y usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
+Antes, aplica `sql/migrations/20261124_usuarios_sincronizacion_sqlserver.sql`, habilita `PDO_SQLSRV` en el PHP de la aplicación y configura `DB2_HOST`, `DB2_PORT`, `DB2_NAME`, `DB2_USER` y `DB2_PASS` en `.env`. Si PHP y SQL Server están en el mismo equipo, `DB2_HOST=localhost\\COMPAC` puede usar la instancia local; deja `DB2_PORT` vacío para que Windows resuelva el puerto de la instancia, o indica el puerto TCP fijo si lo configuraste. Usa credenciales SQL con solo permiso de lectura sobre `dbo.Usuarios`.
 
 En Windows, usa `php.exe` como programa de la tarea y `C:\\ruta\\a\\ticket\\backend\\sincronizar_usuarios_sqlserver.php` como argumento. La sincronización manual es solo para superadministradores.
 
