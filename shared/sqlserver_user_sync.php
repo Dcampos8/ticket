@@ -11,7 +11,7 @@ function conectarSqlServerUsuarios(): PDO
 
     $host = trim((string) env('DB2_HOST', ''));
     $database = trim((string) env('DB2_NAME', ''));
-    $port = trim((string) env('DB2_PORT', ''));
+    $port = trim((string) env('DB2_PORT', '1433'));
     $username = (string) env('DB2_USER', '');
     $password = (string) env('DB2_PASS', '');
     if ($host === '' || $database === '' || $username === '') {

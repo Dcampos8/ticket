@@ -35,6 +35,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
         $error = 'No se pudo guardar el estado. Verifica que la migración de integraciones esté aplicada.';
     }
+    elseif (($_POST['accion'] ?? '') === 'probar_conexion_sqlserver') {
+        try {
+            $sqlsrvTest = conectarSqlServerUsuarios();
+            $sqlsrvTest->query('SELECT TOP (0) id_usuario, nombre, elpassword, status, email FROM dbo.Usuarios');
+            $mensaje = 'Conexión exitosa. El servidor cloud pudo acceder a dbo.Usuarios en SQL Server.';
+        } catch (Throwable $e) {
+            error_log('Prueba de conexión SQL Server fallida (' . get_class($e) . ').');
+            $error = 'No se pudo conectar o consultar dbo.Usuarios. Revisa DB2_HOST, DB2_PORT, DB2_NAME, las credenciales, PDO_SQLSRV y el firewall.';
+        }
+    }
     elseif (($_POST['accion'] ?? '') === 'sincronizar_usuarios') {
         if (($_POST['modo_sincronizacion'] ?? '') !== 'full') {
             $error = 'Modo de sincronización no válido.';
@@ -93,6 +103,11 @@ include ROOT_PATH . 'admin/menu.php';
     <p class="text-muted">La sincronización manual actualiza nombre, correo, contraseña (guardada como hash) y estado de cuentas existentes. Conserva roles, áreas y permisos de la aplicación. Las cuentas con estado B quedan inactivas.</p>
     <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">El PHP de este servidor no reporta PDO_SQLSRV. Habilita el controlador antes de sincronizar.</div><?php endif; ?>
     <?php if (!$sqlsrvConfigurado): ?><div class="alert alert-warning mb-3">Falta completar DB2_HOST, DB2_NAME y DB2_USER en el archivo .env.</div><?php endif; ?>
+    <form method="post" class="d-inline-block me-2 mb-2">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="accion" value="probar_conexion_sqlserver">
+      <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-plug-circle-check me-2"></i>Probar conexión</button>
+    </form>
     <form method="post" onsubmit="return confirm('Esto reemplazará en MySQL los campos sincronizados para usuarios que ya existan. ¿Continuar?')">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="accion" value="sincronizar_usuarios">
