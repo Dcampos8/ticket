@@ -12,7 +12,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 4. Cargar helper de permisos y verificar seguridad
 require_once(ROOT_PATH . 'shared/permisos.php');
+require_once(ROOT_PATH . 'shared/security.php');
 requerirModulo('usuarios');
+$csrfUsuario = asegurarTokenCsrf();
 
 // 5. Cargar el menú
 include(ROOT_PATH . 'admin/menu.php');
@@ -63,6 +65,7 @@ $modulosUsuario = parsearModulos($usuario['modulos_permitidos'] ?? null);
     <form action="<?= BASE_URL ?>admin/usuarios/backend/actualizar_usuario.php" method="POST" class="bg-white p-4 shadow-sm rounded" style="width: 100%; max-width: 600px;">
       <h2 class="mb-4 text-center text-danger">Editar Usuario</h2>
 
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfUsuario, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="id" value="<?= $usuario['id']; ?>">
 
       <div class="mb-3">

@@ -21,8 +21,19 @@ include(ROOT_PATH . 'admin/menu.php');
 
 // 5. Consulta de Datos
 
-$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol, fecha_creacion, activo FROM usuarios ORDER BY nombre_completo ASC";
+$sql = "SELECT id, usuario, nombre_completo, email, phone, area, rol, fecha_creacion, activo, modulos_permitidos FROM usuarios ORDER BY nombre_completo ASC";
 $resultado = $conexion->query($sql);
+$actorEsSuperAdmin = false;
+$idActor = (int) ($_SESSION['id'] ?? 0);
+if ($idActor > 0) {
+    $stmtActor = $conexion->prepare('SELECT rol FROM usuarios WHERE id = ? LIMIT 1');
+    if ($stmtActor) {
+        $stmtActor->bind_param('i', $idActor);
+        $stmtActor->execute();
+        $actorEsSuperAdmin = strtolower(trim((string) ($stmtActor->get_result()->fetch_assoc()['rol'] ?? ''))) === 'superadmin';
+        $stmtActor->close();
+    }
+}
 
 // 6. Helper: iniciales para el avatar
 function iniciales($nombre) {
@@ -54,8 +65,9 @@ function colorRol($rol) {
   <div class="container-fluid">
     <h2 class="titulo">👥 Lista de Usuarios</h2>
     <div class="subtitulo">Administra las cuentas y roles del sistema.</div>
+    <?php if (($_GET['msg'] ?? '') === 'success'): ?><div class="alert alert-success">Usuario actualizado.</div><?php endif; ?>
     <?php if (($_GET['msg'] ?? '') === 'estado_actualizado'): ?><div class="alert alert-success">Estado del usuario actualizado.</div><?php endif; ?>
-    <?php if (($_GET['msg'] ?? '') === 'estado_error'): ?><div class="alert alert-danger">No se pudo actualizar el estado del usuario.</div><?php endif; ?>
+    <?php if (($_GET['msg'] ?? '') === 'estado_error'): ?><div class="alert alert-danger">No se pudo actualizar el usuario.</div><?php endif; ?>
 
     <div class="toolbar">
       <input id="filtro" type="text" placeholder="🔎 Buscar por nombre, usuario o área..." class="search-bar">
@@ -87,6 +99,7 @@ function colorRol($rol) {
             <?php while ($u = $resultado->fetch_assoc()): ?>
               <?php $color = colorRol($u['rol']); ?>
               <?php $usuarioActivo = (int) ($u['activo'] ?? 1) === 1; ?>
+              <?php $modulosUsuarioJson = json_encode(parsearModulos($u['modulos_permitidos'] ?? null), JSON_UNESCAPED_UNICODE); ?>
               <tr data-user-status="<?= $usuarioActivo ? 'active' : 'inactive' ?>">
                 <td><?= $u['id'] ?></td>
                 <td>
@@ -113,12 +126,17 @@ function colorRol($rol) {
                     && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
-                    <button type="button" class="btn-editar-estado" title="Editar estado" aria-label="Editar estado de <?= htmlspecialchars($u['usuario'], ENT_QUOTES, 'UTF-8') ?>"
+                    <button type="button" class="btn-editar-estado" title="Editar usuario" aria-label="Editar usuario <?= htmlspecialchars($u['usuario'], ENT_QUOTES, 'UTF-8') ?>"
                       data-bs-toggle="modal" data-bs-target="#modalEstadoUsuario"
                       data-user-id="<?= (int) $u['id'] ?>"
                       data-user-name="<?= htmlspecialchars($u['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"
                       data-user-handle="<?= htmlspecialchars($u['usuario'], ENT_QUOTES, 'UTF-8') ?>"
-                      data-user-active="<?= $usuarioActivo ? '1' : '0' ?>">✏️</button>
+                      data-user-email="<?= htmlspecialchars((string) ($u['email'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-phone="<?= htmlspecialchars((string) ($u['phone'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-area="<?= htmlspecialchars((string) ($u['area'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-role="<?= htmlspecialchars((string) ($u['rol'] ?? 'usuario'), ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-active="<?= $usuarioActivo ? '1' : '0' ?>"
+                      data-user-modules="<?= htmlspecialchars(is_string($modulosUsuarioJson) ? $modulosUsuarioJson : '[]', ENT_QUOTES, 'UTF-8') ?>">✏️</button>
                     <form class="form-eliminar" action="<?= BASE_URL ?>admin/usuarios/backend/eliminar_usuario.php" method="POST" style="display:inline;">
                       <input type="hidden" name="usuario_id" value="<?= (int) $u['id'] ?>">
                       <button type="button" class="btn-eliminar" title="Eliminar" data-nombre="<?= htmlspecialchars($u['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>">🗑️</button>
@@ -147,12 +165,12 @@ function colorRol($rol) {
 </div>
 
 <div class="modal fade" id="modalEstadoUsuario" tabindex="-1" aria-labelledby="modalEstadoUsuarioLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
     <div class="modal-content">
-      <form action="<?= BASE_URL ?>admin/usuarios/backend/actualizar_estado_usuario.php" method="POST">
+      <form action="<?= BASE_URL ?>admin/usuarios/backend/actualizar_usuario.php" method="POST">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title" id="modalEstadoUsuarioLabel">Editar estado del usuario</h5>
+            <h5 class="modal-title" id="modalEstadoUsuarioLabel">Editar usuario</h5>
             <div class="small text-muted" id="modalEstadoUsuarioNombre"></div>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -160,16 +178,42 @@ function colorRol($rol) {
         <div class="modal-body">
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfEstadoUsuario, ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="id" id="modalEstadoUsuarioId">
-          <label class="form-label" for="modalEstadoUsuarioActivo">Estado</label>
-          <select class="form-select" name="activo" id="modalEstadoUsuarioActivo" required>
-            <option value="1">Activo</option>
-            <option value="0">Inactivo</option>
-          </select>
-          <a class="btn btn-link btn-sm px-0 mt-3" id="modalEstadoUsuarioEditarDatos" href="#">Editar datos completos</a>
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label" for="modalUsuario">Usuario</label><input class="form-control" name="usuario" id="modalUsuario" required maxlength="50"></div>
+            <div class="col-md-6"><label class="form-label" for="modalNombreCompleto">Nombre completo</label><input class="form-control" name="nomcom" id="modalNombreCompleto" required maxlength="100"></div>
+            <div class="col-md-6"><label class="form-label" for="modalEmail">Correo electrónico</label><input class="form-control" type="email" name="email" id="modalEmail" maxlength="125"></div>
+            <div class="col-md-6"><label class="form-label" for="modalTelefono">Teléfono</label><input class="form-control" type="text" name="phone" id="modalTelefono" maxlength="255"></div>
+            <div class="col-md-6"><label class="form-label" for="modalArea">Área</label><input class="form-control" name="area" id="modalArea" required maxlength="100"></div>
+            <div class="col-md-6"><label class="form-label" for="modalEstadoUsuarioActivo">Estado</label><select class="form-select" name="activo" id="modalEstadoUsuarioActivo" required><option value="1">Activo</option><option value="0">Inactivo</option></select></div>
+            <div class="col-md-6">
+              <label class="form-label" for="modalRol">Rol</label>
+              <?php if ($actorEsSuperAdmin): ?>
+                <select class="form-select" name="rol" id="modalRol" required>
+                  <option value="usuario">Usuario</option><option value="admin">Administrador</option><option value="superadmin">Superadministrador</option>
+                </select>
+              <?php else: ?>
+                <input class="form-control" id="modalRolTexto" readonly>
+                <input type="hidden" name="rol" id="modalRol">
+              <?php endif; ?>
+            </div>
+            <div class="col-md-6"><label class="form-label" for="modalContrasena">Nueva contraseña</label><input class="form-control" type="password" name="contrasena" id="modalContrasena" autocomplete="new-password" placeholder="Vacío para conservar la actual"></div>
+          </div>
+          <?php if ($actorEsSuperAdmin): ?>
+            <div class="mt-3" id="modalBloqueModulos" style="display:none; border:1px solid #dee2e6; border-radius:.6rem; padding:.9rem; background:#f8f9fa;">
+              <label class="form-label fw-bold mb-2"><i class="fa-solid fa-shield-halved me-1"></i>Módulos permitidos</label>
+              <div class="row g-2">
+                <?php foreach (MODULOS_DISPONIBLES as $clave => $info): ?>
+                  <?php $idModuloModal = 'modal_mod_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $clave); ?>
+                  <div class="col-sm-6 col-lg-4"><div class="form-check"><input class="form-check-input modal-modulo-checkbox" type="checkbox" name="modulos[]" value="<?= htmlspecialchars($clave, ENT_QUOTES, 'UTF-8') ?>" id="<?= htmlspecialchars($idModuloModal, ENT_QUOTES, 'UTF-8') ?>"><label class="form-check-label" for="<?= htmlspecialchars($idModuloModal, ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid <?= htmlspecialchars($info['icon'], ENT_QUOTES, 'UTF-8') ?> me-1"></i><?= htmlspecialchars($info['label'], ENT_QUOTES, 'UTF-8') ?></label></div></div>
+                <?php endforeach; ?>
+              </div>
+              <div class="form-text">No aplica al superadministrador, que siempre ve todos los módulos.</div>
+            </div>
+          <?php endif; ?>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Guardar estado</button>
+          <button type="submit" class="btn btn-danger">Guardar cambios</button>
         </div>
       </form>
     </div>
@@ -222,8 +266,32 @@ function colorRol($rol) {
     const userId = boton.dataset.userId;
     document.getElementById('modalEstadoUsuarioId').value = userId;
     document.getElementById('modalEstadoUsuarioNombre').textContent = boton.dataset.userName + ' (@' + boton.dataset.userHandle + ')';
+    document.getElementById('modalUsuario').value = boton.dataset.userHandle;
+    document.getElementById('modalNombreCompleto').value = boton.dataset.userName;
+    document.getElementById('modalEmail').value = boton.dataset.userEmail;
+    document.getElementById('modalTelefono').value = boton.dataset.userPhone;
+    document.getElementById('modalArea').value = boton.dataset.userArea;
     document.getElementById('modalEstadoUsuarioActivo').value = boton.dataset.userActive;
-    document.getElementById('modalEstadoUsuarioEditarDatos').href = <?= json_encode(BASE_URL . 'admin/usuarios/editar_usuario.php?id=') ?> + encodeURIComponent(userId);
+    const rol = boton.dataset.userRole;
+    const selectorRol = document.getElementById('modalRol');
+    if (selectorRol.tagName === 'SELECT') selectorRol.value = rol;
+    else {
+      selectorRol.value = rol;
+      document.getElementById('modalRolTexto').value = rol.charAt(0).toUpperCase() + rol.slice(1);
+    }
+    const bloqueModulos = document.getElementById('modalBloqueModulos');
+    if (bloqueModulos) {
+      let modulos = [];
+      try { modulos = JSON.parse(boton.dataset.userModules || '[]'); } catch (error) { modulos = []; }
+      document.querySelectorAll('.modal-modulo-checkbox').forEach(checkbox => { checkbox.checked = modulos.includes(checkbox.value); });
+      bloqueModulos.style.display = rol === 'admin' ? 'block' : 'none';
+    }
+    document.getElementById('modalContrasena').value = '';
+  });
+  const selectorRolModal = document.getElementById('modalRol');
+  if (selectorRolModal.tagName === 'SELECT') selectorRolModal.addEventListener('change', function () {
+    const bloqueModulos = document.getElementById('modalBloqueModulos');
+    if (bloqueModulos) bloqueModulos.style.display = this.value === 'admin' ? 'block' : 'none';
   });
 
   // Confirmación con SweetAlert2 en vez del confirm() nativo

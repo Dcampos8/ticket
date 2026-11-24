@@ -5,6 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../../../shared/permisos.php';
 require_once __DIR__ . '/../../../shared/passwords.php';
+require_once __DIR__ . '/../../../shared/security.php';
 
 // Requiere estar logueado, ser admin/superadmin y tener el módulo "usuarios".
 // (BASE_URL/ROOT_PATH aún no están definidas aquí porque este archivo no
@@ -17,6 +18,10 @@ if (!isset($_SESSION['logueado']) || !esAdminOSuperior()) {
 if (!esSuperAdmin() && !tieneModulo('usuarios')) {
     http_response_code(403);
     exit("No autorizado");
+}
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST' || !validarTokenCsrf()) {
+    http_response_code(400);
+    exit('Solicitud no válida.');
 }
 
 include('../../../backend/conexion.php');
@@ -39,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email   = $_POST['email'];
     $phone   = $_POST['phone'];
     $area    = $_POST["area"];
-    $rol     = $_POST["rol"];
+    $rol     = strtolower(trim((string) ($_POST["rol"] ?? 'usuario')));
     $activoPost = (string) ($_POST['activo'] ?? '1');
     if (!in_array($activoPost, ['0', '1'], true)) {
         http_response_code(400);
@@ -48,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $activo = (int) $activoPost;
 
     // Bloquea cambios directos por POST sobre la cuenta superadmin.
-    $stmtActual = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
+    $stmtActual = $conexion->prepare("SELECT rol, modulos_permitidos FROM usuarios WHERE id = ?");
     $stmtActual->bind_param("i", $id);
     $stmtActual->execute();
     $usuarioActual = $stmtActual->get_result()->fetch_assoc();
@@ -70,24 +75,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Conexión fallida: " . $conexion->connect_error);
     }
 
-    // Solo el superadmin puede dejar/poner a alguien como admin o superadmin.
-    if (!$actorEsSuperAdmin && in_array($rol, ['admin', 'superadmin'], true)) {
-        http_response_code(403);
-        die("No autorizado para asignar ese rol");
-    }
     if (!in_array($rol, ['usuario', 'admin', 'superadmin'], true)) {
         $rol = 'usuario';
+    }
+
+    // Solo el superadmin puede modificar roles.
+    $rolActual = strtolower(trim((string) ($usuarioActual['rol'] ?? '')));
+    if (!$actorEsSuperAdmin && $rol !== $rolActual) {
+        http_response_code(403);
+        die("No autorizado para cambiar el rol");
     }
 
     // Módulos: solo aplican si el rol final es 'admin'. Si deja de ser
     // admin (o es superadmin), se limpian.
     $modulosCsv = null;
     if ($rol === 'admin') {
-        $modulosRecibidos = $_POST['modulos'] ?? [];
-        if (!is_array($modulosRecibidos)) {
-            $modulosRecibidos = [];
+        if ($actorEsSuperAdmin) {
+            $modulosRecibidos = $_POST['modulos'] ?? [];
+            if (!is_array($modulosRecibidos)) {
+                $modulosRecibidos = [];
+            }
+            $modulosCsv = serializarModulos($modulosRecibidos);
+        } elseif ($rolActual === 'admin') {
+            // Un admin puede editar los datos de otro admin, sin tocar sus módulos.
+            $modulosCsv = $usuarioActual['modulos_permitidos'] ?? null;
         }
-        $modulosCsv = serializarModulos($modulosRecibidos);
     }
 
     if (!empty($_POST['contrasena'])) {
