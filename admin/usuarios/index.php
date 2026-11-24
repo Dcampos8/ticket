@@ -72,8 +72,8 @@ function colorRol($rol) {
     <div class="toolbar">
       <input id="filtro" type="text" placeholder="🔎 Buscar por nombre, usuario o área..." class="search-bar">
       <div class="filtros-estado" role="group" aria-label="Filtrar usuarios por estado">
-        <button type="button" class="filtro-estado activo" data-status-filter="all" aria-pressed="true">Todos <span data-status-count="all">0</span></button>
-        <button type="button" class="filtro-estado" data-status-filter="active" aria-pressed="false">Activos <span data-status-count="active">0</span></button>
+        <button type="button" class="filtro-estado" data-status-filter="all" aria-pressed="false">Todos <span data-status-count="all">0</span></button>
+        <button type="button" class="filtro-estado activo" data-status-filter="active" aria-pressed="true">Activos <span data-status-count="active">0</span></button>
         <button type="button" class="filtro-estado" data-status-filter="inactive" aria-pressed="false">Inactivos <span data-status-count="inactive">0</span></button>
       </div>
       <span class="contador" id="contador"></span>
@@ -226,7 +226,7 @@ function colorRol($rol) {
   const filas = [...document.querySelectorAll('tbody tr[data-user-status]')];
   const botonesEstado = [...document.querySelectorAll('[data-status-filter]')];
   const mensajeSinResultados = document.getElementById('sin-resultados-filtro');
-  let estadoSeleccionado = 'all';
+  let estadoSeleccionado = 'active';
 
   function actualizarFilas() {
     const term = filtro.value.trim().toLocaleLowerCase();
