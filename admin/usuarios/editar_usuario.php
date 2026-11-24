@@ -96,6 +96,14 @@ $modulosUsuario = parsearModulos($usuario['modulos_permitidos'] ?? null);
       </div>
 
       <div class="mb-3">
+        <label class="form-label" for="estadoUsuario">Estado:</label>
+        <select name="activo" id="estadoUsuario" class="form-select" required>
+          <option value="1" <?= (int) ($usuario['activo'] ?? 1) === 1 ? 'selected' : '' ?>>Activo</option>
+          <option value="0" <?= (int) ($usuario['activo'] ?? 1) === 0 ? 'selected' : '' ?>>Inactivo</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
         <label class="form-label">Rol:</label>
         <select name="rol" id="rolSelect" class="form-select" required <?= $puedeAsignarRoles ? '' : 'disabled' ?>>
           <option value="usuario" <?= $usuario['rol'] === 'usuario' ? 'selected' : '' ?>>Usuario</option>

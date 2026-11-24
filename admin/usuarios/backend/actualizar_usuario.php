@@ -40,6 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone   = $_POST['phone'];
     $area    = $_POST["area"];
     $rol     = $_POST["rol"];
+    $activoPost = (string) ($_POST['activo'] ?? '1');
+    if (!in_array($activoPost, ['0', '1'], true)) {
+        http_response_code(400);
+        exit('Estado no válido.');
+    }
+    $activo = (int) $activoPost;
 
     // Bloquea cambios directos por POST sobre la cuenta superadmin.
     $stmtActual = $conexion->prepare("SELECT rol FROM usuarios WHERE id = ?");
@@ -54,6 +60,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (strtolower(trim((string) ($usuarioActual['rol'] ?? ''))) === 'superadmin' && !$actorEsSuperAdmin) {
         http_response_code(403);
         exit("No tienes permiso para modificar esta cuenta");
+    }
+    if ($id === $idActor && $activo === 0) {
+        http_response_code(400);
+        exit("No puedes desactivar tu propia cuenta");
     }
 
     if ($conexion->connect_error) {
@@ -85,16 +95,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $hash = password_hash($contrasenaNormalizada, PASSWORD_DEFAULT);
 
         // SQL: orden estricto de columnas
-        $stmt = $conexion->prepare("UPDATE usuarios SET usuario=?, nombre_completo=?, email=?, phone=?, area=?, rol=?, modulos_permitidos=?, contrasena=? WHERE id=?");
+        $stmt = $conexion->prepare("UPDATE usuarios SET usuario=?, nombre_completo=?, email=?, phone=?, area=?, rol=?, modulos_permitidos=?, contrasena=?, activo=? WHERE id=?");
 
         // bind_param: orden estricto de variables
-        $stmt->bind_param("ssssssssi", $usuario, $nomcom, $email, $phone, $area, $rol, $modulosCsv, $hash, $id);
+        $stmt->bind_param("ssssssssii", $usuario, $nomcom, $email, $phone, $area, $rol, $modulosCsv, $hash, $activo, $id);
     } else {
         // SQL: orden estricto de columnas
-        $stmt = $conexion->prepare("UPDATE usuarios SET usuario=?, nombre_completo=?, email=?, phone=?, area=?, rol=?, modulos_permitidos=? WHERE id=?");
+        $stmt = $conexion->prepare("UPDATE usuarios SET usuario=?, nombre_completo=?, email=?, phone=?, area=?, rol=?, modulos_permitidos=?, activo=? WHERE id=?");
 
         // bind_param: orden estricto de variables
-        $stmt->bind_param("sssssssi", $usuario, $nomcom, $email, $phone, $area, $rol, $modulosCsv, $id);
+        $stmt->bind_param("sssssssii", $usuario, $nomcom, $email, $phone, $area, $rol, $modulosCsv, $activo, $id);
     }
 
     if ($stmt->execute()) {

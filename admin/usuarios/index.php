@@ -12,7 +12,9 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 3b. Verificar seguridad y módulo
 require_once(ROOT_PATH . 'shared/permisos.php');
+require_once(ROOT_PATH . 'shared/security.php');
 requerirModulo('usuarios');
+$csrfEstadoUsuario = asegurarTokenCsrf();
 
 // 4. Cargar el menú (Usando ROOT_PATH para asegurar que lo encuentre)
 include(ROOT_PATH . 'admin/menu.php');
@@ -52,6 +54,8 @@ function colorRol($rol) {
   <div class="container-fluid">
     <h2 class="titulo">👥 Lista de Usuarios</h2>
     <div class="subtitulo">Administra las cuentas y roles del sistema.</div>
+    <?php if (($_GET['msg'] ?? '') === 'estado_actualizado'): ?><div class="alert alert-success">Estado del usuario actualizado.</div><?php endif; ?>
+    <?php if (($_GET['msg'] ?? '') === 'estado_error'): ?><div class="alert alert-danger">No se pudo actualizar el estado del usuario.</div><?php endif; ?>
 
     <div class="toolbar">
       <input id="filtro" type="text" placeholder="🔎 Buscar por nombre, usuario o área..." class="search-bar">
@@ -109,7 +113,12 @@ function colorRol($rol) {
                     && strtolower(trim((string) ($u['rol'] ?? ''))) === 'superadmin'): ?>
                     <span title="Solo el superadmin puede administrar esta cuenta">Protegido</span>
                   <?php else: ?>
-                    <a href="editar_usuario.php?id=<?= (int) $u['id'] ?>" title="Editar">✏️</a>
+                    <button type="button" class="btn-editar-estado" title="Editar estado" aria-label="Editar estado de <?= htmlspecialchars($u['usuario'], ENT_QUOTES, 'UTF-8') ?>"
+                      data-bs-toggle="modal" data-bs-target="#modalEstadoUsuario"
+                      data-user-id="<?= (int) $u['id'] ?>"
+                      data-user-name="<?= htmlspecialchars($u['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-handle="<?= htmlspecialchars($u['usuario'], ENT_QUOTES, 'UTF-8') ?>"
+                      data-user-active="<?= $usuarioActivo ? '1' : '0' ?>">✏️</button>
                     <form class="form-eliminar" action="<?= BASE_URL ?>admin/usuarios/backend/eliminar_usuario.php" method="POST" style="display:inline;">
                       <input type="hidden" name="usuario_id" value="<?= (int) $u['id'] ?>">
                       <button type="button" class="btn-eliminar" title="Eliminar" data-nombre="<?= htmlspecialchars($u['nombre_completo'], ENT_QUOTES, 'UTF-8') ?>">🗑️</button>
@@ -133,6 +142,36 @@ function colorRol($rol) {
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalEstadoUsuario" tabindex="-1" aria-labelledby="modalEstadoUsuarioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="<?= BASE_URL ?>admin/usuarios/backend/actualizar_estado_usuario.php" method="POST">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="modalEstadoUsuarioLabel">Editar estado del usuario</h5>
+            <div class="small text-muted" id="modalEstadoUsuarioNombre"></div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfEstadoUsuario, ENT_QUOTES, 'UTF-8') ?>">
+          <input type="hidden" name="id" id="modalEstadoUsuarioId">
+          <label class="form-label" for="modalEstadoUsuarioActivo">Estado</label>
+          <select class="form-select" name="activo" id="modalEstadoUsuarioActivo" required>
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+          <a class="btn btn-link btn-sm px-0 mt-3" id="modalEstadoUsuarioEditarDatos" href="#">Editar datos completos</a>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Guardar estado</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -176,6 +215,16 @@ function colorRol($rol) {
   }));
 
   actualizarFilas();
+
+  const modalEstadoUsuario = document.getElementById('modalEstadoUsuario');
+  modalEstadoUsuario.addEventListener('show.bs.modal', function (event) {
+    const boton = event.relatedTarget;
+    const userId = boton.dataset.userId;
+    document.getElementById('modalEstadoUsuarioId').value = userId;
+    document.getElementById('modalEstadoUsuarioNombre').textContent = boton.dataset.userName + ' (@' + boton.dataset.userHandle + ')';
+    document.getElementById('modalEstadoUsuarioActivo').value = boton.dataset.userActive;
+    document.getElementById('modalEstadoUsuarioEditarDatos').href = <?= json_encode(BASE_URL . 'admin/usuarios/editar_usuario.php?id=') ?> + encodeURIComponent(userId);
+  });
 
   // Confirmación con SweetAlert2 en vez del confirm() nativo
   document.querySelectorAll('.btn-eliminar').forEach(btn => {
