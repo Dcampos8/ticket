@@ -10,6 +10,8 @@ $mensaje = '';
 $error = '';
 $vistaPreviaUsuarios = null;
 $modoVistaPrevia = 'full';
+$pestanasValidas = ['marca', 'usuarios', 'disponibilidad', 'servicios'];
+$pestanaActiva = in_array((string) ($_GET['tab'] ?? ''), $pestanasValidas, true) ? (string) $_GET['tab'] : 'marca';
 $campos = [
     'MAIL_MENSAJERIA_HOST' => ['Correo de mensajería', 'Servidor SMTP', false, 'text'],
     'MAIL_MENSAJERIA_USER' => ['Correo de mensajería', 'Usuario', false, 'text'],
@@ -28,11 +30,18 @@ $campos = [
 ];
 $keyCifradoConfigurado = claveCifradoIntegraciones() !== null;
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    $accionPost = (string) ($_POST['accion'] ?? '');
+    $pestanaActiva = match ($accionPost) {
+        'guardar_marca' => 'marca',
+        'estado_sitio' => 'disponibilidad',
+        'probar_conexion_sqlserver', 'previsualizar_usuarios_sqlserver', 'confirmar_sincronizacion_usuarios_sqlserver' => 'usuarios',
+        default => 'servicios',
+    };
     if (!validarTokenCsrf()) $error = 'La sesión expiró. Recarga la página e intenta de nuevo.';
     elseif (($_POST['accion'] ?? '') === 'estado_sitio') {
         $estadoSitio = ($_POST['sitio_dado_de_baja'] ?? '0') === '1' ? '1' : '0';
         if (guardarConfiguracionIntegracion('SITIO_DADO_DE_BAJA', $estadoSitio, false, (string) ($_SESSION['usuario'] ?? 'superadmin'))) {
-            header('Location: ' . BASE_URL . 'admin/integraciones/?estado=' . ($estadoSitio === '1' ? 'baja' : 'activo'));
+            header('Location: ' . BASE_URL . 'admin/integraciones/?estado=' . ($estadoSitio === '1' ? 'baja' : 'activo') . '&tab=disponibilidad');
             exit;
         }
         $error = 'No se pudo guardar el estado. Verifica que la migración de integraciones esté aplicada.';
@@ -86,7 +95,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     } catch (Throwable $e) {
                         // La tabla de correo puede no estar instalada en todas las instancias.
                     }
-                    header('Location: ' . BASE_URL . 'admin/integraciones/?marca=guardada');
+                    header('Location: ' . BASE_URL . 'admin/integraciones/?marca=guardada&tab=marca');
                     exit;
                 }
                 $error = 'No se pudo guardar la identidad visual en la base de datos.';
@@ -212,6 +221,15 @@ include ROOT_PATH . 'admin/menu.php';
   <?php if (($_GET['marca'] ?? '') === 'guardada'): ?><div class="alert alert-success">Nombre e identidad visual guardados.</div><?php endif; ?>
   <?php if (($_GET['estado'] ?? '') === 'baja'): ?><div class="alert alert-warning">El sitio está dado de baja. El superadministrador conserva el acceso.</div><?php elseif (($_GET['estado'] ?? '') === 'activo'): ?><div class="alert alert-success">El sitio está activo nuevamente.</div><?php endif; ?>
   <?php $sitioBaja = sitioEstaDadoDeBaja(); ?>
+  <div class="integration-tabs-shell">
+    <ul class="nav nav-tabs integration-tabs" id="integrationTabs" role="tablist">
+      <li class="nav-item" role="presentation"><button class="nav-link <?= $pestanaActiva === 'marca' ? 'active' : '' ?>" id="marca-tab" data-bs-toggle="tab" data-bs-target="#marca-pane" type="button" role="tab" aria-controls="marca-pane" aria-selected="<?= $pestanaActiva === 'marca' ? 'true' : 'false' ?>"><i class="fa-solid fa-palette"></i><span>Identidad</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link <?= $pestanaActiva === 'usuarios' ? 'active' : '' ?>" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios-pane" type="button" role="tab" aria-controls="usuarios-pane" aria-selected="<?= $pestanaActiva === 'usuarios' ? 'true' : 'false' ?>"><i class="fa-solid fa-database"></i><span>SQL Server</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link <?= $pestanaActiva === 'disponibilidad' ? 'active' : '' ?>" id="disponibilidad-tab" data-bs-toggle="tab" data-bs-target="#disponibilidad-pane" type="button" role="tab" aria-controls="disponibilidad-pane" aria-selected="<?= $pestanaActiva === 'disponibilidad' ? 'true' : 'false' ?>"><i class="fa-solid fa-power-off"></i><span>Disponibilidad</span></button></li>
+      <li class="nav-item" role="presentation"><button class="nav-link <?= $pestanaActiva === 'servicios' ? 'active' : '' ?>" id="servicios-tab" data-bs-toggle="tab" data-bs-target="#servicios-pane" type="button" role="tab" aria-controls="servicios-pane" aria-selected="<?= $pestanaActiva === 'servicios' ? 'true' : 'false' ?>"><i class="fa-solid fa-plug"></i><span>Servicios</span></button></li>
+    </ul>
+    <div class="tab-content integration-tab-content" id="integrationTabsContent">
+      <div class="tab-pane fade <?= $pestanaActiva === 'marca' ? 'show active' : '' ?>" id="marca-pane" role="tabpanel" aria-labelledby="marca-tab" tabindex="0">
   <section class="card mb-4"><div class="card-body">
     <h2 class="h5 mb-1">Identidad de la empresa</h2>
     <p class="text-muted">El nombre se usa en las páginas, documentos y notificaciones del sistema. El logo aparece en los menús y el icono en la pestaña del navegador.</p>
@@ -224,6 +242,8 @@ include ROOT_PATH . 'admin/menu.php';
       <div class="col-12 text-end"><button class="btn btn-danger" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar identidad</button></div>
     </form>
   </div></section>
+      </div>
+      <div class="tab-pane fade <?= $pestanaActiva === 'usuarios' ? 'show active' : '' ?>" id="usuarios-pane" role="tabpanel" aria-labelledby="usuarios-tab" tabindex="0">
   <?php
     $sqlsrvDisponible = extension_loaded('odbc') && in_array('odbc', PDO::getAvailableDrivers(), true);
     $sqlsrvConfigurado = trim((string) env('DB2_HOST', '')) !== ''
@@ -305,10 +325,14 @@ include ROOT_PATH . 'admin/menu.php';
       <?php endif; ?>
     <?php endif; ?>
   </div></section>
+      </div>
+      <div class="tab-pane fade <?= $pestanaActiva === 'disponibilidad' ? 'show active' : '' ?>" id="disponibilidad-pane" role="tabpanel" aria-labelledby="disponibilidad-tab" tabindex="0">
   <section class="card mb-4"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
     <div><h2 class="h5 mb-1">Disponibilidad del sitio</h2><p class="text-muted mb-0">Al darlo de baja, los usuarios y administradores verán un aviso de indisponibilidad. El superadministrador seguirá usando el sistema.</p></div>
     <form method="post" class="m-0"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="accion" value="estado_sitio"><input type="hidden" name="sitio_dado_de_baja" value="<?= $sitioBaja ? '0' : '1' ?>"><button class="btn <?= $sitioBaja ? 'btn-success' : 'btn-danger' ?>" type="submit"><i class="fa-solid <?= $sitioBaja ? 'fa-circle-check' : 'fa-power-off' ?> me-2"></i><?= $sitioBaja ? 'Reactivar sitio' : 'Dar de baja el sitio' ?></button></form>
   </div></section>
+      </div>
+      <div class="tab-pane fade <?= $pestanaActiva === 'servicios' ? 'show active' : '' ?>" id="servicios-pane" role="tabpanel" aria-labelledby="servicios-tab" tabindex="0">
   <?php if (!$keyCifradoConfigurado): ?><div class="alert alert-warning">Para guardar contraseñas y tokens, agrega <code>APP_SETTINGS_ENCRYPTION_KEY</code> al archivo .env con al menos 32 caracteres y reinicia PHP.</div><?php endif; ?>
   <form method="post" class="integration-form">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
@@ -323,5 +347,8 @@ include ROOT_PATH . 'admin/menu.php';
     <?php endforeach; ?></div></div></section>
     <div class="d-flex justify-content-end"><button class="btn btn-danger px-4" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar configuración</button></div>
   </form>
+      </div>
+    </div>
+  </div>
 </main>
 <link rel="stylesheet" href="<?= BASE_URL ?>css/integraciones.css?v=1">
