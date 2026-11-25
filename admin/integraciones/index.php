@@ -212,10 +212,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 include ROOT_PATH . 'admin/menu.php';
 ?>
 <main class="container-fluid px-4 py-4 integrations-page">
-  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-    <div><h1 class="h3 mb-1"><i class="fa-solid fa-plug text-danger me-2"></i>Conexiones e integraciones</h1><p class="text-muted mb-0">Administra los servicios que utiliza la plataforma.</p></div>
-    <span class="badge <?= $keyCifradoConfigurado ? 'text-bg-success' : 'text-bg-warning' ?>">Cifrado <?= $keyCifradoConfigurado ? 'configurado' : 'pendiente' ?></span>
-  </div>
+  <header class="integration-hero mb-4">
+    <div class="integration-hero-copy">
+      <span class="integration-eyebrow">CENTRO DE ADMINISTRACIÓN</span>
+      <h1><span class="integration-hero-icon"><i class="fa-solid fa-sliders"></i></span><span>Conexiones e integraciones<small>Configura la identidad y los servicios de tu plataforma.</small></span></h1>
+    </div>
+    <div class="integration-security <?= $keyCifradoConfigurado ? 'is-ready' : 'is-pending' ?>">
+      <span class="security-indicator"><i class="fa-solid <?= $keyCifradoConfigurado ? 'fa-lock' : 'fa-lock-open' ?>"></i></span>
+      <span><small>Seguridad de credenciales</small><strong><?= $keyCifradoConfigurado ? 'Cifrado activo' : 'Cifrado pendiente' ?></strong></span>
+    </div>
+  </header>
   <?php if ($mensaje): ?><div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div><?php endif; ?>
   <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
   <?php if (($_GET['marca'] ?? '') === 'guardada'): ?><div class="alert alert-success">Nombre e identidad visual guardados.</div><?php endif; ?>
@@ -230,16 +236,15 @@ include ROOT_PATH . 'admin/menu.php';
     </ul>
     <div class="tab-content integration-tab-content" id="integrationTabsContent">
       <div class="tab-pane fade <?= $pestanaActiva === 'marca' ? 'show active' : '' ?>" id="marca-pane" role="tabpanel" aria-labelledby="marca-tab" tabindex="0">
-  <section class="card mb-4"><div class="card-body">
-    <h2 class="h5 mb-1">Identidad de la empresa</h2>
-    <p class="text-muted">El nombre se usa en las páginas, documentos y notificaciones del sistema. El logo aparece en los menús y el icono en la pestaña del navegador.</p>
+  <section class="card mb-4 integration-feature-card"><div class="card-body">
+    <div class="integration-section-heading"><span class="integration-section-icon"><i class="fa-solid fa-building"></i></span><div><h2 class="h5 mb-1">Identidad de la empresa</h2><p class="text-muted mb-0">Personaliza cómo se presenta la plataforma en sus páginas y documentos.</p></div></div>
     <form method="post" enctype="multipart/form-data" class="row g-3 align-items-end">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="accion" value="guardar_marca">
-      <div class="col-12"><label class="form-label" for="nombre_empresa">Nombre de la empresa</label><input class="form-control" id="nombre_empresa" name="nombre_empresa" maxlength="100" required value="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>"></div>
-      <div class="col-md-6"><label class="form-label" for="logo_empresa">Logo del menú (PNG, JPG o WEBP; máximo 2 MB)</label><input class="form-control" id="logo_empresa" name="logo_empresa" type="file" accept="image/png,image/jpeg,image/webp"><div class="form-text">Actual: <img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Logo actual" style="max-width:150px;max-height:48px;object-fit:contain"></div></div>
-      <div class="col-md-6"><label class="form-label" for="icono_pestana">Icono de pestaña (PNG, JPG o WEBP; máximo 2 MB)</label><input class="form-control" id="icono_pestana" name="icono_pestana" type="file" accept="image/png,image/jpeg,image/webp"><div class="form-text">Actual: <img src="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Icono actual" style="width:32px;height:32px;object-fit:contain"></div></div>
-      <div class="col-12 text-end"><button class="btn btn-danger" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar identidad</button></div>
+      <div class="col-12"><div class="brand-name-field"><label class="form-label" for="nombre_empresa">Nombre de la empresa</label><input class="form-control" id="nombre_empresa" name="nombre_empresa" maxlength="100" required value="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>"><div class="form-text">Se reflejará en el sistema, los documentos y las notificaciones.</div></div></div>
+      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-image"></i></span><div><label class="form-label" for="logo_empresa">Logo del menú</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="logo_empresa" name="logo_empresa" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Logo actual"></div></div></div>
+      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-window-maximize"></i></span><div><label class="form-label" for="icono_pestana">Icono de pestaña</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="icono_pestana" name="icono_pestana" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img class="brand-favicon-preview" src="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Icono actual"></div></div></div>
+      <div class="col-12 d-flex justify-content-end"><button class="btn btn-danger integration-save-button" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar identidad</button></div>
     </form>
   </div></section>
       </div>
@@ -251,8 +256,7 @@ include ROOT_PATH . 'admin/menu.php';
         && trim((string) env('DB2_USER', '')) !== '';
   ?>
   <section class="card mb-4"><div class="card-body">
-    <h2 class="h5 mb-1">Sincronización de usuarios de SQL Server</h2>
-    <p class="text-muted">Primero obtén una vista previa de los usuarios y sus acciones. La conexión usa el DSN ODBC <code>mssql_odbc</code> definido en <code>.odbc.ini</code>.</p>
+    <div class="integration-section-heading"><span class="integration-section-icon"><i class="fa-solid fa-database"></i></span><div><h2 class="h5 mb-1">Sincronización de usuarios de SQL Server</h2><p class="text-muted mb-0">Revisa los cambios antes de aplicarlos. La conexión usa el DSN ODBC <code>mssql_odbc</code>.</p></div></div>
     <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">Habilita las extensiones PHP <code>odbc</code> y <code>pdo_odbc</code> en el panel del hosting.</div><?php endif; ?>
     <?php if (!$sqlsrvConfigurado): ?><div class="alert alert-warning mb-3">Falta completar DB2_HOST, DB2_NAME y DB2_USER en el archivo .env.</div><?php endif; ?>
     <form method="post" class="d-inline-block me-2 mb-2">
@@ -328,7 +332,7 @@ include ROOT_PATH . 'admin/menu.php';
       </div>
       <div class="tab-pane fade <?= $pestanaActiva === 'disponibilidad' ? 'show active' : '' ?>" id="disponibilidad-pane" role="tabpanel" aria-labelledby="disponibilidad-tab" tabindex="0">
   <section class="card mb-4"><div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
-    <div><h2 class="h5 mb-1">Disponibilidad del sitio</h2><p class="text-muted mb-0">Al darlo de baja, los usuarios y administradores verán un aviso de indisponibilidad. El superadministrador seguirá usando el sistema.</p></div>
+    <div class="integration-section-heading mb-0"><span class="integration-section-icon"><i class="fa-solid fa-globe"></i></span><div><h2 class="h5 mb-1">Disponibilidad del sitio</h2><p class="text-muted mb-0">Controla si el personal puede acceder al sistema. El superadministrador conserva el acceso.</p></div></div>
     <form method="post" class="m-0"><input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>"><input type="hidden" name="accion" value="estado_sitio"><input type="hidden" name="sitio_dado_de_baja" value="<?= $sitioBaja ? '0' : '1' ?>"><button class="btn <?= $sitioBaja ? 'btn-success' : 'btn-danger' ?>" type="submit"><i class="fa-solid <?= $sitioBaja ? 'fa-circle-check' : 'fa-power-off' ?> me-2"></i><?= $sitioBaja ? 'Reactivar sitio' : 'Dar de baja el sitio' ?></button></form>
   </div></section>
       </div>
