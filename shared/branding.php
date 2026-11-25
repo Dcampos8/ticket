@@ -14,6 +14,12 @@ function nombreEmpresaHtml(): string
     return htmlspecialchars(nombreEmpresa(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function tituloPaginaEmpresa(string $titulo = ''): string
+{
+    $titulo = trim($titulo);
+    return htmlspecialchars(($titulo !== '' ? $titulo . ' · ' : '') . nombreEmpresa(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
 function recursoMarcaEmpresa(string $clave, string $predeterminado): string
 {
     $ruta = trim(str_replace('\\', '/', (string) obtenerConfiguracionIntegracion($clave, $predeterminado)));

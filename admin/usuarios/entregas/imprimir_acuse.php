@@ -84,7 +84,7 @@ $equipos_entregados = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin perif
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acuse (<?= strtoupper($modo_vista) ?>) - <?= htmlspecialchars($nombre) ?></title>
+    <title><?= tituloPaginaEmpresa('Acuse (' . strtoupper((string) $modo_vista) . ') - ' . (string) $nombre) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

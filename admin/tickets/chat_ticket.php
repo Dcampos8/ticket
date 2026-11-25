@@ -19,7 +19,7 @@ $baseUrl = defined('BASE_URL') ? BASE_URL : '/';
 <html lang="es">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Atender ticket #<?= (int) $ticketId ?> | Service Desk</title>
+    <title><?= tituloPaginaEmpresa('Atender ticket #' . (string) (int) $ticketId . ' | Service Desk') ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>css/pages/admin__tickets__chat_ticket.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__tickets__chat_ticket.css') ?>">
 </head>

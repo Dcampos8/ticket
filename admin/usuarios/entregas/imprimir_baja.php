@@ -38,7 +38,7 @@ $equipos_devueltos = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin hardwa
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acta de Devolución - <?= htmlspecialchars($nombre) ?></title>
+    <title><?= tituloPaginaEmpresa('Acta de Devolución - ' . (string) $nombre) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

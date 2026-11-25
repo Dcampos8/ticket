@@ -47,7 +47,7 @@ if (!$data) {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Formato de Devolución de Celular</title>
+<title><?= tituloPaginaEmpresa('Formato de Devolución de Celular') ?></title>
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__backend__formato_devolucion.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__backend__formato_devolucion.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
 </head>

@@ -171,7 +171,7 @@ function imprimirHoja() {
     ventana.document.write(`
         <html>
         <head>
-            <title>Hoja de Servicio - IT</title>
+            <title><?= tituloPaginaEmpresa('Hoja de Servicio - IT') ?></title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         </head>
         <body>

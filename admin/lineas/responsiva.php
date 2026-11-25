@@ -77,7 +77,7 @@ if ($fechaResponsiva !== '') {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Responsiva - <?= $e($data['usuario'] ?? '') ?></title>
+    <title><?= tituloPaginaEmpresa('Responsiva - ' . (string) ($data['usuario'] ?? '')) ?></title>
     <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__lineas__responsiva.css?v=<?= filemtime(__DIR__ . '/../../css/pages/admin__lineas__responsiva.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
 </head>
