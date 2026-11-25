@@ -242,8 +242,8 @@ include ROOT_PATH . 'admin/menu.php';
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="accion" value="guardar_marca">
       <div class="col-12"><div class="brand-name-field"><label class="form-label" for="nombre_empresa">Nombre de la empresa</label><input class="form-control" id="nombre_empresa" name="nombre_empresa" maxlength="100" required value="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>"><div class="form-text">Se reflejará en el sistema, los documentos y las notificaciones.</div></div></div>
-      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-image"></i></span><div><label class="form-label" for="logo_empresa">Logo del menú</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="logo_empresa" name="logo_empresa" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Logo actual"></div></div></div>
-      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-window-maximize"></i></span><div><label class="form-label" for="icono_pestana">Icono de pestaña</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="icono_pestana" name="icono_pestana" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img class="brand-favicon-preview" src="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Icono actual"></div></div></div>
+      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-image"></i></span><div><label class="form-label" for="logo_empresa">Logo del menú</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="logo_empresa" name="logo_empresa" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img width="180" height="48" src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Logo actual"></div></div></div>
+      <div class="col-lg-6"><div class="brand-upload-card"><div class="brand-upload-top"><span class="brand-upload-icon"><i class="fa-regular fa-window-maximize"></i></span><div><label class="form-label" for="icono_pestana">Icono de pestaña</label><small>PNG, JPG o WEBP · máximo 2 MB</small></div></div><input class="form-control" id="icono_pestana" name="icono_pestana" type="file" accept="image/png,image/jpeg,image/webp"><div class="brand-preview"><span>Vista actual</span><img class="brand-favicon-preview" width="38" height="38" src="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Icono actual"></div></div></div>
       <div class="col-12 d-flex justify-content-end"><button class="btn btn-danger integration-save-button" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar identidad</button></div>
     </form>
   </div></section>
@@ -259,24 +259,28 @@ include ROOT_PATH . 'admin/menu.php';
     <div class="integration-section-heading"><span class="integration-section-icon"><i class="fa-solid fa-database"></i></span><div><h2 class="h5 mb-1">Sincronización de usuarios de SQL Server</h2><p class="text-muted mb-0">Revisa los cambios antes de aplicarlos. La conexión usa el DSN ODBC <code>mssql_odbc</code>.</p></div></div>
     <?php if (!$sqlsrvDisponible): ?><div class="alert alert-warning mb-3">Habilita las extensiones PHP <code>odbc</code> y <code>pdo_odbc</code> en el panel del hosting.</div><?php endif; ?>
     <?php if (!$sqlsrvConfigurado): ?><div class="alert alert-warning mb-3">Falta completar DB2_HOST, DB2_NAME y DB2_USER en el archivo .env.</div><?php endif; ?>
-    <form method="post" class="d-inline-block me-2 mb-2">
+    <div class="integration-connection-tools">
+    <form method="post" class="d-inline-block mb-2">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
       <input type="hidden" name="accion" value="probar_conexion_sqlserver">
       <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-plug-circle-check me-2"></i>Probar conexión</button>
     </form>
-    <div class="d-flex flex-wrap gap-2">
-      <form method="post" class="d-inline-block" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Obteniendo datos...';">
+    <div class="integration-sync-actions">
+      <form method="post" class="integration-action-card" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Obteniendo datos...';">
+        <span class="sync-action-icon"><i class="fa-solid fa-arrows-rotate"></i></span><span class="sync-action-copy"><strong>Vista previa completa</strong><small>Revisa usuarios nuevos y actualizaciones</small></span>
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="accion" value="previsualizar_usuarios_sqlserver">
         <input type="hidden" name="modo_sincronizacion" value="full">
-        <button class="btn btn-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-arrows-rotate me-2"></i>Vista previa completa</button>
+        <button class="btn btn-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>>Obtener vista previa</button>
       </form>
-      <form method="post" class="d-inline-block" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Buscando nuevos...';">
+      <form method="post" class="integration-action-card" onsubmit="const button=this.querySelector('button[type=submit]'); button.disabled=true; button.innerHTML='<span class=\'spinner-border spinner-border-sm me-2\' aria-hidden=\'true\'></span>Buscando nuevos...';">
+        <span class="sync-action-icon is-new"><i class="fa-solid fa-user-plus"></i></span><span class="sync-action-copy"><strong>Solo usuarios nuevos</strong><small>Busca activos que todavía no existen</small></span>
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="accion" value="previsualizar_usuarios_sqlserver">
         <input type="hidden" name="modo_sincronizacion" value="insert_only">
-        <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>><i class="fa-solid fa-user-plus me-2"></i>Vista previa: solo nuevos activos</button>
+        <button class="btn btn-outline-primary" type="submit" <?= (!$sqlsrvDisponible || !$sqlsrvConfigurado) ? 'disabled' : '' ?>>Buscar nuevos activos</button>
       </form>
+    </div>
     </div>
     <?php if (is_array($vistaPreviaUsuarios)): ?>
       <?php
@@ -342,9 +346,10 @@ include ROOT_PATH . 'admin/menu.php';
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
     <?php $grupoActual = ''; foreach ($campos as $clave => [$grupo, $etiqueta, $secreto, $tipo]): ?>
       <?php if ($grupo !== $grupoActual): if ($grupoActual !== '') echo '</div></section>'; $grupoActual = $grupo; ?>
-      <section class="card integration-card mb-4"><div class="card-body"><h2 class="h5 mb-3"><?= htmlspecialchars($grupo) ?></h2><div class="row g-3">
+      <?php $iconoGrupo = ['Correo de mensajería' => 'fa-envelope', 'Reportes de tickets' => 'fa-chart-column', 'Alertas del Service Desk' => 'fa-bell', 'Correo de sistemas' => 'fa-inbox', 'Telegram' => 'fa-paper-plane', 'Inteligencia artificial' => 'fa-wand-magic-sparkles', 'Intranet' => 'fa-building-shield'][$grupo] ?? 'fa-plug'; ?>
+      <section class="card integration-card mb-4"><div class="card-body"><div class="integration-group-heading"><span class="integration-group-icon"><i class="fa-solid <?= htmlspecialchars($iconoGrupo, ENT_QUOTES, 'UTF-8') ?>"></i></span><h2 class="h5"><?= htmlspecialchars($grupo) ?></h2></div><div class="row g-3">
       <?php endif; $valorPredeterminado = $clave === 'GEMINI_MODEL' ? 'gemini-3.5-flash-lite' : ($clave === 'MAIL_SISTEMAS_HOST' ? '{imap.hostinger.com:993/imap/ssl}INBOX' : ''); $valor = obtenerConfiguracionIntegracion($clave, $valorPredeterminado); ?>
-      <div class="col-12 col-md-6"><label class="form-label" for="<?= $clave ?>"><?= htmlspecialchars($etiqueta) ?></label>
+      <div class="integration-field col-12 col-md-6"><label class="form-label" for="<?= $clave ?>"><?= htmlspecialchars($etiqueta) ?></label>
         <?php if ($secreto): ?><input class="form-control" type="password" id="<?= $clave ?>" name="<?= $clave ?>" autocomplete="new-password" placeholder="<?= $valor !== '' ? 'Configurado; vacío conserva el valor actual' : 'Sin configurar' ?>" <?= !$keyCifradoConfigurado ? 'disabled' : '' ?>>
         <?php else: ?><input class="form-control" type="<?= in_array($tipo, ['email', 'url'], true) ? $tipo : 'text' ?>" id="<?= $clave ?>" name="<?= $clave ?>" value="<?= htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8') ?>" <?= $clave === 'INTRANET_TICKET_API_SECRET' ? 'minlength="32"' : '' ?>><?php endif; ?>
       </div>
@@ -355,4 +360,4 @@ include ROOT_PATH . 'admin/menu.php';
     </div>
   </div>
 </main>
-<link rel="stylesheet" href="<?= BASE_URL ?>css/integraciones.css?v=1">
+<link rel="stylesheet" href="<?= BASE_URL ?>css/integraciones.css?v=<?= filemtime(ROOT_PATH . 'css/integraciones.css') ?>">
