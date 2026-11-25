@@ -4,12 +4,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Transportes Valadez</title>
+    <title><?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- 1. ICONO -->
-    <link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>img/favicon.svg?v=2">
-    <link rel="manifest" href="<?= BASE_URL ?>manifest.webmanifest?v=2">
+    <link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="manifest" href="<?= BASE_URL ?>manifest.php?v=<?= rawurlencode(nombreEmpresa()) ?>">
 
     <!-- 2. ESTILOS EXTERNOS (CDN) -->
     <!-- FontAwesome (Solo una vez) -->

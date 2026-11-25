@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../shared/integration_settings.php';
+require_once __DIR__ . '/../../../shared/branding.php';
 // 1. CONFIGURACIÓN DE ERRORES Y LIBRERÍAS
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -115,7 +116,7 @@ try {
     $mail->Port       = 465;
     $mail->CharSet    = 'UTF-8';
 
-    $mail->setFrom('noreply@mensajeriatv.site', 'Sistemas - Transportes Valadez');
+    $mail->setFrom('noreply@mensajeriatv.site', 'Sistemas - ' . nombreEmpresa());
     
     $lista_correos = explode(',', $destinatarios);
     foreach($lista_correos as $correo) {

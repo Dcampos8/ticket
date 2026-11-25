@@ -115,7 +115,7 @@ $equipos_entregados = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin perif
             <!-- Encabezado Institucional -->
             <div class="header">
                 <div class="brand">
-                    <div class="brand-title">TRANSPORTES VALADEZ</div>
+                    <div class="brand-title"><?= nombreEmpresaHtml() ?></div>
                     <div class="brand-subtitle">Departamento de Tecnologías de la Información</div>
                 </div>
                 <div class="doc-tag">
@@ -216,7 +216,7 @@ $equipos_entregados = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin perif
 
             <!-- Cláusula Legal / Términos -->
             <div class="legal-notice">
-                <strong>TÉRMINOS Y CONDICIONES DE USO:</strong> El colaborador declara recibir a entera satisfacción los accesos, credenciales y/o componentes de cómputo detallados en este documento. Se compromete a destinar los activos exclusivamente para el desempeño de sus funciones laborales dentro de Transportes Valadez, salvaguardando la confidencialidad de sus contraseñas. En caso de baja o reasignación de funciones, se compromete a devolver las herramientas físicas y se cancelarán los accesos en el sistema.
+                <strong>TÉRMINOS Y CONDICIONES DE USO:</strong> El colaborador declara recibir a entera satisfacción los accesos, credenciales y/o componentes de cómputo detallados en este documento. Se compromete a destinar los activos exclusivamente para el desempeño de sus funciones laborales dentro de <?= nombreEmpresaHtml() ?>, salvaguardando la confidencialidad de sus contraseñas. En caso de baja o reasignación de funciones, se compromete a devolver las herramientas físicas y se cancelarán los accesos en el sistema.
             </div>
         </div>
 
@@ -243,7 +243,7 @@ $equipos_entregados = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin perif
             <?php endif; ?>
 
             <div class="footer-note">
-                Transportes Valadez &copy; <?= date('Y') ?> &bull; Sistema de Control de Activos y Accesos TI
+                <?= nombreEmpresaHtml() ?> &copy; <?= date('Y') ?> &bull; Sistema de Control de Activos y Accesos TI
             </div>
         </div>
     </div>

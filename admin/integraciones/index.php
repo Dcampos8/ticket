@@ -37,6 +37,62 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
         $error = 'No se pudo guardar el estado. Verifica que la migración de integraciones esté aplicada.';
     }
+    elseif (($_POST['accion'] ?? '') === 'guardar_marca') {
+        $nombreMarca = trim((string) ($_POST['nombre_empresa'] ?? ''));
+        $nombreAnterior = nombreEmpresa();
+        if ($nombreMarca === '' || mb_strlen($nombreMarca, 'UTF-8') > 100) {
+            $error = 'Escribe un nombre de empresa de 1 a 100 caracteres.';
+        } else {
+            $rutasMarca = [];
+            $tiposImagen = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/webp' => 'webp'];
+            $directorioMarca = ROOT_PATH . 'uploads/branding';
+            foreach (['logo_empresa' => 'MARCA_LOGO', 'icono_pestana' => 'MARCA_ICONO'] as $campoArchivo => $claveMarca) {
+                if (!isset($_FILES[$campoArchivo]) || ($_FILES[$campoArchivo]['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
+                $archivoMarca = $_FILES[$campoArchivo];
+                if (($archivoMarca['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || (int) ($archivoMarca['size'] ?? 0) > 2 * 1024 * 1024) {
+                    $error = 'Cada imagen debe pesar 2 MB o menos y cargarse correctamente.';
+                    break;
+                }
+                $datosImagen = @getimagesize((string) $archivoMarca['tmp_name']);
+                $mimeImagen = is_array($datosImagen) ? (string) ($datosImagen['mime'] ?? '') : '';
+                if (!isset($tiposImagen[$mimeImagen])) {
+                    $error = 'Usa imágenes PNG, JPG o WEBP para el logo y el icono.';
+                    break;
+                }
+                if (!is_dir($directorioMarca) && !mkdir($directorioMarca, 0755, true) && !is_dir($directorioMarca)) {
+                    $error = 'No se pudo preparar la carpeta para guardar las imágenes de marca.';
+                    break;
+                }
+                $nombreArchivo = bin2hex(random_bytes(12)) . '.' . $tiposImagen[$mimeImagen];
+                if (!move_uploaded_file((string) $archivoMarca['tmp_name'], $directorioMarca . DIRECTORY_SEPARATOR . $nombreArchivo)) {
+                    $error = 'No se pudo guardar una de las imágenes de marca.';
+                    break;
+                }
+                $rutasMarca[$claveMarca] = 'uploads/branding/' . $nombreArchivo;
+            }
+            if ($error === '') {
+                $okMarca = guardarConfiguracionIntegracion('MARCA_NOMBRE_EMPRESA', $nombreMarca, false, (string) ($_SESSION['usuario'] ?? 'superadmin'));
+                foreach ($rutasMarca as $claveMarca => $rutaMarca) {
+                    $okMarca = guardarConfiguracionIntegracion($claveMarca, $rutaMarca, false, (string) ($_SESSION['usuario'] ?? 'superadmin')) && $okMarca;
+                }
+                if ($okMarca) {
+                    try {
+                        $stmtCarpetaMarca = $conexion->prepare('UPDATE correo_carpetas SET nombre = ? WHERE id = 1 AND nombre = ?');
+                        if ($stmtCarpetaMarca) {
+                            $stmtCarpetaMarca->bind_param('ss', $nombreMarca, $nombreAnterior);
+                            $stmtCarpetaMarca->execute();
+                            $stmtCarpetaMarca->close();
+                        }
+                    } catch (Throwable $e) {
+                        // La tabla de correo puede no estar instalada en todas las instancias.
+                    }
+                    header('Location: ' . BASE_URL . 'admin/integraciones/?marca=guardada');
+                    exit;
+                }
+                $error = 'No se pudo guardar la identidad visual en la base de datos.';
+            }
+        }
+    }
     elseif (($_POST['accion'] ?? '') === 'probar_conexion_sqlserver') {
         $sqlHostTest = trim((string) env('DB2_HOST', ''));
         $sqlPortTest = (int) env('DB2_PORT', '1433');
@@ -153,8 +209,21 @@ include ROOT_PATH . 'admin/menu.php';
   </div>
   <?php if ($mensaje): ?><div class="alert alert-success"><?= htmlspecialchars($mensaje) ?></div><?php endif; ?>
   <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+  <?php if (($_GET['marca'] ?? '') === 'guardada'): ?><div class="alert alert-success">Nombre e identidad visual guardados.</div><?php endif; ?>
   <?php if (($_GET['estado'] ?? '') === 'baja'): ?><div class="alert alert-warning">El sitio está dado de baja. El superadministrador conserva el acceso.</div><?php elseif (($_GET['estado'] ?? '') === 'activo'): ?><div class="alert alert-success">El sitio está activo nuevamente.</div><?php endif; ?>
   <?php $sitioBaja = sitioEstaDadoDeBaja(); ?>
+  <section class="card mb-4"><div class="card-body">
+    <h2 class="h5 mb-1">Identidad de la empresa</h2>
+    <p class="text-muted">El nombre se usa en las páginas, documentos y notificaciones del sistema. El logo aparece en los menús y el icono en la pestaña del navegador.</p>
+    <form method="post" enctype="multipart/form-data" class="row g-3 align-items-end">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
+      <input type="hidden" name="accion" value="guardar_marca">
+      <div class="col-12"><label class="form-label" for="nombre_empresa">Nombre de la empresa</label><input class="form-control" id="nombre_empresa" name="nombre_empresa" maxlength="100" required value="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>"></div>
+      <div class="col-md-6"><label class="form-label" for="logo_empresa">Logo del menú (PNG, JPG o WEBP; máximo 2 MB)</label><input class="form-control" id="logo_empresa" name="logo_empresa" type="file" accept="image/png,image/jpeg,image/webp"><div class="form-text">Actual: <img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Logo actual" style="max-width:150px;max-height:48px;object-fit:contain"></div></div>
+      <div class="col-md-6"><label class="form-label" for="icono_pestana">Icono de pestaña (PNG, JPG o WEBP; máximo 2 MB)</label><input class="form-control" id="icono_pestana" name="icono_pestana" type="file" accept="image/png,image/jpeg,image/webp"><div class="form-text">Actual: <img src="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="Icono actual" style="width:32px;height:32px;object-fit:contain"></div></div>
+      <div class="col-12 text-end"><button class="btn btn-danger" type="submit"><i class="fa-solid fa-floppy-disk me-2"></i>Guardar identidad</button></div>
+    </form>
+  </div></section>
   <?php
     $sqlsrvDisponible = extension_loaded('odbc') && in_array('odbc', PDO::getAvailableDrivers(), true);
     $sqlsrvConfigurado = trim((string) env('DB2_HOST', '')) !== ''

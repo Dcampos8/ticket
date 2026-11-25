@@ -2,6 +2,7 @@
 session_start();
 require_once __DIR__ . '/../../../shared/security.php';
 require_once __DIR__ . '/../../../shared/integration_settings.php';
+require_once __DIR__ . '/../../../shared/branding.php';
 require_once __DIR__ . '/../../../shared/ticket_clasificacion.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -189,7 +190,7 @@ try {
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
     $mail->Port = 465;
 
-    $mail->setFrom('noreply@mensajeriatv.site', 'Transportes Valadez');
+    $mail->setFrom('noreply@mensajeriatv.site', nombreEmpresa());
     $destinatarioTickets = trim((string) env('MAIL_TICKETS_TO', '')) ?: 'sistemas@transportesvaladez.com';
     $mail->addAddress($destinatarioTickets);
 
@@ -210,6 +211,7 @@ try {
     $areaCorreo = $escapeHtml($area);
     $fechaCorreo = $escapeHtml($fecha_creacion);
     $urlTicketCorreo = $escapeHtml($urlTicket);
+    $nombreEmpresaCorreo = htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8');
     $bloqueAdjunto = $nombre_imagen !== null
         ? '<tr><td style="padding:0 28px 24px"><a href="' . $escapeHtml($urlImagen) . '" style="display:inline-block;padding:10px 15px;border:1px solid #d0d5dd;border-radius:8px;color:#344054;text-decoration:none;font-size:14px;font-weight:700">Ver imagen adjunta&nbsp; →</a></td></tr>'
         : '';
@@ -224,7 +226,7 @@ try {
     <tr><td align="center">
       <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #eaecf0;border-radius:14px;overflow:hidden">
         <tr><td style="padding:22px 28px;background:#292b31;border-bottom:4px solid #ed1c24">
-          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#fda4a8;text-transform:uppercase">Transportes Valadez · Sistemas</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#fda4a8;text-transform:uppercase">{$nombreEmpresaCorreo} · Sistemas</div>
           <div style="padding-top:8px;color:#ffffff;font-size:23px;font-weight:700">Nuevo ticket recibido</div>
           <div style="padding-top:5px;color:#d0d5dd;font-size:14px">Folio #{$ticketId}</div>
         </td></tr>
@@ -244,7 +246,7 @@ try {
         </td></tr>
         {$bloqueAdjunto}
         <tr><td align="center" style="padding:0 28px 28px"><a href="{$urlTicketCorreo}" style="display:inline-block;padding:13px 22px;border-radius:8px;background:#ed1c24;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700">Abrir y atender ticket&nbsp; →</a></td></tr>
-        <tr><td style="padding:16px 28px;background:#f9fafb;border-top:1px solid #eaecf0;color:#98a2b3;font-size:11px;line-height:1.5;text-align:center">Notificación automática del sistema de tickets de Transportes Valadez.</td></tr>
+        <tr><td style="padding:16px 28px;background:#f9fafb;border-top:1px solid #eaecf0;color:#98a2b3;font-size:11px;line-height:1.5;text-align:center">Notificación automática del sistema de tickets de {$nombreEmpresaCorreo}.</td></tr>
       </table>
     </td></tr>
   </table>

@@ -5,7 +5,7 @@ ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 
 /**
- * SISTEMA DE GESTIÓN DE ACTIVOS - TRANSPORTES VALADEZ
+ * SISTEMA DE GESTIÓN DE ACTIVOS
  * Registro de Nuevo Equipo
  */
 

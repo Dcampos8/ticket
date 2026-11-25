@@ -2,6 +2,7 @@
 session_start();
 require('../../../backend/conexion.php');
 require_once __DIR__ . '/../../../shared/integration_settings.php';
+require_once __DIR__ . '/../../../shared/branding.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -90,7 +91,7 @@ if (mysqli_stmt_execute($stmt)) {
             $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port = 465;
 
-            $mail->setFrom('noreply@mensajeriatv.site', 'Transportes Valadez');
+            $mail->setFrom('noreply@mensajeriatv.site', nombreEmpresa());
             $mail->addAddress('sistemas@transportesvaladez.com');
 
             $mail->isHTML(true);

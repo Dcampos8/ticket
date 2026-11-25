@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../../shared/branding.php';
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -13,7 +14,7 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__ticket__crear_ticket.css?v=<?= filemtime(__DIR__ . '/../../css/pages/usuario__ticket__crear_ticket.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
-<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg?v=2">
+<link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
 <div class="form-header">
     <span class="form-eyebrow">SOPORTE TÉCNICO</span>
     <h2><i class="fas fa-ticket-alt"></i> Crear un ticket</h2>

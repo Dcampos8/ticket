@@ -1,6 +1,6 @@
 # Manual breve: levantar un ticket
 
-Guía para usuarios estándar del Sistema de Tickets de Transportes Valadez.
+Guía para usuarios estándar del Sistema de Tickets.
 
 ## Crear una solicitud
 

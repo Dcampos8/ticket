@@ -1,6 +1,6 @@
 <?php
 /**
- * SISTEMA DE GESTIÓN DE ACTIVOS - TRANSPORTES VALADEZ
+ * SISTEMA DE GESTIÓN DE ACTIVOS
  * Edición de Equipo (Espejo del formulario de captura)
  */
 

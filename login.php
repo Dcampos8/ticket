@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/config/env.php';
+require_once __DIR__ . '/shared/branding.php';
 $recaptchaSiteKey = trim((string) env('RECAPTCHA_V3_SITE_KEY', ''));
 ?>
 
@@ -9,25 +10,25 @@ $recaptchaSiteKey = trim((string) env('RECAPTCHA_V3_SITE_KEY', ''));
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Transportes Valadez</title>
+  <title>Login - <?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/theme.css?v=<?= time() ?>">
   <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/login.css?v=<?= filemtime(__DIR__ . '/css/pages/login.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/css/brand.css') ?>">
-  <link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=2">
-  <link rel="manifest" href="manifest.webmanifest?v=2">
+  <link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
+  <link rel="manifest" href="<?= htmlspecialchars(rtrim((string) env('APP_BASE_URL', '/'), '/') . '/manifest.php', ENT_QUOTES, 'UTF-8') ?>?v=<?= rawurlencode(nombreEmpresa()) ?>">
 </head>
 <body class="login-page">
 
 <div class="login-shell">
   <div class="login-logo">
-    <img src="img/Camion%20Cont%20Der.png" alt="Transportes Valadez">
+    <img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>">
   </div>
 
   <div class="login-container">
     <h2>Iniciar Sesión</h2>
-    <p class="login-subtitle">Sistema de Tickets &middot; Transportes Valadez</p>
+    <p class="login-subtitle">Sistema de Tickets &middot; <?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?></p>
 
     <?php if (isset($_GET['error']) && $_GET['error'] === '1'): ?>
       <div class="error-msg">Usuario o contraseña incorrectos.</div>
@@ -53,7 +54,7 @@ $recaptchaSiteKey = trim((string) env('RECAPTCHA_V3_SITE_KEY', ''));
     </form>
   </div>
 
-  <p class="login-footer">&copy; <?= date('Y') ?> Transportes Valadez — Sistema de Tickets</p>
+  <p class="login-footer">&copy; <?= date('Y') ?> <?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?> — Sistema de Tickets</p>
 </div>
 
 <?php if ($recaptchaSiteKey !== ''): ?>

@@ -1,6 +1,6 @@
 <?php
 /**
- * SISTEMA DE GESTIÓN DE ACTIVOS - TRANSPORTES VALADEZ
+ * SISTEMA DE GESTIÓN DE ACTIVOS
  * Vista Principal - Versión Extendida con Detalles Técnicos
  */
 

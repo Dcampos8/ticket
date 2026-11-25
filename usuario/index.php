@@ -30,7 +30,7 @@ $mensajeAviso = trim(implode("\n", $lineasAviso));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Usuario</title>
+    <title><?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?> · Portal de usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Tema global del rediseño (retinta Bootstrap a los colores de marca) -->
@@ -39,8 +39,8 @@ $mensajeAviso = trim(implode("\n", $lineasAviso));
     <link rel="stylesheet" href="../css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
     <link rel="stylesheet" href="../css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">
     <link rel="stylesheet" href="../css/pages/usuario__index.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__index.css') ?>">
-    <link rel="icon" type="image/svg+xml" href="../img/favicon.svg?v=2">
-    <link rel="manifest" href="../manifest.webmanifest?v=2">
+    <link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="manifest" href="<?= BASE_URL ?>manifest.php?v=<?= rawurlencode(nombreEmpresa()) ?>">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>

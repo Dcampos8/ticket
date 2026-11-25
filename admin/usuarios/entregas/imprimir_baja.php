@@ -64,7 +64,7 @@ $equipos_devueltos = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin hardwa
             <!-- Encabezado Institucional -->
             <div class="header">
                 <div class="brand">
-                    <div class="brand-title">TRANSPORTES VALADEZ</div>
+                    <div class="brand-title"><?= nombreEmpresaHtml() ?></div>
                     <div class="brand-subtitle">Departamento de Tecnologías de la Información</div>
                 </div>
                 <div class="doc-tag">
@@ -144,7 +144,7 @@ $equipos_devueltos = !empty($pc_info) ? implode(' • ', $pc_info) : 'Sin hardwa
             </div>
 
             <div class="footer-note">
-                Transportes Valadez &copy; <?= date('Y') ?> &bull; Sistema de Control de Activos y Accesos TI
+                <?= nombreEmpresaHtml() ?> &copy; <?= date('Y') ?> &bull; Sistema de Control de Activos y Accesos TI
             </div>
         </div>
     </div>

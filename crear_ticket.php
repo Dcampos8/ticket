@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../backend/conexion.php';
+require_once __DIR__ . '/shared/branding.php';
 
 if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
     http_response_code(403);
@@ -10,8 +11,8 @@ if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/crear_ticket.css?v=<?= filemtime(__DIR__ . '/css/pages/crear_ticket.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/css/brand.css') ?>">
-<link rel="icon" type="image/svg+xml" href="img/favicon.svg?v=2">
-<link rel="manifest" href="manifest.webmanifest?v=2">
+<link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="manifest" href="<?= htmlspecialchars(rtrim((string) env('APP_BASE_URL', '/'), '/') . '/manifest.php', ENT_QUOTES, 'UTF-8') ?>?v=<?= rawurlencode(nombreEmpresa()) ?>">
 <div class="form-header">
     <h2>
         <i class="fas fa-ticket-alt text-primary"></i>

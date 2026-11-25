@@ -38,7 +38,7 @@ $img = imagecreatetruecolor($anchoImg, $altoImg);
 $blanco   = imagecolorallocate($img, 255, 255, 255);
 $negro    = imagecolorallocate($img, 0, 0, 0);
 $gris     = imagecolorallocate($img, 80, 80, 80);
-$rojo_tv  = imagecolorallocate($img, 185, 28, 28); // Rojo Transportes Valadez
+$rojo_tv  = imagecolorallocate($img, 185, 28, 28); // Rojo institucional
 
 imagefilledrectangle($img, 0, 0, $anchoImg, $altoImg, $blanco);
 
@@ -135,7 +135,7 @@ imagedestroy($img);
 
 // Preparar Email
 $boundary = bin2hex(random_bytes(24));
-$subject  = "Firma - Transportes Valadez";
+$subject  = 'Firma - ' . nombreEmpresa();
 $headers  = "MIME-Version: 1.0\r\n";
 $headers .= "From: Sistemas TV <sistemas@transportesvaladez.com>\r\n";
 $headers .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\r\n";

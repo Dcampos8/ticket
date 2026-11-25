@@ -108,7 +108,7 @@ function checkActive($target, $currentPath, $dropdowns = []) {
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top custom-navbar">
   <div class="container-fluid px-4">
     <a class="navbar-brand me-4" href="<?= BASE_URL ?>admin/">
-      <img src="<?= BASE_URL ?>img/Camion%20Cont%20Der.png" height="36" class="logo-animate" alt="Transportes Valadez">
+      <img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" height="36" class="logo-animate" alt="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>">
     </a>
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Abrir navegación">
       <span class="fas fa-bars"></span>

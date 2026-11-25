@@ -95,7 +95,7 @@ if ($fechaResponsiva !== '') {
   <div class="page-content">
     <h2>RESPONSIVA DE EQUIPO CELULAR CORPORATIVO</h2>
     <p class="fecha-responsiva">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
-    <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> el siguiente equipo para uso laboral:</p>
+    <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong><?= nombreEmpresaHtml() ?></strong> el siguiente equipo para uso laboral:</p>
     
     <div class="info-box">
         <strong>Información del Equipo:</strong><br>
@@ -142,7 +142,7 @@ if ($fechaResponsiva !== '') {
   <div class="page-content">
     <h2>RESPONSIVA DE SIM CORPORATIVA</h2>
     <p class="fecha-responsiva">Aguascalientes, Ags., a <?= $e($fechaTexto) ?></p>
-    <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> una línea telefónica corporativa (SIM) para uso exclusivo en actividades laborales.</p>
+    <p>Yo, <strong><?= $e($data['usuario'] ?? '') ?></strong>, confirmo que recibo por parte de <strong><?= nombreEmpresaHtml() ?></strong> una línea telefónica corporativa (SIM) para uso exclusivo en actividades laborales.</p>
     
     <div class="info-box">
         <strong>Información de la línea asignada</strong><br>
@@ -159,7 +159,7 @@ if ($fechaResponsiva !== '') {
     </div>
 
     <h4>CONDICIONES DE USO</h4>
-    <p>La línea telefónica corporativa es propiedad de Transportes Valadez S. de R.L. de C.V. y se asigna exclusivamente para fines laborales.</p>
+    <p>La línea telefónica corporativa es propiedad de <?= nombreEmpresaHtml() ?> y se asigna exclusivamente para fines laborales.</p>
     <p>Queda estrictamente prohibido:</p>
     <ul>
         <li>Utilizar la línea para fines personales.</li>
@@ -175,7 +175,7 @@ if ($fechaResponsiva !== '') {
         <li>Reportar de inmediato cualquier falla, pérdida, robo o mal funcionamiento de la tarjeta SIM.</li>
         <li>Cumplir con las políticas internas de uso de dispositivos y líneas corporativas establecidas por la empresa.</li>
     </ul>
-    <p>En caso de pérdida, daño o uso indebido de la línea o equipo asociado, me comprometo a cubrir los costos de reposición (tarjeta SIM $3500 o valor correspondiente) y/o cualquier cargo adicional. Si el daño al equipo deriva de una mala práctica o descuido, seré responsable de recobrar la comunicación (mediante su envío a reparación) o bien optar por cubrir el descuento total del equipo, conforme a lo determinado por la empresa. La línea telefónica deberá ser devuelta cuando Transportes Valadez S. de R.L. de C.V. así lo solicite o al término de la relación laboral.</p>
+    <p>En caso de pérdida, daño o uso indebido de la línea o equipo asociado, me comprometo a cubrir los costos de reposición (tarjeta SIM $3500 o valor correspondiente) y/o cualquier cargo adicional. Si el daño al equipo deriva de una mala práctica o descuido, seré responsable de recobrar la comunicación (mediante su envío a reparación) o bien optar por cubrir el descuento total del equipo, conforme a lo determinado por la empresa. La línea telefónica deberá ser devuelta cuando <?= nombreEmpresaHtml() ?> así lo solicite o al término de la relación laboral.</p>
 
     <div class="firmas">
         <div class="linea-firma"></div>

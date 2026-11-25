@@ -37,7 +37,7 @@ $nip_almacen  = val('nip_almacen');
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Entrega de Credenciales - Transportes Valadez</title>
+<title>Entrega de Credenciales - <?= nombreEmpresaHtml() ?></title>
 
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/admin__usuarios__entregas__formato_imprimir.css?v=<?= filemtime(__DIR__ . '/../../../css/pages/admin__usuarios__entregas__formato_imprimir.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../../css/brand.css') ?>">
@@ -59,7 +59,7 @@ $nip_almacen  = val('nip_almacen');
     <h1>Entrega de Credenciales</h1>
 
     <div class="subtitulo">
-        Transportes Valadez<br>
+        <?= nombreEmpresaHtml() ?><br>
         Fecha: <?= htmlspecialchars($fecha) ?>
     </div>
 

@@ -2,13 +2,14 @@
 // Aseguramos que la sesión esté iniciada
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 $userBaseUrl = defined('BASE_URL') ? BASE_URL : '/';
+require_once __DIR__ . '/../shared/branding.php';
 ?>
-<link rel="icon" type="image/svg+xml" href="<?= htmlspecialchars($userBaseUrl) ?>img/favicon.svg?v=2">
+<link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars($userBaseUrl) ?>css/redesign.css?v=<?= time() ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../css/brand.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__menu.css?v=<?= filemtime(__DIR__ . '/../css/pages/usuario__menu.css') ?>">
 <nav class="sidebar d-flex flex-column">
-    <img src="<?= htmlspecialchars($userBaseUrl) ?>img/Camion%20Cont%20Der.png" class="logo-animate" alt="Transportes Valadez">
+    <img src="<?= htmlspecialchars(logoEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>" class="logo-animate" alt="<?= htmlspecialchars(nombreEmpresa(), ENT_QUOTES, 'UTF-8') ?>">
     <div class="sidebar-user">
         <i class="fa-solid fa-user-circle me-2"></i>
         <?= htmlspecialchars($_SESSION['nombre_completo'] ?? 'Usuario') ?>

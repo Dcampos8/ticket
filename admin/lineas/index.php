@@ -2747,7 +2747,7 @@ if ($kpi_otros > 0) {
                         Aguascalientes, Ags., a <span class="res_fecha_texto"></span>
                     </div>
                     <p>
-                        Yo, <strong class="res_usuario">---</strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> el siguiente equipo para uso laboral:
+                        Yo, <strong class="res_usuario">---</strong>, confirmo que recibo por parte de <strong><?= nombreEmpresaHtml() ?></strong> el siguiente equipo para uso laboral:
                     </p>
                     <div class="info-box">
                         <p><strong>Información del Equipo:</strong></p>
@@ -2794,7 +2794,7 @@ if ($kpi_otros > 0) {
                         Aguascalientes, Ags., a <span class="res_fecha_texto"></span>
                     </div>
                     <p>
-                        Yo, <strong class="res_usuario">---</strong>, confirmo que recibo por parte de <strong>Transportes Valadez S. de R.L. de C.V.</strong> la tarjeta SIM / chip corporativo para uso strictly laboral:
+                        Yo, <strong class="res_usuario">---</strong>, confirmo que recibo por parte de <strong><?= nombreEmpresaHtml() ?></strong> la tarjeta SIM / chip corporativo para uso strictly laboral:
                     </p>
                     <div class="info-box">
                         <p><strong>Información de la Línea / SIM:</strong></p>

@@ -1,4 +1,4 @@
-# Sistema de Tickets — Transportes Valadez
+# Sistema de Tickets
 
 Aplicación PHP para registrar y administrar tickets, evidencias y módulos administrativos. El repositorio se despliega en Hostinger para `ticket.transportesvaladez.com`.
 

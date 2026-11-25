@@ -74,7 +74,7 @@ if ($generada) {
 <section class="preview-container visible"><article class="sheet">
 <h2><?= $campos['tipo']==='equipo' ? 'RESPONSIVA DE EQUIPO CELULAR CORPORATIVO' : 'RESPONSIVA DE LÍNEA Y TARJETA SIM CORPORATIVA' ?></h2>
 <div class="date"><?= $e($campos['lugar']) ?>, a <?= $e($fechaTexto) ?></div>
-<p>Yo, <strong><?= $e($campos['nombre']) ?></strong><?= $campos['puesto']!=='' ? ', quien ocupa el puesto de <strong>'.$e($campos['puesto']).'</strong>' : '' ?><?= $campos['area']!=='' ? ' del área de <strong>'.$e($campos['area']).'</strong>' : '' ?>, confirmo que recibo de Transportes Valadez S. de R.L. de C.V. los recursos corporativos descritos a continuación, para uso relacionado con mis actividades laborales.</p>
+<p>Yo, <strong><?= $e($campos['nombre']) ?></strong><?= $campos['puesto']!=='' ? ', quien ocupa el puesto de <strong>'.$e($campos['puesto']).'</strong>' : '' ?><?= $campos['area']!=='' ? ' del área de <strong>'.$e($campos['area']).'</strong>' : '' ?>, confirmo que recibo de <?= nombreEmpresaHtml() ?> los recursos corporativos descritos a continuación, para uso relacionado con mis actividades laborales.</p>
 <div class="info"><strong>DATOS DE LA ASIGNACIÓN</strong>
 <p><strong>Persona resguardante:</strong> <?= $e($campos['nombre']) ?></p>
 <?php if ($campos['puesto']!==''): ?><p><strong>Puesto:</strong> <?= $e($campos['puesto']) ?></p><?php endif; ?>

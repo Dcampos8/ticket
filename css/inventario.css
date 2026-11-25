@@ -88,7 +88,7 @@
     
     /* Fuerza el fondo del menú si se volvió transparente */
 .navbar {
-    background-color: #ffffff !important; /* O el color corporativo de Transportes Valadez */
+  background-color: #ffffff !important; /* O el color corporativo */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 

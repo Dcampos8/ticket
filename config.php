@@ -29,6 +29,7 @@ if (file_exists($conexion_path)) {
 // Cierre global de la aplicación: se aplica a solicitudes PHP autenticadas,
 // y deja intacto el acceso del superadministrador para operar y reabrirla.
 require_once ROOT_PATH . 'shared/integration_settings.php';
+require_once ROOT_PATH . 'shared/branding.php';
 if (!function_exists('sitioEstaDadoDeBaja')) {
     function sitioEstaDadoDeBaja(): bool
     {

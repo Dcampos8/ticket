@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../shared/security.php';
+require_once '../../shared/branding.php';
 asegurarTokenCsrf();
 
 if (!isset($_SESSION['logueado']) || $_SESSION['rol'] !== 'usuario') {
@@ -43,7 +44,7 @@ $ticketsAbiertos = count(array_filter($tickets, static fn($ticket) => in_array($
 <!-- ✅ Estilo Moderno y Minimalista -->
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/pages/usuario__ticket__mis_tickets.css?v=<?= filemtime(__DIR__ . '/../../css/pages/usuario__ticket__mis_tickets.css') ?>">
 <link rel="stylesheet" href="<?= defined('BASE_URL') ? BASE_URL : '/' ?>css/brand.css?v=<?= filemtime(__DIR__ . '/../../css/brand.css') ?>">
-<link rel="icon" type="image/svg+xml" href="../../img/favicon.svg?v=2">
+<link rel="icon" href="<?= htmlspecialchars(iconoPestanaEmpresaUrl(), ENT_QUOTES, 'UTF-8') ?>">
 <script>
 window.ticketActual = null;
 window.usuarioActual = <?= json_encode((string) ($_SESSION['usuario'] ?? ''), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;

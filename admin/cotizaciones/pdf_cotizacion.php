@@ -112,7 +112,7 @@ class PDF extends FPDF {
         // Datos de la empresa (Alineados a la derecha) — paleta neutra slate
         $this->SetFont('Arial', 'B', 12);
         $this->SetTextColor(15, 23, 42); // slate-900
-        $this->Cell(0, 5, txt('Transportes Valadez'), 0, 1, 'R');
+        $this->Cell(0, 5, txt(nombreEmpresa()), 0, 1, 'R');
         $this->SetFont('Arial', '', 9);
         $this->SetTextColor(100, 116, 139); // slate-500
         $this->Cell(0, 5, txt('José María Romo 139, Cd. Industrial, 20290, Aguascalientes, Ags.'), 0, 1, 'R');

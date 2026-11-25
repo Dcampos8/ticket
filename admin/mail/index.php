@@ -27,10 +27,18 @@ $conexion->query("CREATE TABLE IF NOT EXISTS correo_reglas (
 $conexion->query("ALTER TABLE correo_reglas MODIFY COLUMN direccion_filtro VARCHAR(150) DEFAULT NULL");
 $conexion->query("ALTER TABLE correo_reglas ADD COLUMN IF NOT EXISTS palabra_clave VARCHAR(150) DEFAULT NULL");
 
-// Verificar si existe la carpeta por defecto "Transportes Valadez"
-$res_valadez_check = $conexion->query("SELECT id FROM correo_carpetas WHERE id = 1 OR nombre = 'Transportes Valadez' LIMIT 1");
+// Verificar si existe la carpeta de correo de la empresa.
+$nombreEmpresaConfigurada = nombreEmpresa();
+$stmtCarpetaEmpresa = $conexion->prepare('SELECT id FROM correo_carpetas WHERE id = 1 OR nombre = ? LIMIT 1');
+$stmtCarpetaEmpresa->bind_param('s', $nombreEmpresaConfigurada);
+$stmtCarpetaEmpresa->execute();
+$res_valadez_check = $stmtCarpetaEmpresa->get_result();
+$stmtCarpetaEmpresa->close();
 if ($res_valadez_check->num_rows == 0) {
-    $conexion->query("INSERT INTO correo_carpetas (id, nombre, padre_id) VALUES (1, 'Transportes Valadez', NULL)");
+    $stmtCarpetaEmpresa = $conexion->prepare('INSERT INTO correo_carpetas (id, nombre, padre_id) VALUES (1, ?, NULL)');
+    $stmtCarpetaEmpresa->bind_param('s', $nombreEmpresaConfigurada);
+    $stmtCarpetaEmpresa->execute();
+    $stmtCarpetaEmpresa->close();
 }
 
 // Asegurar columnas carpeta_id y leido en correos_archivados
@@ -109,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_del->execute();
             $stmt_del->close();
 
-            $mensaje_alerta = "¡Carpeta eliminada con éxito! Sus correos fueron movidos a Transportes Valadez.";
+            $mensaje_alerta = '¡Carpeta eliminada con éxito! Sus correos fueron movidos a ' . nombreEmpresa() . '.';
         } else {
             $mensaje_alerta = "No se puede eliminar la carpeta principal del sistema.";
         }
@@ -953,7 +961,7 @@ function renderizarCuerpoYAdjuntos($cuerpo_crudo) {
               <div class="mb-3"><label class="form-label">Nombre Completo:</label><input type="text" name="nombre_contacto" class="form-control" required placeholder="Ej. Juan Pérez"></div>
               <div class="mb-3"><label class="form-label">Correo Electrónico:</label><input type="email" name="correo_contacto" class="form-control" required placeholder="correo@empresa.com"></div>
               <div class="mb-3"><label class="form-label">Teléfono:</label><input type="text" name="telefono_contacto" class="form-control" placeholder="Ej. 4491234567"></div>
-              <div class="mb-3"><label class="form-label">Empresa / Área:</label><input type="text" name="empresa_contacto" class="form-control" placeholder="Ej. Transportes Valadez"></div>
+              <div class="mb-3"><label class="form-label">Empresa / Área:</label><input type="text" name="empresa_contacto" class="form-control" placeholder="Ej. Nombre de empresa"></div>
           </div>
           <div class="modal-footer bg-light"><button type="submit" class="btn btn-dark fw-bold" style="background: var(--dark-valadez);">Guardar Contacto</button></div>
       </form>
@@ -1022,7 +1030,7 @@ function prefillResponderTodos(remitente, destinatarioOriginal, asunto) {
 
 function descargarPlantilla(e) {
     e.preventDefault();
-    const csvContent = "data:text/csv;charset=utf-8,Nombre,Correo,Telefono,Empresa\nJuan Perez,juan.perez@ejemplo.com,4491234567,Transportes Valadez\nMaria Gomez,maria.gomez@ejemplo.com,4499876543,General";
+    const csvContent = "data:text/csv;charset=utf-8,Nombre,Correo,Telefono,Empresa\nJuan Perez,juan.perez@ejemplo.com,4491234567,Empresa de ejemplo\nMaria Gomez,maria.gomez@ejemplo.com,4499876543,General";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
